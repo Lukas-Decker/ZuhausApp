@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/inventory/ui/inventory_screen.dart';
 import '../features/placeholder/module_placeholder.dart';
 import '../features/settings/settings_screen.dart';
 import 'navigation.dart';
@@ -18,17 +19,7 @@ final appRouter = GoRouter(
       builder: (context, state, navigationShell) =>
           AppShell(navigationShell: navigationShell),
       branches: [
-        _branch(
-          AppModule.inventory,
-          const ModulePlaceholder(
-            title: 'Inventar',
-            icon: Icons.kitchen_rounded,
-            plannedVersion: 'v0.2',
-            description:
-                'Vorräte mit Barcode oder manuell erfassen, inklusive '
-                'Mindestbestand und Ablaufdatum.',
-          ),
-        ),
+        _branch(AppModule.inventory, const InventoryScreen()),
         _branch(
           AppModule.shopping,
           const ModulePlaceholder(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/settings/app_settings.dart';
 import '../../core/widgets/scope_switcher_sheet.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class SettingsScreen extends ConsumerWidget {
     final identity = ref.watch(identityProvider);
     final households = ref.watch(householdsProvider);
     final scope = ref.watch(activeScopeProvider);
+    final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Einstellungen')),
@@ -68,11 +70,45 @@ class SettingsScreen extends ConsumerWidget {
                   ),
           ),
           const Divider(),
+          const _SectionHeader('Erinnerungen'),
+          SwitchListTile(
+            secondary: const Icon(Icons.event_busy_rounded),
+            value: settings.expiryWarningsEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setExpiryWarningsEnabled,
+            title: const Text('Ablaufwarnungen'),
+            subtitle: Text(
+              'Warnt ${settings.expiryWarningDays} Tage vorher. '
+              'Pro Artikel zusätzlich einzeln abschaltbar.',
+            ),
+          ),
+          const Divider(),
+          const _SectionHeader('Datenschutz'),
+          ListTile(
+            leading: const Icon(Icons.cloud_outlined),
+            title: const Text('Produktdaten von Open Food Facts'),
+            subtitle: Text(
+              switch (settings.openFoodFactsConsent) {
+                true =>
+                  'Erlaubt. Beim Scan wird nur der Barcode übertragen.',
+                false => 'Abgelehnt. Produkte werden selbst angelegt.',
+                null => 'Noch nicht entschieden.',
+              },
+            ),
+            trailing: Switch(
+              value: settings.openFoodFactsConsent ?? false,
+              onChanged: ref
+                  .read(appSettingsProvider.notifier)
+                  .setOpenFoodFactsConsent,
+            ),
+          ),
+          const Divider(),
           const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.1.0'),
+            subtitle: Text('Version 0.2.0'),
           ),
         ],
       ),

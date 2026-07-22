@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/navigation.dart';
 
-/// Einheitlicher Rahmen fuer alle Modul-Bildschirme.
+/// Einheitlicher Rahmen für alle Modul-Bildschirme.
 ///
-/// Der Kontextbanner sitzt eine Ebene hoeher in der [AppShell], deshalb
+/// Der Kontextbanner sitzt eine Ebene höher in der [AppShell], deshalb
 /// braucht hier nur noch die Kopfzeile gesetzt zu werden.
 class ModuleScaffold extends StatelessWidget {
   const ModuleScaffold({

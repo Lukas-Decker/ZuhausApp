@@ -24,7 +24,7 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(
               identity.isLinkedToAccount
                   ? 'Mit Konto verbunden'
-                  : 'Lokal auf diesem Geraet, noch kein Konto',
+                  : 'Lokal auf diesem Gerät, noch kein Konto',
             ),
             trailing: const Icon(Icons.edit_outlined),
             onTap: () => _editDisplayName(context, ref, identity.displayName),
@@ -53,7 +53,7 @@ class SettingsScreen extends ConsumerWidget {
                     leading: Icon(Icons.info_outline),
                     title: Text('Noch kein Haushalt'),
                     subtitle: Text(
-                      'Ueber den Kontext-Umschalter kannst du einen erstellen.',
+                      'Über den Kontext-Umschalter kannst du einen erstellen.',
                     ),
                   )
                 : Column(
@@ -68,7 +68,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
           ),
           const Divider(),
-          const _SectionHeader('Ueber'),
+          const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),

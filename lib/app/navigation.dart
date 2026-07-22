@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Die fuenf Module der App in fester Reihenfolge.
+/// Die fünf Module der App in fester Reihenfolge.
 enum AppModule {
   inventory(
     path: '/inventar',

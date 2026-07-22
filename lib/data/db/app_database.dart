@@ -9,8 +9,8 @@ part 'app_database.g.dart';
 
 /// Lokale SQLite-Datenbank.
 ///
-/// Sie ist die einzige Wahrheit fuer die Oberflaeche. Die App funktioniert
-/// vollstaendig offline; der Server ist ab v0.9 nur Abgleichspartner.
+/// Sie ist die einzige Wahrheit für die Oberfläche. Die App funktioniert
+/// vollständig offline; der Server ist ab v0.9 nur Abgleichspartner.
 @DriftDatabase(
   tables: [
     Households,
@@ -21,7 +21,7 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
 
-  /// Wird pro Ausbaustufe erhoeht, sobald Tabellen dazukommen.
+  /// Wird pro Ausbaustufe erhöht, sobald Tabellen dazukommen.
   @override
   int get schemaVersion => 1;
 

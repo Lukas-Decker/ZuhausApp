@@ -25,7 +25,7 @@ final appRouter = GoRouter(
             icon: Icons.kitchen_rounded,
             plannedVersion: 'v0.2',
             description:
-                'Vorraete mit Barcode oder manuell erfassen, inklusive '
+                'Vorräte mit Barcode oder manuell erfassen, inklusive '
                 'Mindestbestand und Ablaufdatum.',
           ),
         ),
@@ -37,7 +37,7 @@ final appRouter = GoRouter(
             plannedVersion: 'v0.3',
             description:
                 'Einkaufslisten, die sich beim Abhaken direkt ins Inventar '
-                'uebertragen lassen.',
+                'übertragen lassen.',
           ),
         ),
         _branch(
@@ -57,7 +57,7 @@ final appRouter = GoRouter(
             icon: Icons.medication_rounded,
             plannedVersion: 'v0.5',
             description:
-                'Medikamentenplaene mit Erinnerung, Einnahme-Protokoll und '
+                'Medikamentenpläne mit Erinnerung, Einnahme-Protokoll und '
                 'optionaler Betreuer-Freigabe.',
           ),
         ),
@@ -68,8 +68,8 @@ final appRouter = GoRouter(
             icon: Icons.pets_rounded,
             plannedVersion: 'v0.6',
             description:
-                'Fuetterung, Arznei, Tierarzttermine und Gewichtsverlauf '
-                'fuer alle Tiere im Haushalt.',
+                'Fütterung, Arznei, Tierarzttermine und Gewichtsverlauf '
+                'für alle Tiere im Haushalt.',
           ),
         ),
       ],

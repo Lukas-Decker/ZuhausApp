@@ -8,8 +8,8 @@ import 'scope_switcher_sheet.dart';
 
 /// Dauerhaft sichtbare Leiste, die den aktiven Kontext anzeigt.
 ///
-/// Bewusst kraeftig eingefaerbt und nicht ausblendbar: Nutzer lesen Hinweise
-/// nicht, aber sie sehen Farbe. Ein Tipp darauf oeffnet den Umschalter.
+/// Bewusst kräftig eingefärbt und nicht ausblendbar: Nutzer lesen Hinweise
+/// nicht, aber sie sehen Farbe. Ein Tipp darauf öffnet den Umschalter.
 class ScopeBanner extends ConsumerWidget implements PreferredSizeWidget {
   const ScopeBanner({super.key});
 
@@ -52,7 +52,7 @@ class ScopeBanner extends ConsumerWidget implements PreferredSizeWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isPersonal ? 'Nur fuer dich sichtbar' : scope.label,
+                    isPersonal ? 'Nur für dich sichtbar' : scope.label,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: scheme.onPrimary.withValues(alpha: 0.85),
@@ -80,9 +80,9 @@ class ScopeBanner extends ConsumerWidget implements PreferredSizeWidget {
   }
 }
 
-/// Kleiner Kontext-Chip fuer Dialoge und Formulare.
+/// Kleiner Kontext-Chip für Dialoge und Formulare.
 ///
-/// Wird ueberall dort eingesetzt, wo etwas angelegt wird, damit der Zielort
+/// Wird überall dort eingesetzt, wo etwas angelegt wird, damit der Zielort
 /// auch im Formular selbst noch einmal auftaucht.
 class ScopeChip extends ConsumerWidget {
   const ScopeChip({super.key, this.onTap});
@@ -135,6 +135,6 @@ class ScopeChip extends ConsumerWidget {
   }
 }
 
-/// Beschriftung fuer Aktionsbuttons, damit das Ziel im Klartext dasteht.
-String scopeActionLabel(AppScope scope, {String verb = 'Hinzufuegen'}) =>
+/// Beschriftung für Aktionsbuttons, damit das Ziel im Klartext dasteht.
+String scopeActionLabel(AppScope scope, {String verb = 'Hinzufügen'}) =>
     scope.isPersonal ? '$verb (privat)' : '$verb zu ${scope.label}';

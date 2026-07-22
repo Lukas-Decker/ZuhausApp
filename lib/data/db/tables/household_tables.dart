@@ -39,7 +39,7 @@ class HouseholdMembers extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-/// Protokoll relevanter Aenderungen, Grundlage fuer die Audit-Ansicht (v1.0).
+/// Protokoll relevanter Änderungen, Grundlage für die Audit-Ansicht (v1.0).
 class AuditEntries extends Table with SyncedRecord {
   /// z.B. 'inventory_item', 'med_plan'.
   TextColumn get entityType => text().withLength(min: 1, max: 40)();

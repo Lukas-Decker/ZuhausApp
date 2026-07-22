@@ -9,7 +9,7 @@ void main() {
       expect(HouseholdRole.member.rank, greaterThan(HouseholdRole.guest.rank));
     });
 
-    test('nur der Owner darf aufloesen und uebergeben', () {
+    test('nur der Owner darf auflösen und übergeben', () {
       expect(HouseholdRole.owner.canDeleteHousehold, isTrue);
       expect(HouseholdRole.owner.canTransferOwnership, isTrue);
       for (final role in HouseholdRole.values.where(
@@ -33,7 +33,7 @@ void main() {
       }
     });
 
-    test('Mitglied und Gast duerfen niemanden verwalten', () {
+    test('Mitglied und Gast dürfen niemanden verwalten', () {
       expect(HouseholdRole.member.canManageMembers, isFalse);
       expect(HouseholdRole.guest.canManageMembers, isFalse);
       expect(HouseholdRole.guest.canEditSharedContent, isFalse);

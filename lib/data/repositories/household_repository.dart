@@ -50,7 +50,7 @@ class HouseholdRepository {
         .watch();
   }
 
-  /// Legt einen Haushalt an und macht [userId] zum Eigentuemer.
+  /// Legt einen Haushalt an und macht [userId] zum Eigentümer.
   Future<Household> create({
     required String name,
     required String userId,
@@ -90,7 +90,7 @@ class HouseholdRepository {
     );
   }
 
-  /// Soft-Delete, damit die Sync-Engine das Loeschen weitergeben kann.
+  /// Soft-Delete, damit die Sync-Engine das Löschen weitergeben kann.
   Future<void> softDelete(String householdId) async {
     final now = DateTime.now();
     await _db.transaction(() async {

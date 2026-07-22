@@ -11,7 +11,7 @@ class MultiApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Das Theme haengt am aktiven Kontext: die ganze App wechselt die Farbe.
+    // Das Theme hängt am aktiven Kontext: die ganze App wechselt die Farbe.
     final scopeKind = ref.watch(activeScopeProvider).kind;
 
     return MaterialApp.router(

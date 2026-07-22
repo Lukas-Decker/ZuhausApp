@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Rollen innerhalb eines Haushalts.
 ///
-/// Der Ersteller ist [owner] und behaelt Sonderrechte, die kein [admin]
-/// entziehen kann. [guest] ist die eingeschraenkte Kind-/Gastrolle.
+/// Der Ersteller ist [owner] und behält Sonderrechte, die kein [admin]
+/// entziehen kann. [guest] ist die eingeschränkte Kind-/Gastrolle.
 enum HouseholdRole {
   owner,
   admin,
@@ -11,7 +11,7 @@ enum HouseholdRole {
   guest;
 
   String get label => switch (this) {
-    HouseholdRole.owner => 'Eigentuemer',
+    HouseholdRole.owner => 'Eigentümer',
     HouseholdRole.admin => 'Admin',
     HouseholdRole.member => 'Mitglied',
     HouseholdRole.guest => 'Kind / Gast',
@@ -19,9 +19,9 @@ enum HouseholdRole {
 
   String get description => switch (this) {
     HouseholdRole.owner =>
-      'Kann alles, inklusive Haushalt aufloesen und Eigentuemerschaft uebergeben.',
+      'Kann alles, inklusive Haushalt auflösen und Eigentümerschaft übergeben.',
     HouseholdRole.admin =>
-      'Kann einladen, Mitglieder verwalten und Einstellungen aendern.',
+      'Kann einladen, Mitglieder verwalten und Einstellungen ändern.',
     HouseholdRole.member => 'Kann alle freigegebenen Inhalte lesen und bearbeiten.',
     HouseholdRole.guest =>
       'Sieht nur freigegebene Module, keine Gesundheitsdaten anderer.',
@@ -34,7 +34,7 @@ enum HouseholdRole {
     HouseholdRole.guest => Icons.child_care_rounded,
   };
 
-  /// Rangfolge, hoeher schlaegt niedriger. Der Owner zieht immer am meisten.
+  /// Rangfolge, höher schlägt niedriger. Der Owner zieht immer am meisten.
   int get rank => switch (this) {
     HouseholdRole.owner => 300,
     HouseholdRole.admin => 200,

@@ -4,9 +4,9 @@ import '../core/scope/app_scope.dart';
 
 /// Farbwelt der App.
 ///
-/// Der aktive Scope faerbt die gesamte Oberflaeche: Privat blau, Haushalt
-/// gruen. Das ist bewusst kein dezenter Akzent, sondern das Hauptsignal,
-/// weil Nutzer Texthinweise ueberlesen.
+/// Der aktive Scope färbt die gesamte Oberfläche: Privat blau, Haushalt
+/// grün. Das ist bewusst kein dezenter Akzent, sondern das Hauptsignal,
+/// weil Nutzer Texthinweise überlesen.
 abstract final class ScopePalette {
   static const Color personalSeed = Color(0xFF2563EB);
   static const Color householdSeed = Color(0xFF059669);
@@ -17,7 +17,7 @@ abstract final class ScopePalette {
   static IconData iconFor(ScopeKind kind) =>
       kind == ScopeKind.personal ? Icons.lock_person_rounded : Icons.groups_rounded;
 
-  /// Kurzes Label fuer Banner und Buttons, immer in Grossbuchstaben gedacht.
+  /// Kurzes Label für Banner und Buttons, immer in Grossbuchstaben gedacht.
   static String badgeFor(ScopeKind kind) =>
       kind == ScopeKind.personal ? 'PRIVAT' : 'HAUSHALT';
 }

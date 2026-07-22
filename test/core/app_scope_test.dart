@@ -12,7 +12,7 @@ void main() {
 
     test('Gleichheit ignoriert das Label', () {
       expect(
-        AppScope.household('h1', 'Familie Mueller'),
+        AppScope.household('h1', 'Familie Müller'),
         AppScope.household('h1', 'Umbenannt'),
       );
       expect(
@@ -21,7 +21,7 @@ void main() {
       );
     });
 
-    test('tryParse findet nur verfuegbare Kontexte', () {
+    test('tryParse findet nur verfügbare Kontexte', () {
       final available = [
         AppScope.personal('u1'),
         AppScope.household('h1', 'Familie'),
@@ -36,11 +36,11 @@ void main() {
     test('nennt das Ziel im Klartext', () {
       expect(
         scopeActionLabel(AppScope.personal('u1')),
-        'Hinzufuegen (privat)',
+        'Hinzufügen (privat)',
       );
       expect(
-        scopeActionLabel(AppScope.household('h1', 'Familie Mueller')),
-        'Hinzufuegen zu Familie Mueller',
+        scopeActionLabel(AppScope.household('h1', 'Familie Müller')),
+        'Hinzufügen zu Familie Müller',
       );
       expect(
         scopeActionLabel(AppScope.household('h1', 'WG'), verb: 'Speichern'),
@@ -53,7 +53,7 @@ void main() {
     test('Initialen aus Vor- und Nachname', () {
       const identity = LocalIdentity(
         userId: 'u1',
-        displayName: 'Lukas Mueller',
+        displayName: 'Lukas Müller',
         isLinkedToAccount: false,
       );
       expect(identity.initials, 'LM');

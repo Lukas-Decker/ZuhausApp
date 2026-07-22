@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-/// Wer diese App auf diesem Geraet bedient.
+/// Wer diese App auf diesem Gerät bedient.
 ///
-/// Bis zur Anmeldung (v0.7) ist das eine rein lokale Identitaet. Beim spaeteren
+/// Bis zur Anmeldung (v0.7) ist das eine rein lokale Identität. Beim späteren
 /// Login wird [userId] auf die Konto-ID umgeschrieben, damit vorhandene lokale
 /// Daten erhalten bleiben.
 @immutable
@@ -18,7 +18,7 @@ class LocalIdentity {
   final String userId;
   final String displayName;
 
-  /// True, sobald die Identitaet an ein Supabase-Konto gebunden ist.
+  /// True, sobald die Identität an ein Supabase-Konto gebunden ist.
   final bool isLinkedToAccount;
 
   LocalIdentity copyWith({
@@ -31,7 +31,7 @@ class LocalIdentity {
     isLinkedToAccount: isLinkedToAccount ?? this.isLinkedToAccount,
   );
 
-  /// Initialen fuer Avatare, z.B. "LM" aus "Lukas Mueller".
+  /// Initialen für Avatare, z.B. "LM" aus "Lukas Müller".
   String get initials {
     final parts = displayName.trim().split(RegExp(r'\s+'))
       ..removeWhere((p) => p.isEmpty);
@@ -45,7 +45,7 @@ extension on String {
   String characters1() => isEmpty ? '' : substring(0, 1).toUpperCase();
 }
 
-/// Laedt und speichert die lokale Identitaet in den SharedPreferences.
+/// Lädt und speichert die lokale Identität in den SharedPreferences.
 class LocalIdentityStore {
   LocalIdentityStore(this._prefs);
 

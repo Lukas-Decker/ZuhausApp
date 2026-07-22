@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Unterscheidet, wem ein Datensatz gehoert.
+/// Unterscheidet, wem ein Datensatz gehört.
 ///
-/// Jeder Datensatz in der App haengt an genau einem [AppScope]. Der aktive
-/// Scope wird global umgeschaltet und ist ueber Farbe und Dauerbanner sichtbar,
+/// Jeder Datensatz in der App hängt an genau einem [AppScope]. Der aktive
+/// Scope wird global umgeschaltet und ist über Farbe und Dauerbanner sichtbar,
 /// damit niemand versehentlich privat statt in den Haushalt schreibt.
 enum ScopeKind {
   personal,
@@ -18,7 +18,7 @@ class AppScope {
     required this.label,
   });
 
-  /// Der persoenliche Scope des angemeldeten Nutzers.
+  /// Der persönliche Scope des angemeldeten Nutzers.
   factory AppScope.personal(String userId, {String label = 'Privat'}) =>
       AppScope(kind: ScopeKind.personal, id: userId, label: label);
 
@@ -30,13 +30,13 @@ class AppScope {
   /// Nutzer-ID bei [ScopeKind.personal], Haushalts-ID bei [ScopeKind.household].
   final String id;
 
-  /// Anzeigename, z.B. "Privat" oder "Familie Mueller".
+  /// Anzeigename, z.B. "Privat" oder "Familie Müller".
   final String label;
 
   bool get isPersonal => kind == ScopeKind.personal;
   bool get isHousehold => kind == ScopeKind.household;
 
-  /// Stabiler Schluessel fuer Persistenz und Datenbankspalten.
+  /// Stabiler Schlüssel für Persistenz und Datenbankspalten.
   String get key => '${kind.name}:$id';
 
   static AppScope? tryParse(String? value, List<AppScope> available) {

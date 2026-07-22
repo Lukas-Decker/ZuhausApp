@@ -6,12 +6,12 @@ import '../data/repositories/household_repository.dart';
 import 'identity/local_identity.dart';
 import 'scope/app_scope.dart';
 
-/// Wird in `main()` mit der echten Instanz ueberschrieben.
+/// Wird in `main()` mit der echten Instanz überschrieben.
 final sharedPreferencesProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('SharedPreferences nicht initialisiert'),
 );
 
-/// Wird in `main()` mit der echten Instanz ueberschrieben.
+/// Wird in `main()` mit der echten Instanz überschrieben.
 final databaseProvider = Provider<AppDatabase>(
   (ref) => throw UnimplementedError('AppDatabase nicht initialisiert'),
 );
@@ -46,7 +46,7 @@ final householdsProvider = StreamProvider<List<HouseholdWithRole>>((ref) {
 
 /// Alle Kontexte, zwischen denen umgeschaltet werden kann.
 ///
-/// Der persoenliche Scope steht immer an erster Stelle und existiert immer.
+/// Der persönliche Scope steht immer an erster Stelle und existiert immer.
 final availableScopesProvider = Provider<List<AppScope>>((ref) {
   final identity = ref.watch(identityProvider);
   final households = ref.watch(householdsProvider).value ?? const [];
@@ -75,7 +75,7 @@ class ActiveScopeController extends Notifier<AppScope> {
   }
 }
 
-/// Der aktive Kontext. Faerbt die gesamte Oberflaeche.
+/// Der aktive Kontext. Färbt die gesamte Oberfläche.
 final activeScopeProvider =
     NotifierProvider<ActiveScopeController, AppScope>(ActiveScopeController.new);
 

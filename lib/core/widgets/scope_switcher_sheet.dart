@@ -7,7 +7,7 @@ import '../scope/app_scope.dart';
 
 /// Auswahl des aktiven Kontexts.
 ///
-/// Die Eintraege sind in ihrer jeweiligen Kontextfarbe gehalten, damit die
+/// Die Einträge sind in ihrer jeweiligen Kontextfarbe gehalten, damit die
 /// Zuordnung Farbe zu Kontext sofort gelernt wird.
 class ScopeSwitcherSheet extends ConsumerWidget {
   const ScopeSwitcherSheet({super.key});
@@ -41,7 +41,7 @@ class ScopeSwitcherSheet extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
-                'Alles was du anlegst, landet im gewaehlten Kontext.',
+                'Alles was du anlegst, landet im gewählten Kontext.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -81,7 +81,7 @@ class ScopeSwitcherSheet extends ConsumerWidget {
           textCapitalization: TextCapitalization.sentences,
           decoration: const InputDecoration(
             labelText: 'Name',
-            hintText: 'z.B. Familie Mueller',
+            hintText: 'z.B. Familie Müller',
           ),
           onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
         ),
@@ -165,7 +165,7 @@ class _ScopeTile extends StatelessWidget {
                     ),
                     Text(
                       scope.isPersonal
-                          ? 'Nur auf deinen Geraeten'
+                          ? 'Nur auf deinen Geräten'
                           : 'Geteilt mit allen Mitgliedern',
                       style: TextStyle(
                         fontSize: 13,

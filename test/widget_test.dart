@@ -8,7 +8,7 @@ import 'package:multiapp/data/repositories/household_repository.dart';
 import 'package:multiapp/core/widgets/scope_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Baut eine Haushalts-Zeile ohne Datenbank, nur fuer den Test.
+/// Baut eine Haushalts-Zeile ohne Datenbank, nur für den Test.
 HouseholdWithRole _household(String id, String name) => HouseholdWithRole(
   household: Household(
     id: id,
@@ -35,20 +35,20 @@ Future<Widget> _boot({List<HouseholdWithRole> households = const []}) async {
 }
 
 void main() {
-  testWidgets('Banner zeigt standardmaessig den privaten Kontext', (
+  testWidgets('Banner zeigt standardmäßig den privaten Kontext', (
     tester,
   ) async {
     await tester.pumpWidget(await _boot());
     await tester.pumpAndSettle();
 
     expect(find.text('PRIVAT'), findsOneWidget);
-    expect(find.text('Nur fuer dich sichtbar'), findsOneWidget);
+    expect(find.text('Nur für dich sichtbar'), findsOneWidget);
     expect(find.text('Wechseln'), findsOneWidget);
   });
 
-  testWidgets('Umschalten auf den Haushalt aendert den Banner', (tester) async {
+  testWidgets('Umschalten auf den Haushalt ändert den Banner', (tester) async {
     await tester.pumpWidget(
-      await _boot(households: [_household('h1', 'Familie Mueller')]),
+      await _boot(households: [_household('h1', 'Familie Müller')]),
     );
     await tester.pumpAndSettle();
 
@@ -57,11 +57,11 @@ void main() {
 
     expect(find.text('Wo arbeitest du gerade?'), findsOneWidget);
 
-    await tester.tap(find.text('Familie Mueller'));
+    await tester.tap(find.text('Familie Müller'));
     await tester.pumpAndSettle();
 
     expect(find.text('HAUSHALT'), findsOneWidget);
-    expect(find.text('Familie Mueller'), findsOneWidget);
+    expect(find.text('Familie Müller'), findsOneWidget);
     expect(find.text('PRIVAT'), findsNothing);
   });
 }

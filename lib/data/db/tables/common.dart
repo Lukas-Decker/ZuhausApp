@@ -5,8 +5,8 @@ const uuid = Uuid();
 
 /// Spalten, die jede synchronisierte Tabelle braucht.
 ///
-/// Die Sync-Engine (ab v0.9) arbeitet mit Last-Write-Wins ueber [updatedAt]
-/// und Soft-Deletes ueber [deletedAt]. Deshalb wird nie physisch geloescht,
+/// Die Sync-Engine (ab v0.9) arbeitet mit Last-Write-Wins über [updatedAt]
+/// und Soft-Deletes über [deletedAt]. Deshalb wird nie physisch gelöscht,
 /// solange ein Datensatz noch nicht durchsynchronisiert ist.
 mixin SyncedRecord on Table {
   TextColumn get id => text().clientDefault(uuid.v4)();
@@ -26,7 +26,7 @@ mixin SyncedRecord on Table {
   TextColumn get createdBy => text().nullable()();
   TextColumn get updatedBy => text().nullable()();
 
-  /// Wurde lokal geaendert und noch nicht zum Server geschickt.
+  /// Wurde lokal geändert und noch nicht zum Server geschickt.
   BoolColumn get isDirty => boolean().withDefault(const Constant(true))();
 
   @override

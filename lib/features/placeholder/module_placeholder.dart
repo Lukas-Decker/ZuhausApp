@@ -6,10 +6,10 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/module_scaffold.dart';
 import '../../core/widgets/scope_banner.dart';
 
-/// Platzhalter fuer Module, die in einer spaeteren Ausbaustufe kommen.
+/// Platzhalter für Module, die in einer späteren Ausbaustufe kommen.
 ///
 /// Zeigt bereits den aktiven Kontext, damit die Kontextlogik von Anfang an
-/// ueberall sichtbar ist.
+/// überall sichtbar ist.
 class ModulePlaceholder extends ConsumerWidget {
   const ModulePlaceholder({
     super.key,
@@ -45,7 +45,7 @@ class ModulePlaceholder extends ConsumerWidget {
             child: EmptyState(
               icon: icon,
               title: '$title folgt in $plannedVersion',
-              message: '$description\n\nAktuell ausgewaehlt: '
+              message: '$description\n\nAktuell ausgewählt: '
                   '${scope.isPersonal ? "Privat" : scope.label}',
             ),
           ),

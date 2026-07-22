@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/inventory/ui/inventory_screen.dart';
+import '../features/notes/ui/notes_screen.dart';
 import '../features/placeholder/module_placeholder.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shopping/ui/shopping_screen.dart';
@@ -22,16 +23,7 @@ final appRouter = GoRouter(
       branches: [
         _branch(AppModule.inventory, const InventoryScreen()),
         _branch(AppModule.shopping, const ShoppingScreen()),
-        _branch(
-          AppModule.notes,
-          const ModulePlaceholder(
-            title: 'Notizen',
-            icon: Icons.sticky_note_2_rounded,
-            plannedVersion: 'v0.4',
-            description:
-                'Notizen und Checklisten mit Anheften, Farben und Suche.',
-          ),
-        ),
+        _branch(AppModule.notes, const NotesScreen()),
         _branch(
           AppModule.meds,
           const ModulePlaceholder(

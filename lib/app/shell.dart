@@ -1,0 +1,122 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../core/widgets/scope_banner.dart';
+import 'navigation.dart';
+
+/// Rahmen der App: Kontextbanner ganz oben, darunter die Navigation.
+///
+/// Schmale Fenster bekommen eine untere Leiste, breite eine seitliche Schiene.
+class AppShell extends ConsumerWidget {
+  const AppShell({super.key, required this.navigationShell});
+
+  final StatefulNavigationShell navigationShell;
+
+  static const double _railBreakpoint = 700;
+  static const double _extendedRailBreakpoint = 1100;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final width = MediaQuery.sizeOf(context).width;
+    final useRail = width >= _railBreakpoint;
+
+    return Scaffold(
+      body: Column(
+        children: [
+          const SafeArea(bottom: false, child: ScopeBanner()),
+          Expanded(
+            child: useRail
+                ? Row(
+                    children: [
+                      _ModuleRail(
+                        navigationShell: navigationShell,
+                        extended: width >= _extendedRailBreakpoint,
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(child: navigationShell),
+                    ],
+                  )
+                : navigationShell,
+          ),
+        ],
+      ),
+      bottomNavigationBar: useRail
+          ? null
+          : _ModuleBottomBar(navigationShell: navigationShell),
+    );
+  }
+}
+
+class _ModuleBottomBar extends StatelessWidget {
+  const _ModuleBottomBar({required this.navigationShell});
+
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      selectedIndex: navigationShell.currentIndex,
+      onDestinationSelected: (index) =>
+          navigationShell.goBranch(index, initialLocation: false),
+      destinations: [
+        for (final module in AppModule.values)
+          NavigationDestination(
+            icon: Icon(module.icon),
+            selectedIcon: Icon(module.selectedIcon),
+            label: module.label,
+          ),
+      ],
+    );
+  }
+}
+
+class _ModuleRail extends StatelessWidget {
+  const _ModuleRail({required this.navigationShell, required this.extended});
+
+  final StatefulNavigationShell navigationShell;
+  final bool extended;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: IntrinsicHeight(
+            child: NavigationRail(
+              extended: extended,
+              labelType: extended
+                  ? NavigationRailLabelType.none
+                  : NavigationRailLabelType.all,
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: (index) =>
+                  navigationShell.goBranch(index, initialLocation: false),
+              destinations: [
+                for (final module in AppModule.values)
+                  NavigationRailDestination(
+                    icon: Icon(module.icon),
+                    selectedIcon: Icon(module.selectedIcon),
+                    label: Text(module.label),
+                  ),
+              ],
+              trailing: Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: IconButton(
+                      tooltip: 'Einstellungen',
+                      onPressed: () => context.push(settingsPath),
+                      icon: const Icon(Icons.settings_outlined),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

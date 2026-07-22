@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/inventory/ui/inventory_screen.dart';
 import '../features/placeholder/module_placeholder.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/shopping/ui/shopping_screen.dart';
 import 'navigation.dart';
 import 'shell.dart';
 
@@ -20,17 +21,7 @@ final appRouter = GoRouter(
           AppShell(navigationShell: navigationShell),
       branches: [
         _branch(AppModule.inventory, const InventoryScreen()),
-        _branch(
-          AppModule.shopping,
-          const ModulePlaceholder(
-            title: 'Einkauf',
-            icon: Icons.shopping_cart_rounded,
-            plannedVersion: 'v0.3',
-            description:
-                'Einkaufslisten, die sich beim Abhaken direkt ins Inventar '
-                'übertragen lassen.',
-          ),
-        ),
+        _branch(AppModule.shopping, const ShoppingScreen()),
         _branch(
           AppModule.notes,
           const ModulePlaceholder(

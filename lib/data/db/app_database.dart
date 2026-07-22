@@ -5,6 +5,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables/common.dart';
 import 'tables/household_tables.dart';
 import 'tables/inventory_tables.dart';
+import 'tables/shopping_tables.dart';
 
 part 'app_database.g.dart';
 
@@ -20,6 +21,8 @@ part 'app_database.g.dart';
     StorageLocations,
     Products,
     InventoryItems,
+    ShoppingLists,
+    ShoppingItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -29,8 +32,9 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// 1: Haushalte, Mitglieder, Audit-Log (v0.1)
   /// 2: Lagerorte, Produkte, Vorräte (v0.2)
+  /// 3: Einkaufslisten und Posten (v0.3)
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -42,6 +46,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(storageLocations);
         await m.createTable(products);
         await m.createTable(inventoryItems);
+      }
+      if (from < 3) {
+        await m.createTable(shoppingLists);
+        await m.createTable(shoppingItems);
       }
     },
     beforeOpen: (details) async {

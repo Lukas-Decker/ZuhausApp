@@ -212,11 +212,37 @@ class InventoryRepository {
     });
   }
 
+  Future<InventoryItem?> findById(String id) {
+    return (_db.select(_db.inventoryItems)..where((i) => i.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   Future<InventoryItem?> findByBarcode(AppScope scope, String barcode) {
     return (_db.select(_db.inventoryItems)
           ..where((i) => i.scopeKind.equals(scope.kind.name))
           ..where((i) => i.scopeId.equals(scope.id))
           ..where((i) => i.barcode.equals(barcode))
+          ..where((i) => i.deletedAt.isNull())
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  /// Sucht einen vorhandenen Vorrat, zuerst über den Barcode, sonst über den
+  /// Namen. Basis dafür, dass ein eingekaufter Posten den Bestand erhöht,
+  /// statt einen zweiten Eintrag anzulegen.
+  Future<InventoryItem?> findMatching(
+    AppScope scope, {
+    String? barcode,
+    required String name,
+  }) async {
+    if (barcode != null && barcode.isNotEmpty) {
+      final byBarcode = await findByBarcode(scope, barcode);
+      if (byBarcode != null) return byBarcode;
+    }
+    return (_db.select(_db.inventoryItems)
+          ..where((i) => i.scopeKind.equals(scope.kind.name))
+          ..where((i) => i.scopeId.equals(scope.id))
+          ..where((i) => i.name.lower().equals(name.trim().toLowerCase()))
           ..where((i) => i.deletedAt.isNull())
           ..limit(1))
         .getSingleOrNull();

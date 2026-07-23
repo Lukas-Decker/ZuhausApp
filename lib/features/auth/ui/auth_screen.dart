@@ -268,9 +268,46 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         Navigator.of(context).pop();
       case AuthNeedsEmailConfirmation(:final email):
         _showConfirmDialog(email);
+      case AuthEmailNotConfirmed(:final email):
+        _showNotConfirmedDialog(email);
       case AuthFailure(:final message):
         _snack(message);
     }
+  }
+
+  void _showNotConfirmedDialog(String email) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.mark_email_unread_outlined),
+        title: const Text('E-Mail noch nicht bestaetigt'),
+        content: Text(
+          'Fuer $email steht die Bestaetigung noch aus. Oeffne den Link aus '
+          'der Bestaetigungs-Mail und melde dich dann erneut an. Keine Mail '
+          'erhalten?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Schliessen'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              final result =
+                  await ref.read(authServiceProvider).resendConfirmation(email);
+              if (!mounted) return;
+              _snack(
+                result is AuthSuccess
+                    ? 'Bestaetigungs-Mail erneut gesendet an $email.'
+                    : (result as AuthFailure).message,
+              );
+            },
+            child: const Text('Erneut senden'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showConfirmDialog(String email) {

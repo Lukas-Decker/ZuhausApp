@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -33,6 +34,9 @@ Future<void> main() async {
       // Der oeffentliche Schluessel des Projekts (im Dashboard "anon"/
       // "publishable key").
       publishableKey: AppConfig.supabaseAnonKey,
+      // Im Debug-Build interne Supabase-Warnungen ausgeben (u.a. Fehler beim
+      // Persistieren der Sitzung).
+      debug: kDebugMode,
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
       ),

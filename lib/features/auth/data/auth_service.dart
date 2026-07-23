@@ -18,6 +18,12 @@ class AuthNeedsEmailConfirmation extends AuthResult {
   final String email;
 }
 
+/// Login gescheitert, weil die E-Mail noch nicht bestaetigt ist.
+class AuthEmailNotConfirmed extends AuthResult {
+  const AuthEmailNotConfirmed(this.email);
+  final String email;
+}
+
 class AuthFailure extends AuthResult {
   const AuthFailure(this.message);
   final String message;
@@ -90,10 +96,40 @@ class AuthService {
       );
       return const AuthSuccess();
     } on AuthException catch (error) {
+      if (_isNotConfirmed(error)) {
+        return AuthEmailNotConfirmed(email.trim());
+      }
       return AuthFailure(_translate(error));
     } catch (error) {
       return AuthFailure('Unerwarteter Fehler: $error');
     }
+  }
+
+  /// Sendet die Bestaetigungs-Mail erneut.
+  Future<AuthResult> resendConfirmation(String email) async {
+    final client = _client;
+    if (client == null) return const AuthFailure(_notConfigured);
+    try {
+      await client.auth.resend(
+        type: OtpType.signup,
+        email: email.trim(),
+        emailRedirectTo: AppConfig.authRedirectUrl,
+      );
+      return const AuthSuccess();
+    } on AuthException catch (error) {
+      return AuthFailure(_translate(error));
+    } catch (error) {
+      return AuthFailure('Unerwarteter Fehler: $error');
+    }
+  }
+
+  static bool _isNotConfirmed(AuthException error) {
+    final code = error.code?.toLowerCase() ?? '';
+    final msg = error.message.toLowerCase();
+    return code.contains('not_confirmed') ||
+        code.contains('email_not_confirmed') ||
+        msg.contains('not confirmed') ||
+        msg.contains('confirm your');
   }
 
   /// Startet den Google-Login ueber den System-Browser mit Deep-Link-Rueckweg.

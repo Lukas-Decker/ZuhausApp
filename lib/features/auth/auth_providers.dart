@@ -35,8 +35,15 @@ final currentUserProvider = Provider<User?>((ref) {
   final user = service.currentUser;
 
   change.whenData((state) {
-    if (state?.event == AuthChangeEvent.signedIn && state?.session != null) {
-      ref.read(accountBinderProvider).onSignedIn(state!.session!.user.id);
+    if (state?.session != null &&
+        (state?.event == AuthChangeEvent.signedIn ||
+            state?.event == AuthChangeEvent.initialSession)) {
+      final userId = state!.session!.user.id;
+      // Nach dem Build ausfuehren: der Rebind schreibt in andere Provider und
+      // wuerde sonst "setState during build" ausloesen.
+      Future.microtask(
+        () => ref.read(accountBinderProvider).onSignedIn(userId),
+      );
     }
   });
 

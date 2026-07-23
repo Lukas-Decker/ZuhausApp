@@ -26,29 +26,45 @@ class HouseholdRemoteService {
   // --- Lesen ---------------------------------------------------------------
 
   /// Meine Haushalte samt meiner Rolle darin.
+  ///
+  /// Bewusst in zwei einfachen Abfragen statt eingebettetem Join: so haengt das
+  /// Ergebnis nicht daran, ob die RLS des eingebetteten Haushalts sauber
+  /// aufloest.
   Future<List<RemoteHousehold>> fetchMyHouseholds() async {
     final uid = _uid;
     if (uid == null) return const [];
 
-    final rows = await _client
+    final memberships = await _client
         .from('household_members')
-        .select('role, households(id, name, owner_user_id)')
+        .select('household_id, role')
         .eq('user_id', uid);
 
-    final result = <RemoteHousehold>[];
-    for (final row in rows as List) {
+    final rolesById = <String, HouseholdRole>{};
+    for (final row in memberships as List) {
       final map = row as Map<String, dynamic>;
-      final h = map['households'] as Map<String, dynamic>?;
-      if (h == null) continue;
-      result.add(
-        RemoteHousehold(
-          id: h['id'] as String,
-          name: h['name'] as String,
-          ownerUserId: h['owner_user_id'] as String,
-          myRole: HouseholdRole.values.firstWhere(
+      rolesById[map['household_id'] as String] = HouseholdRole.values
+          .firstWhere(
             (r) => r.name == map['role'],
             orElse: () => HouseholdRole.member,
-          ),
+          );
+    }
+    if (rolesById.isEmpty) return const [];
+
+    final households = await _client
+        .from('households')
+        .select('id, name, owner_user_id')
+        .inFilter('id', rolesById.keys.toList());
+
+    final result = <RemoteHousehold>[];
+    for (final row in households as List) {
+      final h = row as Map<String, dynamic>;
+      final id = h['id'] as String;
+      result.add(
+        RemoteHousehold(
+          id: id,
+          name: h['name'] as String,
+          ownerUserId: h['owner_user_id'] as String,
+          myRole: rolesById[id] ?? HouseholdRole.member,
         ),
       );
     }

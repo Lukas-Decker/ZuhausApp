@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -50,8 +51,9 @@ final householdSyncProvider = Provider<void>((ref) {
             ),
         ],
       );
-    } catch (_) {
+    } catch (error) {
       // Offline o.ae.: bestehenden lokalen Cache behalten.
+      debugPrint('[household] Sync fehlgeschlagen: $error');
     }
   }
 

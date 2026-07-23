@@ -108,6 +108,12 @@ So einspielen:
 3. **Run** druecken. Die Datei ist idempotent, wiederholtes Ausfuehren schadet
    nicht.
 
+Die Datei enthaelt neben Tabellen, RLS und Funktionen auch die noetigen
+`GRANT`-Rechte fuer die Rolle `authenticated`. Ohne diese Rechte scheitert jede
+Leseabfrage mit "permission denied ... code 42501". Falls du eine aeltere
+Fassung ohne GRANTs eingespielt hattest, reicht das Nachziehen ueber
+`supabase/migrations/0002_household_grants.sql`.
+
 Danach kannst du in der App (angemeldet) ueber den Kontext-Umschalter einen
 Haushalt **erstellen**, per Code/Link **einladen** und **beitreten**. Die
 Verwaltung (Mitglieder, Rollen, Eigentuemer-Uebergabe) findest du in den

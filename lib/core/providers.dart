@@ -30,6 +30,7 @@ class IdentityController extends Notifier<LocalIdentity> {
   @override
   LocalIdentity build() {
     final user = ref.watch(currentUserProvider);
+    final store = ref.watch(localIdentityStoreProvider);
     if (user != null) {
       // Angemeldet: Identitaet kommt vom Konto.
       return LocalIdentity(
@@ -38,8 +39,16 @@ class IdentityController extends Notifier<LocalIdentity> {
         isLinkedToAccount: true,
       );
     }
-    // Gastmodus: lokale Identitaet.
-    return ref.watch(localIdentityStoreProvider).loadOrCreate();
+    // Keine Session: immer als Gast fuehren, auch wenn lokal noch ein altes
+    // "verbunden"-Flag steht (sonst zeigen die Einstellungen faelschlich
+    // "Abmelden" ohne echte Sitzung).
+    final stored = store.loadOrCreate();
+    if (stored.isLinkedToAccount) {
+      final guest = stored.copyWith(isLinkedToAccount: false);
+      store.save(guest);
+      return guest;
+    }
+    return stored;
   }
 
   Future<void> setDisplayName(String name) async {

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/inventory/ui/inventory_screen.dart';
 import '../features/meds/ui/meds_screen.dart';
 import '../features/notes/ui/notes_screen.dart';
-import '../features/placeholder/module_placeholder.dart';
+import '../features/pets/ui/pets_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shopping/ui/shopping_screen.dart';
 import 'navigation.dart';
@@ -26,17 +26,7 @@ final appRouter = GoRouter(
         _branch(AppModule.shopping, const ShoppingScreen()),
         _branch(AppModule.notes, const NotesScreen()),
         _branch(AppModule.meds, const MedsScreen()),
-        _branch(
-          AppModule.pets,
-          const ModulePlaceholder(
-            title: 'Tiere',
-            icon: Icons.pets_rounded,
-            plannedVersion: 'v0.6',
-            description:
-                'Fütterung, Arznei, Tierarzttermine und Gewichtsverlauf '
-                'für alle Tiere im Haushalt.',
-          ),
-        ),
+        _branch(AppModule.pets, const PetsScreen()),
       ],
     ),
     GoRoute(

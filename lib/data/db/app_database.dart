@@ -7,6 +7,7 @@ import 'tables/household_tables.dart';
 import 'tables/inventory_tables.dart';
 import 'tables/medication_tables.dart';
 import 'tables/notes_tables.dart';
+import 'tables/pet_tables.dart';
 import 'tables/shopping_tables.dart';
 
 part 'app_database.g.dart';
@@ -29,6 +30,11 @@ part 'app_database.g.dart';
     NoteChecklistItems,
     MedicationPlans,
     MedicationLogs,
+    Pets,
+    PetTasks,
+    PetTaskLogs,
+    PetHealthEntries,
+    PetWeightEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -41,8 +47,9 @@ class AppDatabase extends _$AppDatabase {
   /// 3: Einkaufslisten und Posten (v0.3)
   /// 4: Notizen und Checklistenpunkte (v0.4)
   /// 5: Medikamentenpläne und Einnahme-Log (v0.5)
+  /// 6: Tiere, Aufgaben, Gesundheit, Gewicht (v0.6)
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,6 +73,13 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         await m.createTable(medicationPlans);
         await m.createTable(medicationLogs);
+      }
+      if (from < 6) {
+        await m.createTable(pets);
+        await m.createTable(petTasks);
+        await m.createTable(petTaskLogs);
+        await m.createTable(petHealthEntries);
+        await m.createTable(petWeightEntries);
       }
     },
     beforeOpen: (details) async {

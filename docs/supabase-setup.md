@@ -124,8 +124,22 @@ Aenderungen laufen ueber serverseitige Funktionen, die die Rollenrechte
 durchsetzen. Ein Gast (nicht angemeldet) kann keine Haushalte anlegen; die App
 fuehrt dann zur Anmeldung.
 
-## Hinweis
+## 7. Sync der Modul-Inhalte (ab v0.9)
 
-Die Synchronisierung der Modul-Inhalte (Inventar, Notizen usw.) zwischen Geraeten
-kommt in v0.9 (Sync-Engine) dazu. In v0.8 werden nur Haushalte und
-Mitgliedschaften geteilt.
+Damit Inventar, Einkauf, Notizen, Pillen und Tiere zwischen Geraeten und
+Haushaltsmitgliedern abgeglichen werden, brauchst du eine weitere Migration:
+
+`supabase/migrations/0003_sync.sql`
+
+Genauso einspielen wie die anderen (SQL Editor -> New query -> Inhalt einfuegen
+-> Run). Sie legt eine generische `sync_records`-Tabelle mit RLS an, dazu die
+Merge-Funktion `push_record` (Last-Write-Wins, additive Zaehler) und aktiviert
+Realtime.
+
+Danach synchronisiert die App automatisch: beim Start, alle paar Minuten und
+live ueber Realtime. Den Status siehst du in den Einstellungen unter
+"Synchronisierung"; dort kannst du auch manuell abgleichen.
+
+Zaehler (Vorratsmengen, Medikamenten-Vorrat) werden additiv zusammengefuehrt:
+verbrauchen zwei Geraete offline vom selben Vorrat, summieren sich die Mengen
+statt sich zu ueberschreiben. Alle anderen Felder folgen Last-Write-Wins.

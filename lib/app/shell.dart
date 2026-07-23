@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/widgets/scope_banner.dart';
 import '../features/household/household_providers.dart';
+import '../features/sync/sync_providers.dart';
 import 'navigation.dart';
 
 /// Rahmen der App: Kontextbanner ganz oben, darunter die Navigation.
@@ -24,6 +25,8 @@ class AppShell extends ConsumerWidget {
 
     // Haelt den lokalen Haushalts-Cache mit dem Server im Takt.
     ref.watch(householdSyncProvider);
+    // Haelt die Modul-Inhalte mit dem Server im Takt.
+    ref.watch(syncControllerProvider);
 
     return Scaffold(
       body: Column(

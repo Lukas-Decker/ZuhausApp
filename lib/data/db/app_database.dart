@@ -9,6 +9,7 @@ import 'tables/medication_tables.dart';
 import 'tables/notes_tables.dart';
 import 'tables/pet_tables.dart';
 import 'tables/shopping_tables.dart';
+import 'tables/sync_tables.dart';
 
 part 'app_database.g.dart';
 
@@ -35,6 +36,8 @@ part 'app_database.g.dart';
     PetTaskLogs,
     PetHealthEntries,
     PetWeightEntries,
+    SyncOutbox,
+    SyncMeta,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -48,8 +51,9 @@ class AppDatabase extends _$AppDatabase {
   /// 4: Notizen und Checklistenpunkte (v0.4)
   /// 5: Medikamentenpläne und Einnahme-Log (v0.5)
   /// 6: Tiere, Aufgaben, Gesundheit, Gewicht (v0.6)
+  /// 7: Sync-Outbox und -Metadaten (v0.9)
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +84,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(petTaskLogs);
         await m.createTable(petHealthEntries);
         await m.createTable(petWeightEntries);
+      }
+      if (from < 7) {
+        await m.createTable(syncOutbox);
+        await m.createTable(syncMeta);
       }
     },
     beforeOpen: (details) async {
@@ -128,6 +136,28 @@ class AppDatabase extends _$AppDatabase {
         );
       }
     });
+  }
+
+  /// Vermerkt eine additive Zaehler-Aenderung fuer den Sync.
+  ///
+  /// Wird von den Repositories zusammen mit der eigentlichen Mengenaenderung
+  /// aufgerufen. Beim Push werden diese Deltas serverseitig atomar addiert, so
+  /// geht bei gleichzeitiger Aenderung auf mehreren Geraeten nichts verloren.
+  Future<void> logCounterDelta({
+    required String table,
+    required String rowId,
+    required String field,
+    required double delta,
+  }) async {
+    if (delta == 0) return;
+    await into(syncOutbox).insert(
+      SyncOutboxCompanion.insert(
+        targetTable: table,
+        rowId: rowId,
+        field: field,
+        delta: delta,
+      ),
+    );
   }
 
   static QueryExecutor _open() => driftDatabase(name: 'multiapp');

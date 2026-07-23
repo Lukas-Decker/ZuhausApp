@@ -297,23 +297,41 @@ class InventoryRepository {
     Value<String?> note = const Value.absent(),
     bool? remindOnExpiry,
   }) async {
-    await (_db.update(_db.inventoryItems)..where((i) => i.id.equals(id))).write(
-      InventoryItemsCompanion(
-        name: name == null ? const Value.absent() : Value(name),
-        quantity: quantity == null ? const Value.absent() : Value(quantity),
-        unit: unit == null ? const Value.absent() : Value(unit),
-        locationId: locationId,
-        expiresAt: expiresAt,
-        minQuantity: minQuantity,
-        note: note,
-        remindOnExpiry: remindOnExpiry == null
-            ? const Value.absent()
-            : Value(remindOnExpiry),
-        updatedAt: Value(DateTime.now()),
-        updatedBy: Value(userId),
-        isDirty: const Value(true),
-      ),
-    );
+    await _db.transaction(() async {
+      // Menge ist ein additiver Zaehler: eine absolute Aenderung aus dem
+      // Formular wird als Delta (neu - alt) verbucht.
+      if (quantity != null) {
+        final current = await (_db.select(_db.inventoryItems)
+              ..where((i) => i.id.equals(id)))
+            .getSingleOrNull();
+        if (current != null && current.quantity != quantity) {
+          await _db.logCounterDelta(
+            table: 'inventory_items',
+            rowId: id,
+            field: 'quantity',
+            delta: quantity - current.quantity,
+          );
+        }
+      }
+      await (_db.update(_db.inventoryItems)..where((i) => i.id.equals(id)))
+          .write(
+        InventoryItemsCompanion(
+          name: name == null ? const Value.absent() : Value(name),
+          quantity: quantity == null ? const Value.absent() : Value(quantity),
+          unit: unit == null ? const Value.absent() : Value(unit),
+          locationId: locationId,
+          expiresAt: expiresAt,
+          minQuantity: minQuantity,
+          note: note,
+          remindOnExpiry: remindOnExpiry == null
+              ? const Value.absent()
+              : Value(remindOnExpiry),
+          updatedAt: Value(DateTime.now()),
+          updatedBy: Value(userId),
+          isDirty: const Value(true),
+        ),
+      );
+    });
   }
 
   /// Verändert den Bestand relativ.
@@ -331,6 +349,7 @@ class InventoryRepository {
             ..where((i) => i.id.equals(id)))
           .getSingle();
       final next = (item.quantity + delta).clamp(0.0, double.maxFinite);
+      final applied = next - item.quantity;
       await (_db.update(_db.inventoryItems)..where((i) => i.id.equals(id)))
           .write(
         InventoryItemsCompanion(
@@ -339,6 +358,14 @@ class InventoryRepository {
           updatedBy: Value(userId),
           isDirty: const Value(true),
         ),
+      );
+      // Additiv synchronisieren, damit gleichzeitiger Verbrauch nicht verloren
+      // geht.
+      await _db.logCounterDelta(
+        table: 'inventory_items',
+        rowId: id,
+        field: 'quantity',
+        delta: applied,
       );
       return next;
     });

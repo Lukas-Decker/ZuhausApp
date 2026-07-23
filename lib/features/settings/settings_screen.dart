@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/providers.dart';
 import '../../core/settings/app_settings.dart';
@@ -8,6 +9,7 @@ import '../auth/auth_providers.dart';
 import '../auth/ui/auth_screen.dart';
 import '../household/household_actions.dart';
 import '../household/ui/household_screen.dart';
+import '../sync/sync_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -35,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.edit_outlined),
             onTap: () => _editDisplayName(context, ref, identity.displayName),
           ),
-          if (identity.isLinkedToAccount)
+          if (identity.isLinkedToAccount) ...[
             ListTile(
               leading: const Icon(Icons.logout_rounded),
               title: const Text('Abmelden'),
@@ -43,8 +45,9 @@ class SettingsScreen extends ConsumerWidget {
                 'Lokale Daten bleiben auf diesem Gerät erhalten.',
               ),
               onTap: () => _signOut(context, ref),
-            )
-          else
+            ),
+            const _SyncTile(),
+          ] else
             ListTile(
               leading: const Icon(Icons.login_rounded),
               title: const Text('Anmelden oder Konto erstellen'),
@@ -79,7 +82,7 @@ class SettingsScreen extends ConsumerWidget {
                     leading: Icon(Icons.info_outline),
                     title: Text('Noch kein Haushalt'),
                     subtitle: Text(
-                      'Über den Kontext-Umschalter kannst du einen erstellen '
+                      '�ober den Kontext-Umschalter kannst du einen erstellen '
                       'oder beitreten.',
                     ),
                   )
@@ -177,11 +180,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
-          const _SectionHeader('Über'),
+          const _SectionHeader('�ober'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.8.1'),
+            subtitle: Text('Version 0.9.0'),
           ),
         ],
       ),
@@ -247,6 +250,50 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (confirmed != true) return;
     await ref.read(authServiceProvider).signOut();
+  }
+}
+
+/// Zeigt den Synchronisierungs-Status und erlaubt manuelles Abgleichen.
+class _SyncTile extends ConsumerWidget {
+  const _SyncTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(syncControllerProvider);
+
+    final (icon, text) = switch (status.phase) {
+      SyncPhase.syncing => (Icons.sync_rounded, 'Wird synchronisiert ...'),
+      SyncPhase.error => (
+        Icons.sync_problem_rounded,
+        'Letzter Abgleich fehlgeschlagen',
+      ),
+      SyncPhase.offline => (Icons.cloud_off_rounded, 'Kein Konto'),
+      SyncPhase.idle => (
+        Icons.cloud_done_rounded,
+        status.lastSyncedAt == null
+            ? 'Bereit'
+            : 'Zuletzt ${DateFormat('HH:mm', 'de').format(status.lastSyncedAt!)}',
+      ),
+    };
+
+    return ListTile(
+      leading: status.isSyncing
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(icon),
+      title: const Text('Synchronisierung'),
+      subtitle: Text(text),
+      trailing: IconButton(
+        tooltip: 'Jetzt abgleichen',
+        onPressed: status.isSyncing
+            ? null
+            : () => ref.read(syncControllerProvider.notifier).syncNow(),
+        icon: const Icon(Icons.refresh_rounded),
+      ),
+    );
   }
 }
 

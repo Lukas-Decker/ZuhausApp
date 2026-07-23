@@ -98,14 +98,32 @@ class MedicationRepository {
       isDirty: const Value(true),
     );
 
-    if (id == null) {
-      await _db.into(_db.medicationPlans).insert(
-        companion.copyWith(createdBy: Value(userId)),
-      );
-    } else {
-      await (_db.update(_db.medicationPlans)..where((p) => p.id.equals(id)))
-          .write(companion);
-    }
+    await _db.transaction(() async {
+      if (id == null) {
+        // Anlegen: der Vorrat steckt in der Zeile selbst (kein Delta noetig).
+        await _db.into(_db.medicationPlans).insert(
+          companion.copyWith(createdBy: Value(userId)),
+        );
+      } else {
+        // Beim Aendern den Vorrat als additives Delta (neu - alt) verbuchen.
+        if (stockCount != null) {
+          final current = await (_db.select(_db.medicationPlans)
+                ..where((p) => p.id.equals(id)))
+              .getSingleOrNull();
+          final old = current?.stockCount;
+          if (old != null && old != stockCount) {
+            await _db.logCounterDelta(
+              table: 'medication_plans',
+              rowId: id,
+              field: 'stock_count',
+              delta: stockCount - old,
+            );
+          }
+        }
+        await (_db.update(_db.medicationPlans)..where((p) => p.id.equals(id)))
+            .write(companion);
+      }
+    });
     return planId;
   }
 
@@ -238,6 +256,7 @@ class MedicationRepository {
       if (plan.stockCount != null && wasTaken != willBeTaken) {
         final delta = willBeTaken ? -plan.dosePerIntake : plan.dosePerIntake;
         final next = (plan.stockCount! + delta).clamp(0.0, double.maxFinite);
+        final applied = next - plan.stockCount!;
         await (_db.update(_db.medicationPlans)..where((p) => p.id.equals(plan.id)))
             .write(
           MedicationPlansCompanion(
@@ -246,6 +265,12 @@ class MedicationRepository {
             updatedBy: Value(userId),
             isDirty: const Value(true),
           ),
+        );
+        await _db.logCounterDelta(
+          table: 'medication_plans',
+          rowId: plan.id,
+          field: 'stock_count',
+          delta: applied,
         );
       }
     });

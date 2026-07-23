@@ -14,6 +14,9 @@ class AppSettings {
     required this.medicationRemindersEnabled,
     required this.petRemindersEnabled,
     required this.healthDataConsent,
+    required this.familyPushEnabled,
+    required this.medEscalationEnabled,
+    required this.petOverdueEnabled,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -40,6 +43,15 @@ class AppSettings {
   /// nötig bevor der Pillen-Tracker genutzt wird. `null` = noch nicht gefragt.
   final bool? healthDataConsent;
 
+  /// Empfang von Familien-Ereignissen als Benachrichtigung.
+  final bool familyPushEnabled;
+
+  /// Eskalation nicht bestätigter Einnahmen an die Betreuungsperson.
+  final bool medEscalationEnabled;
+
+  /// Meldung überfälliger Tier-Aufgaben an den Haushalt.
+  final bool petOverdueEnabled;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
@@ -47,6 +59,9 @@ class AppSettings {
     bool? medicationRemindersEnabled,
     bool? petRemindersEnabled,
     Object? healthDataConsent = _unset,
+    bool? familyPushEnabled,
+    bool? medEscalationEnabled,
+    bool? petOverdueEnabled,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
@@ -59,6 +74,9 @@ class AppSettings {
     healthDataConsent: healthDataConsent == _unset
         ? this.healthDataConsent
         : healthDataConsent as bool?,
+    familyPushEnabled: familyPushEnabled ?? this.familyPushEnabled,
+    medEscalationEnabled: medEscalationEnabled ?? this.medEscalationEnabled,
+    petOverdueEnabled: petOverdueEnabled ?? this.petOverdueEnabled,
   );
 
   static const Object _unset = Object();
@@ -71,6 +89,9 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyExpiryDays = 'reminder.expiry.days';
   static const _keyMedsEnabled = 'reminder.medication.enabled';
   static const _keyPetsEnabled = 'reminder.pet.enabled';
+  static const _keyFamilyPush = 'reminder.family.enabled';
+  static const _keyMedEscalation = 'reminder.med.escalation';
+  static const _keyPetOverdue = 'reminder.pet.overdue';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -84,6 +105,9 @@ class AppSettingsController extends Notifier<AppSettings> {
       medicationRemindersEnabled: prefs.getBool(_keyMedsEnabled) ?? true,
       petRemindersEnabled: prefs.getBool(_keyPetsEnabled) ?? true,
       healthDataConsent: prefs.getBool(_keyHealthConsent),
+      familyPushEnabled: prefs.getBool(_keyFamilyPush) ?? true,
+      medEscalationEnabled: prefs.getBool(_keyMedEscalation) ?? true,
+      petOverdueEnabled: prefs.getBool(_keyPetOverdue) ?? true,
     );
   }
 
@@ -121,6 +145,21 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setPetRemindersEnabled(bool enabled) async {
     await _prefs.setBool(_keyPetsEnabled, enabled);
     state = state.copyWith(petRemindersEnabled: enabled);
+  }
+
+  Future<void> setFamilyPushEnabled(bool enabled) async {
+    await _prefs.setBool(_keyFamilyPush, enabled);
+    state = state.copyWith(familyPushEnabled: enabled);
+  }
+
+  Future<void> setMedEscalationEnabled(bool enabled) async {
+    await _prefs.setBool(_keyMedEscalation, enabled);
+    state = state.copyWith(medEscalationEnabled: enabled);
+  }
+
+  Future<void> setPetOverdueEnabled(bool enabled) async {
+    await _prefs.setBool(_keyPetOverdue, enabled);
+    state = state.copyWith(petOverdueEnabled: enabled);
   }
 }
 

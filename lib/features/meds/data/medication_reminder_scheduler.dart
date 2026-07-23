@@ -70,7 +70,9 @@ class MedicationReminderScheduler {
       title: '${form.label} nehmen',
       body: body,
       when: occ.scheduledFor,
-      payload: 'med:${occ.plan.id}',
+      // Plan und genauer Zeitpunkt, damit die Aktionen die richtige Einnahme
+      // treffen: "med:<planId>|<scheduledForIso>".
+      payload: 'med:${occ.plan.id}|${occ.scheduledFor.toIso8601String()}',
     );
   }
 }

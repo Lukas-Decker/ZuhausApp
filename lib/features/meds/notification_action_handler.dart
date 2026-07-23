@@ -1,0 +1,81 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/notifications/notification_providers.dart';
+import '../../core/notifications/notification_service.dart';
+import '../../core/providers.dart';
+import '../../core/scope/app_scope.dart';
+import 'domain/medication_schedule.dart';
+import 'meds_providers.dart';
+
+/// Reagiert auf Aktionen aus Medikamenten-Benachrichtigungen
+/// (Genommen / Snooze) und den Start aus einer Benachrichtigung.
+///
+/// Muss beobachtet werden (siehe AppShell), damit die Verarbeitung laeuft.
+final notificationActionHandlerProvider = Provider<void>((ref) {
+  final service = ref.watch(notificationServiceProvider);
+
+  final sub = service.actions.listen((action) => _handle(ref, service, action));
+  ref.onDispose(sub.cancel);
+
+  // Falls die App durch Antippen einer Benachrichtigung gestartet wurde.
+  service.initialAction().then((action) {
+    if (action != null) _handle(ref, service, action);
+  });
+});
+
+Future<void> _handle(
+  Ref ref,
+  NotificationService service,
+  NotificationAction action,
+) async {
+  final payload = action.payload;
+  if (payload == null || !payload.startsWith('med:')) return;
+
+  final rest = payload.substring(4);
+  final parts = rest.split('|');
+  final planId = parts.first;
+  final scheduledFor = parts.length > 1 ? DateTime.tryParse(parts[1]) : null;
+  if (scheduledFor == null) return;
+
+  final repo = ref.read(medicationRepositoryProvider);
+  final plan = await repo.getPlan(planId);
+  if (plan == null) return;
+
+  final scope = plan.scopeKind == ScopeKind.household.name
+      ? AppScope.household(plan.scopeId, '')
+      : AppScope.personal(plan.scopeId);
+  final userId = ref.read(identityProvider).userId;
+  final slotKey = '$planId@${scheduledFor.toIso8601String()}';
+
+  switch (action.actionId) {
+    case medTakenActionId:
+      await repo.recordIntake(
+        scope: scope,
+        userId: userId,
+        plan: plan,
+        scheduledFor: scheduledFor,
+        status: 'taken',
+      );
+      await service.cancel(notificationIdFromKey(slotKey));
+
+    case medSnoozeActionId:
+      final form = medicationForm(plan.form);
+      final dosage = plan.dosage.trim();
+      await service.schedule(
+        ScheduledReminder(
+          id: notificationIdFromKey('snooze:$slotKey'),
+          title: '${form.label} nehmen',
+          body: dosage.isEmpty
+              ? 'Zeit für ${plan.name}'
+              : 'Zeit für ${plan.name}: $dosage',
+          when: DateTime.now().add(const Duration(minutes: 15)),
+          payload: payload,
+        ),
+        channel: NotificationService.medicationChannel,
+      );
+
+    default:
+      // Einfaches Antippen: keine Sonderbehandlung noetig.
+      break;
+  }
+}

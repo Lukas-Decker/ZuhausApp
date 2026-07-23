@@ -139,8 +139,44 @@ class SettingsScreen extends ConsumerWidget {
                 .setExpiryWarningsEnabled,
             title: const Text('Ablaufwarnungen'),
             subtitle: Text(
-              'Warnt ${settings.expiryWarningDays} Tage vorher. '
-              'Pro Artikel zusätzlich einzeln abschaltbar.',
+              'Tägliche Sammelmeldung, ${settings.expiryWarningDays} Tage '
+              'vorher. Pro Artikel zusätzlich abschaltbar.',
+            ),
+          ),
+          const Divider(),
+          const _SectionHeader('Familie'),
+          SwitchListTile(
+            secondary: const Icon(Icons.notifications_active_outlined),
+            value: settings.familyPushEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setFamilyPushEnabled,
+            title: const Text('Familien-Benachrichtigungen'),
+            subtitle: const Text(
+              'Ereignisse aus dem Haushalt auf diesem Gerät anzeigen.',
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.escalator_warning_rounded),
+            value: settings.medEscalationEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setMedEscalationEnabled,
+            title: const Text('Pillen-Eskalation'),
+            subtitle: const Text(
+              'Nicht bestätigte Einnahmen (geteilt/mit Betreuer) an die '
+              'Familie melden.',
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.pets_outlined),
+            value: settings.petOverdueEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setPetOverdueEnabled,
+            title: const Text('Fütterung überfällig'),
+            subtitle: const Text(
+              'Meldet abends offene Fütterungen an den Haushalt.',
             ),
           ),
           const Divider(),
@@ -184,7 +220,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.9.3'),
+            subtitle: Text('Version 0.10.0'),
           ),
         ],
       ),

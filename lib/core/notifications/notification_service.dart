@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -24,6 +25,20 @@ class ScheduledReminder {
   final String? payload;
 }
 
+/// Reaktion auf eine Benachrichtigung (Tippen oder Aktions-Button).
+class NotificationAction {
+  const NotificationAction({this.actionId, this.payload});
+
+  /// z.B. [medTaken] oder [medSnooze]; `null` beim einfachen Antippen.
+  final String? actionId;
+  final String? payload;
+}
+
+/// Aktions-Kennungen der Medikamenten-Benachrichtigung.
+const medTakenActionId = 'med_taken';
+const medSnoozeActionId = 'med_snooze';
+const _medCategoryId = 'med_reminder';
+
 /// Kapselt lokale Benachrichtigungen und blendet Plattformunterschiede aus.
 ///
 /// Erinnerungen werden auf dem Gerät geplant und funktionieren offline. Wo das
@@ -36,14 +51,20 @@ class NotificationService {
   static const _medicationChannelId = 'medication_reminders';
   static const _petChannelId = 'pet_reminders';
   static const _inventoryChannelId = 'inventory_reminders';
+  static const _familyChannelId = 'family_events';
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _ready = false;
   bool _supported = false;
 
+  final StreamController<NotificationAction> _actions =
+      StreamController<NotificationAction>.broadcast();
+
+  /// Strom der Benutzer-Reaktionen auf Benachrichtigungen.
+  Stream<NotificationAction> get actions => _actions.stream;
+
   bool get isSupported => _supported;
 
-  /// Auf welchen Plattformen geplante Benachrichtigungen unterstuetzt werden.
   static bool get _platformSupported {
     if (kIsWeb) return false;
     return Platform.isAndroid ||
@@ -65,7 +86,17 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation(localZone.identifier));
 
       const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-      const darwinInit = DarwinInitializationSettings();
+      final darwinInit = DarwinInitializationSettings(
+        notificationCategories: [
+          DarwinNotificationCategory(
+            _medCategoryId,
+            actions: [
+              DarwinNotificationAction.plain(medTakenActionId, 'Genommen'),
+              DarwinNotificationAction.plain(medSnoozeActionId, 'Snooze'),
+            ],
+          ),
+        ],
+      );
       const linuxInit = LinuxInitializationSettings(
         defaultActionName: 'Öffnen',
       );
@@ -76,13 +107,14 @@ class NotificationService {
       );
 
       await _plugin.initialize(
-        settings: const InitializationSettings(
+        settings: InitializationSettings(
           android: androidInit,
           iOS: darwinInit,
           macOS: darwinInit,
           linux: linuxInit,
           windows: windowsInit,
         ),
+        onDidReceiveNotificationResponse: _onResponse,
       );
 
       _supported = true;
@@ -91,6 +123,32 @@ class NotificationService {
       _supported = false;
     }
     _ready = true;
+  }
+
+  void _onResponse(NotificationResponse response) {
+    _actions.add(
+      NotificationAction(
+        actionId: response.actionId,
+        payload: response.payload,
+      ),
+    );
+  }
+
+  /// Wurde die App durch Antippen einer Benachrichtigung gestartet, liefert
+  /// dies die zugehoerige Aktion (damit der Aufrufer navigieren kann).
+  Future<NotificationAction?> initialAction() async {
+    if (!_supported) return null;
+    try {
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      final response = details?.notificationResponse;
+      if (details?.didNotificationLaunchApp == true && response != null) {
+        return NotificationAction(
+          actionId: response.actionId,
+          payload: response.payload,
+        );
+      }
+    } catch (_) {}
+    return null;
   }
 
   /// Fragt (auf Android/iOS) die Benachrichtigungsberechtigung an.
@@ -143,6 +201,28 @@ class NotificationService {
     }
   }
 
+  /// Zeigt eine Benachrichtigung sofort (z.B. Familien-Ereignis).
+  Future<void> show({
+    required int id,
+    required String title,
+    required String body,
+    String channel = _familyChannelId,
+    String? payload,
+  }) async {
+    if (!_supported) return;
+    try {
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: _detailsFor(channel),
+        payload: payload,
+      );
+    } catch (error) {
+      debugPrint('show fehlgeschlagen: $error');
+    }
+  }
+
   Future<void> cancel(int id) async {
     if (!_supported) return;
     try {
@@ -163,8 +243,11 @@ class NotificationService {
     final (name, description) = switch (channel) {
       _petChannelId => ('Tier-Erinnerungen', 'Fütterung, Arznei, Termine'),
       _inventoryChannelId => ('Vorrats-Warnungen', 'Ablaufende Lebensmittel'),
+      _familyChannelId => ('Familie', 'Ereignisse aus deinem Haushalt'),
       _ => ('Medikamenten-Erinnerungen', 'Einnahme-Erinnerungen'),
     };
+
+    final isMed = channel == _medicationChannelId;
 
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -174,9 +257,19 @@ class NotificationService {
         importance: Importance.high,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
+        actions: isMed
+            ? const [
+                AndroidNotificationAction(medTakenActionId, 'Genommen'),
+                AndroidNotificationAction(medSnoozeActionId, 'Snooze'),
+              ]
+            : null,
       ),
-      iOS: const DarwinNotificationDetails(),
-      macOS: const DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        categoryIdentifier: isMed ? _medCategoryId : null,
+      ),
+      macOS: DarwinNotificationDetails(
+        categoryIdentifier: isMed ? _medCategoryId : null,
+      ),
       linux: LinuxNotificationDetails(
         urgency: LinuxNotificationUrgency.critical,
       ),
@@ -184,9 +277,14 @@ class NotificationService {
     );
   }
 
+  void dispose() {
+    _actions.close();
+  }
+
   static const medicationChannel = _medicationChannelId;
   static const petChannel = _petChannelId;
   static const inventoryChannel = _inventoryChannelId;
+  static const familyChannel = _familyChannelId;
 }
 
 /// Wandelt einen Schlüssel stabil in eine 31-Bit-Notification-ID um.

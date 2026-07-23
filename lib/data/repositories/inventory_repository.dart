@@ -217,6 +217,24 @@ class InventoryRepository {
         .getSingleOrNull();
   }
 
+  /// Alle bald ablaufenden Vorraete ueber alle Kontexte, fuer die taegliche
+  /// Sammelbenachrichtigung. Beruecksichtigt den Pro-Artikel-Schalter.
+  Future<List<InventoryItem>> expiringSoon(int withinDays) {
+    final today = DateTime.now();
+    final horizon = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).add(Duration(days: withinDays + 1));
+    return (_db.select(_db.inventoryItems)
+          ..where((i) => i.deletedAt.isNull())
+          ..where((i) => i.remindOnExpiry.equals(true))
+          ..where((i) => i.expiresAt.isNotNull())
+          ..where((i) => i.expiresAt.isSmallerThanValue(horizon))
+          ..orderBy([(i) => OrderingTerm.asc(i.expiresAt)]))
+        .get();
+  }
+
   Future<InventoryItem?> findByBarcode(AppScope scope, String barcode) {
     return (_db.select(_db.inventoryItems)
           ..where((i) => i.scopeKind.equals(scope.kind.name))

@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/scope_banner.dart';
+import '../features/family/family_providers.dart';
 import '../features/household/household_providers.dart';
+import '../features/inventory/inventory_providers.dart';
+import '../features/meds/notification_action_handler.dart';
 import '../features/sync/sync_providers.dart';
 import 'navigation.dart';
 
@@ -27,6 +30,13 @@ class AppShell extends ConsumerWidget {
     ref.watch(householdSyncProvider);
     // Haelt die Modul-Inhalte mit dem Server im Takt.
     ref.watch(syncControllerProvider);
+    // Verarbeitet Aktionen aus Benachrichtigungen (Genommen/Snooze).
+    ref.watch(notificationActionHandlerProvider);
+    // Haelt die taegliche Ablauf-Sammelbenachrichtigung aktuell.
+    ref.watch(expiryNotificationSyncProvider);
+    // Empfaengt Familien-Ereignisse und prueft auf meldenswerte Situationen.
+    ref.watch(familyEventListenerProvider);
+    ref.watch(familyEventCheckerProvider);
 
     // Beim Tab-Wechsel einen Abgleich anstossen.
     void onNavigate() =>

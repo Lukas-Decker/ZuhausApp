@@ -143,3 +143,21 @@ live ueber Realtime. Den Status siehst du in den Einstellungen unter
 Zaehler (Vorratsmengen, Medikamenten-Vorrat) werden additiv zusammengefuehrt:
 verbrauchen zwei Geraete offline vom selben Vorrat, summieren sich die Mengen
 statt sich zu ueberschreiben. Alle anderen Felder folgen Last-Write-Wins.
+
+## 8. Familien-Benachrichtigungen (ab v0.10)
+
+Fuer Push an Familiengeraete (z.B. "Hund noch nicht gefuettert", verpasste
+Pille) ohne Firebase - komplett ueber Supabase-Realtime:
+
+`supabase/migrations/0004_family_events.sql`
+
+Genauso einspielen. Sie legt die Tabelle `household_events` mit RLS an, dazu die
+Funktion `post_household_event` (mit Doppel-Schutz) und aktiviert Realtime.
+
+So funktioniert es: Ein laufendes Geraet erkennt eine Situation und legt ein
+Ereignis an; alle verbundenen Geraete des Haushalts zeigen es als
+Benachrichtigung. Einschraenkung des Realtime-Ansatzes: eine komplett
+geschlossene App wird nicht geweckt - die Benachrichtigung erscheint, sobald die
+App wieder laeuft. In den Einstellungen unter "Familie" laesst sich jeder Kanal
+(Familien-Benachrichtigungen, Pillen-Eskalation, Fuetterung ueberfaellig)
+einzeln an- und abschalten.

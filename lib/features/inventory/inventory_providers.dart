@@ -1,13 +1,43 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/notifications/notification_providers.dart';
 import '../../core/providers.dart';
+import '../../core/settings/app_settings.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/inventory_repository.dart';
+import 'data/expiry_notification_scheduler.dart';
 import 'data/open_food_facts_service.dart';
 
 final inventoryRepositoryProvider = Provider<InventoryRepository>(
   (ref) => InventoryRepository(ref.watch(databaseProvider)),
 );
+
+final expiryNotificationSchedulerProvider =
+    Provider<ExpiryNotificationScheduler>(
+      (ref) => ExpiryNotificationScheduler(
+        inventory: ref.watch(inventoryRepositoryProvider),
+        notifications: ref.watch(notificationServiceProvider),
+      ),
+    );
+
+/// Emittiert bei jeder Aenderung an der Inventar-Tabelle (kontextuebergreifend).
+final _inventoryChangesProvider = StreamProvider<void>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.tableUpdates().where((set) {
+    return set.any((u) => u.table == 'inventory_items');
+  }).map((_) {});
+});
+
+/// Plant die taegliche Ablauf-Sammelbenachrichtigung neu, sobald sich das
+/// Inventar oder die Einstellung aendert. Muss beobachtet werden (AppShell).
+final expiryNotificationSyncProvider = Provider<void>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  ref.watch(_inventoryChangesProvider);
+  ref.watch(expiryNotificationSchedulerProvider).reschedule(
+    enabled: settings.expiryWarningsEnabled,
+    warningDays: settings.expiryWarningDays,
+  );
+});
 
 final openFoodFactsServiceProvider = Provider<OpenFoodFactsService>((ref) {
   final service = OpenFoodFactsService();

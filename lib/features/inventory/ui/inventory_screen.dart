@@ -479,13 +479,21 @@ class _InventoryTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              tooltip: 'Weniger',
-              onPressed: item.quantity <= 0
-                  ? null
-                  : () => _adjust(ref, -1),
-              icon: const Icon(Icons.remove_circle_outline_rounded),
-            ),
+            if (item.quantity <= 0)
+              IconButton(
+                tooltip: 'Löschen',
+                onPressed: () => _confirmAndDelete(context, ref),
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: scheme.error,
+                ),
+              )
+            else
+              IconButton(
+                tooltip: 'Weniger',
+                onPressed: () => _adjust(ref, -1),
+                icon: const Icon(Icons.remove_circle_outline_rounded),
+              ),
             ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 62),
               child: Text(
@@ -546,6 +554,12 @@ class _InventoryTile extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('"${entry.item.name}" gelöscht')),
     );
+  }
+
+  Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref) async {
+    if (await _confirmDelete(context, entry.item.name) && context.mounted) {
+      _delete(context, ref);
+    }
   }
 }
 

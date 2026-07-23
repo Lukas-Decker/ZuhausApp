@@ -269,12 +269,49 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
                         : scopeActionLabel(scope, verb: 'Hinzufügen'),
                   ),
                 ),
+                if (_isEdit) ...[
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: _saving ? null : _delete,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    icon: const Icon(Icons.delete_outline_rounded),
+                    label: const Text('Aus dem Inventar löschen'),
+                  ),
+                ],
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Vorrat löschen?'),
+        content: Text('"${widget.item!.name}" wird aus dem Inventar entfernt.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref
+        .read(inventoryRepositoryProvider)
+        .deleteItem(widget.item!.id, ref.read(identityProvider).userId);
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   Future<void> _save() async {

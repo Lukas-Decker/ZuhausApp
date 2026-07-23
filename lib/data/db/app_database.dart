@@ -92,6 +92,11 @@ class AppDatabase extends _$AppDatabase {
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+      // WAL erlaubt gleichzeitiges Lesen waehrend eines Schreibvorgangs;
+      // busy_timeout laesst konkurrierende Schreibzugriffe kurz warten statt
+      // sofort mit "database is locked" zu scheitern (z.B. zwei App-Fenster).
+      await customStatement('PRAGMA journal_mode = WAL');
+      await customStatement('PRAGMA busy_timeout = 4000');
     },
   );
 

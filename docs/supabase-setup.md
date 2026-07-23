@@ -15,13 +15,19 @@ Synchronisierung brauchst du ein kostenloses Supabase-Projekt.
 
 ## 2. Zugangsdaten holen
 
-Im Projekt unter **Project Settings -> API**:
+Das Dashboard-Layout hat sich geaendert. Aktuell:
 
-- **Project URL** (z.B. `https://abcdefgh.supabase.co`)
-- **anon / publishable key** (langer oeffentlicher Schluessel)
+- **Project Settings -> API Keys -> Publishable key** (`sb_publishable_...`) ->
+  das ist der oeffentliche Schluessel fuer die App (frueher "anon key").
+- **Project Settings -> Data API -> API URL** -> die Projekt-URL.
 
-Der anon-Key ist oeffentlich und darf in die App, gehoert aber trotzdem nicht
-ins Git-Repo (deshalb `env.json` in `.gitignore`).
+**Achtung bei der URL:** Trage nur die Basis-URL ein, also
+`https://<projekt>.supabase.co` **ohne** den Pfad `/rest/v1/`. Falls das
+Dashboard die URL mit `/rest/v1/` am Ende zeigt, schneide diesen Teil ab. (Die
+App entfernt einen solchen Pfad zur Sicherheit auch selbst.)
+
+Der Publishable Key ist oeffentlich und darf in die App, gehoert aber trotzdem
+nicht ins Git-Repo (deshalb `env.json` in `.gitignore`).
 
 ## 3. env.json anlegen
 

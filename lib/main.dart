@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'core/config/app_config.dart';
+import 'core/deeplink/windows_deeplink.dart';
 import 'core/notifications/notification_providers.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/providers.dart';
@@ -36,6 +37,9 @@ Future<void> main() async {
         authFlowType: AuthFlowType.pkce,
       ),
     );
+    // Custom-URL-Schema bei Windows registrieren, damit OAuth-Rueckwege und
+    // Passwort-Reset auch auf dem Desktop in die App zurueckkommen.
+    await registerWindowsDeepLinkScheme();
   }
 
   runApp(

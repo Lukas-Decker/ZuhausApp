@@ -80,6 +80,20 @@ Unter **Authentication -> Providers -> Email**:
 Ohne diesen Schritt funktioniert E-Mail + Passwort trotzdem; der Google-Button
 zeigt dann nur eine Fehlermeldung.
 
+## Deep-Links auf dem Desktop (Windows)
+
+Die E-Mail-Bestaetigung funktioniert immer: der Klick auf den Link bestaetigt
+das Konto serverseitig, danach kannst du dich in der App mit E-Mail + Passwort
+anmelden. Ein Ruecksprung in die App ist dafuer nicht noetig.
+
+Google-Login und Passwort-Reset laufen ueber den Browser und muessen zurueck in
+die App springen (`de.lukas.multiapp://login-callback`). Auf Android geschieht
+das ueber den Intent-Filter automatisch. Auf **Windows** registriert die App das
+URL-Schema beim ersten Start selbst in der Registry (HKEY_CURRENT_USER, keine
+Admin-Rechte noetig) und leitet den Link an das laufende Fenster weiter. Der
+Eintrag zeigt auf die gerade gestartete exe; startest du die App aus einem
+anderen Pfad, wird er beim naechsten Start aktualisiert.
+
 ## Hinweis
 
 Datenbank-Tabellen und Row-Level-Security fuer die Synchronisierung kommen in

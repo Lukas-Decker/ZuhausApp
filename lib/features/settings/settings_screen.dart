@@ -166,7 +166,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.7.1'),
+            subtitle: Text('Version 0.7.2'),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -41,10 +42,22 @@ class SyncStatus {
 /// Muss beobachtet werden (siehe AppShell), damit die Ausloeser laufen.
 class SyncController extends Notifier<SyncStatus> {
   Timer? _timer;
+  Timer? _debounce;
   RealtimeChannel? _channel;
+  StreamSubscription<void>? _localChanges;
+  AppLifecycleListener? _lifecycle;
   bool _pending = false;
 
-  static const _interval = Duration(minutes: 3);
+  /// Sicherheitsnetz-Intervall.
+  static const _interval = Duration(seconds: 90);
+
+  /// Wartezeit, um mehrere schnelle lokale Aenderungen zu buendeln.
+  static const _debounceDelay = Duration(milliseconds: 1500);
+
+  /// Tabellen, deren lokale Aenderung einen Abgleich ausloest.
+  static final Set<String> _syncedTables = {
+    for (final t in SyncEngine.tables) t.name,
+  };
 
   @override
   SyncStatus build() {
@@ -61,9 +74,12 @@ class SyncController extends Notifier<SyncStatus> {
   }
 
   void _start() {
+    final db = ref.read(databaseProvider);
+
     _timer?.cancel();
     _timer = Timer.periodic(_interval, (_) => syncNow());
 
+    // Eingehende Aenderungen anderer Geraete.
     _channel?.unsubscribe();
     _channel = Supabase.instance.client
         .channel('sync-records')
@@ -75,8 +91,26 @@ class SyncController extends Notifier<SyncStatus> {
         )
         .subscribe();
 
+    // Eigene lokale Aenderungen: kurz buendeln, dann abgleichen. So gehen
+    // Aenderungen fast sofort raus, ohne bei jedem Tastendruck zu funken.
+    _localChanges?.cancel();
+    _localChanges = db.tableUpdates().listen((updates) {
+      if (updates.any((u) => _syncedTables.contains(u.table))) {
+        _scheduleDebounced();
+      }
+    });
+
+    // Beim Zurueckkehren in die App abgleichen.
+    _lifecycle?.dispose();
+    _lifecycle = AppLifecycleListener(onResume: syncNow);
+
     // Erstabgleich nach dem Aufbau.
     Future.microtask(syncNow);
+  }
+
+  void _scheduleDebounced() {
+    _debounce?.cancel();
+    _debounce = Timer(_debounceDelay, syncNow);
   }
 
   /// Stoesst einen Abgleich an. Laeuft bereits einer, wird er danach einmal
@@ -111,8 +145,14 @@ class SyncController extends Notifier<SyncStatus> {
   void _teardown() {
     _timer?.cancel();
     _timer = null;
+    _debounce?.cancel();
+    _debounce = null;
     _channel?.unsubscribe();
     _channel = null;
+    _localChanges?.cancel();
+    _localChanges = null;
+    _lifecycle?.dispose();
+    _lifecycle = null;
   }
 }
 

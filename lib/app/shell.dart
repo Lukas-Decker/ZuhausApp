@@ -28,6 +28,10 @@ class AppShell extends ConsumerWidget {
     // Haelt die Modul-Inhalte mit dem Server im Takt.
     ref.watch(syncControllerProvider);
 
+    // Beim Tab-Wechsel einen Abgleich anstossen.
+    void onNavigate() =>
+        ref.read(syncControllerProvider.notifier).syncNow();
+
     return Scaffold(
       body: Column(
         children: [
@@ -39,6 +43,7 @@ class AppShell extends ConsumerWidget {
                       _ModuleRail(
                         navigationShell: navigationShell,
                         extended: width >= _extendedRailBreakpoint,
+                        onNavigate: onNavigate,
                       ),
                       const VerticalDivider(width: 1),
                       Expanded(child: navigationShell),
@@ -50,22 +55,31 @@ class AppShell extends ConsumerWidget {
       ),
       bottomNavigationBar: useRail
           ? null
-          : _ModuleBottomBar(navigationShell: navigationShell),
+          : _ModuleBottomBar(
+              navigationShell: navigationShell,
+              onNavigate: onNavigate,
+            ),
     );
   }
 }
 
 class _ModuleBottomBar extends StatelessWidget {
-  const _ModuleBottomBar({required this.navigationShell});
+  const _ModuleBottomBar({
+    required this.navigationShell,
+    required this.onNavigate,
+  });
 
   final StatefulNavigationShell navigationShell;
+  final VoidCallback onNavigate;
 
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
       selectedIndex: navigationShell.currentIndex,
-      onDestinationSelected: (index) =>
-          navigationShell.goBranch(index, initialLocation: false),
+      onDestinationSelected: (index) {
+        onNavigate();
+        navigationShell.goBranch(index, initialLocation: false);
+      },
       destinations: [
         for (final module in AppModule.values)
           NavigationDestination(
@@ -79,10 +93,15 @@ class _ModuleBottomBar extends StatelessWidget {
 }
 
 class _ModuleRail extends StatelessWidget {
-  const _ModuleRail({required this.navigationShell, required this.extended});
+  const _ModuleRail({
+    required this.navigationShell,
+    required this.extended,
+    required this.onNavigate,
+  });
 
   final StatefulNavigationShell navigationShell;
   final bool extended;
+  final VoidCallback onNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +116,10 @@ class _ModuleRail extends StatelessWidget {
                   ? NavigationRailLabelType.none
                   : NavigationRailLabelType.all,
               selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: (index) =>
-                  navigationShell.goBranch(index, initialLocation: false),
+              onDestinationSelected: (index) {
+                onNavigate();
+                navigationShell.goBranch(index, initialLocation: false);
+              },
               destinations: [
                 for (final module in AppModule.values)
                   NavigationRailDestination(

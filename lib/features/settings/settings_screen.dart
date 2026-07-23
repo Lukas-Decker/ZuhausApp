@@ -72,6 +72,26 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const _SectionHeader('Erinnerungen'),
           SwitchListTile(
+            secondary: const Icon(Icons.medication_rounded),
+            value: settings.medicationRemindersEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setMedicationRemindersEnabled,
+            title: const Text('Medikamenten-Erinnerungen'),
+            subtitle: const Text(
+              'Pro Plan zusätzlich einzeln abschaltbar.',
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.pets_rounded),
+            value: settings.petRemindersEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setPetRemindersEnabled,
+            title: const Text('Tier-Erinnerungen'),
+            subtitle: const Text('Fütterung, Arznei und Termine.'),
+          ),
+          SwitchListTile(
             secondary: const Icon(Icons.event_busy_rounded),
             value: settings.expiryWarningsEnabled,
             onChanged: ref
@@ -103,12 +123,28 @@ class SettingsScreen extends ConsumerWidget {
                   .setOpenFoodFactsConsent,
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.health_and_safety_outlined),
+            title: const Text('Gesundheitsdaten (Pillen-Tracker)'),
+            subtitle: Text(
+              switch (settings.healthDataConsent) {
+                true => 'Einwilligung erteilt (DSGVO Art. 9).',
+                false || null => 'Noch nicht eingewilligt.',
+              },
+            ),
+            trailing: Switch(
+              value: settings.healthDataConsent ?? false,
+              onChanged: ref
+                  .read(appSettingsProvider.notifier)
+                  .setHealthDataConsent,
+            ),
+          ),
           const Divider(),
           const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.2.0'),
+            subtitle: Text('Version 0.5.0'),
           ),
         ],
       ),

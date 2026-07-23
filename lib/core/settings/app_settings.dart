@@ -11,6 +11,9 @@ class AppSettings {
     required this.openFoodFactsConsent,
     required this.expiryWarningsEnabled,
     required this.expiryWarningDays,
+    required this.medicationRemindersEnabled,
+    required this.petRemindersEnabled,
+    required this.healthDataConsent,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -26,16 +29,36 @@ class AppSettings {
   /// Wie viele Tage vorher gewarnt wird.
   final int expiryWarningDays;
 
+  /// Globaler Schalter für Medikamenten-Erinnerungen. Zusätzlich hat jeder
+  /// Plan einen eigenen Schalter.
+  final bool medicationRemindersEnabled;
+
+  /// Globaler Schalter für Tier-Erinnerungen.
+  final bool petRemindersEnabled;
+
+  /// Einwilligung in die Verarbeitung von Gesundheitsdaten (DSGVO Art. 9),
+  /// nötig bevor der Pillen-Tracker genutzt wird. `null` = noch nicht gefragt.
+  final bool? healthDataConsent;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
     int? expiryWarningDays,
+    bool? medicationRemindersEnabled,
+    bool? petRemindersEnabled,
+    Object? healthDataConsent = _unset,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
         : openFoodFactsConsent as bool?,
     expiryWarningsEnabled: expiryWarningsEnabled ?? this.expiryWarningsEnabled,
     expiryWarningDays: expiryWarningDays ?? this.expiryWarningDays,
+    medicationRemindersEnabled:
+        medicationRemindersEnabled ?? this.medicationRemindersEnabled,
+    petRemindersEnabled: petRemindersEnabled ?? this.petRemindersEnabled,
+    healthDataConsent: healthDataConsent == _unset
+        ? this.healthDataConsent
+        : healthDataConsent as bool?,
   );
 
   static const Object _unset = Object();
@@ -43,8 +66,11 @@ class AppSettings {
 
 class AppSettingsController extends Notifier<AppSettings> {
   static const _keyOffConsent = 'consent.openfoodfacts';
+  static const _keyHealthConsent = 'consent.healthdata';
   static const _keyExpiryEnabled = 'reminder.expiry.enabled';
   static const _keyExpiryDays = 'reminder.expiry.days';
+  static const _keyMedsEnabled = 'reminder.medication.enabled';
+  static const _keyPetsEnabled = 'reminder.pet.enabled';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -55,6 +81,9 @@ class AppSettingsController extends Notifier<AppSettings> {
       openFoodFactsConsent: prefs.getBool(_keyOffConsent),
       expiryWarningsEnabled: prefs.getBool(_keyExpiryEnabled) ?? true,
       expiryWarningDays: prefs.getInt(_keyExpiryDays) ?? 5,
+      medicationRemindersEnabled: prefs.getBool(_keyMedsEnabled) ?? true,
+      petRemindersEnabled: prefs.getBool(_keyPetsEnabled) ?? true,
+      healthDataConsent: prefs.getBool(_keyHealthConsent),
     );
   }
 
@@ -69,6 +98,11 @@ class AppSettingsController extends Notifier<AppSettings> {
     state = state.copyWith(openFoodFactsConsent: null);
   }
 
+  Future<void> setHealthDataConsent(bool granted) async {
+    await _prefs.setBool(_keyHealthConsent, granted);
+    state = state.copyWith(healthDataConsent: granted);
+  }
+
   Future<void> setExpiryWarningsEnabled(bool enabled) async {
     await _prefs.setBool(_keyExpiryEnabled, enabled);
     state = state.copyWith(expiryWarningsEnabled: enabled);
@@ -77,6 +111,16 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setExpiryWarningDays(int days) async {
     await _prefs.setInt(_keyExpiryDays, days);
     state = state.copyWith(expiryWarningDays: days);
+  }
+
+  Future<void> setMedicationRemindersEnabled(bool enabled) async {
+    await _prefs.setBool(_keyMedsEnabled, enabled);
+    state = state.copyWith(medicationRemindersEnabled: enabled);
+  }
+
+  Future<void> setPetRemindersEnabled(bool enabled) async {
+    await _prefs.setBool(_keyPetsEnabled, enabled);
+    state = state.copyWith(petRemindersEnabled: enabled);
   }
 }
 

@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.4.0+4
+version: 0.5.0+5
 
 environment:
   sdk: ^3.12.2
@@ -31,6 +31,14 @@ dependencies:
   collection: ^1.19.1
   http: ^1.6.0
   mobile_scanner: ^7.4.0
+  # 17.x ist die letzte Reihe ohne das Windows-Backend, das die ATL-Bibliothek
+  # von Visual Studio voraussetzt (auf diesem Rechner nicht verfuegbar). Android,
+  # iOS, macOS und Linux erhalten damit volle geplante Benachrichtigungen; auf
+  # Windows greift der No-op-Pfad des NotificationService (In-App-Hinweise
+  # bleiben). Auf >=18 wechseln, sobald ATL installiert ist.
+  flutter_local_notifications: ^17.2.4
+  timezone: ^0.9.4
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:

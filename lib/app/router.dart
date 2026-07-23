@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/inventory/ui/inventory_screen.dart';
+import '../features/meds/ui/meds_screen.dart';
 import '../features/notes/ui/notes_screen.dart';
 import '../features/placeholder/module_placeholder.dart';
 import '../features/settings/settings_screen.dart';
@@ -24,17 +25,7 @@ final appRouter = GoRouter(
         _branch(AppModule.inventory, const InventoryScreen()),
         _branch(AppModule.shopping, const ShoppingScreen()),
         _branch(AppModule.notes, const NotesScreen()),
-        _branch(
-          AppModule.meds,
-          const ModulePlaceholder(
-            title: 'Pillen',
-            icon: Icons.medication_rounded,
-            plannedVersion: 'v0.5',
-            description:
-                'Medikamentenpläne mit Erinnerung, Einnahme-Protokoll und '
-                'optionaler Betreuer-Freigabe.',
-          ),
-        ),
+        _branch(AppModule.meds, const MedsScreen()),
         _branch(
           AppModule.pets,
           const ModulePlaceholder(

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers.dart';
+import '../features/household/join_link_listener.dart';
 import 'router.dart';
 import 'theme.dart';
 
@@ -14,20 +15,22 @@ class MultiApp extends ConsumerWidget {
     // Das Theme hängt am aktiven Kontext: die ganze App wechselt die Farbe.
     final scopeKind = ref.watch(activeScopeProvider).kind;
 
-    return MaterialApp.router(
-      title: 'MultiApp',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(scopeKind),
-      darkTheme: AppTheme.dark(scopeKind),
-      themeMode: ThemeMode.system,
-      routerConfig: appRouter,
-      locale: const Locale('de'),
-      supportedLocales: const [Locale('de'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+    return JoinLinkListener(
+      child: MaterialApp.router(
+        title: 'MultiApp',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(scopeKind),
+        darkTheme: AppTheme.dark(scopeKind),
+        themeMode: ThemeMode.system,
+        routerConfig: appRouter,
+        locale: const Locale('de'),
+        supportedLocales: const [Locale('de'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+      ),
     );
   }
 }

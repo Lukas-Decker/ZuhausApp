@@ -6,6 +6,8 @@ import '../../core/settings/app_settings.dart';
 import '../../core/widgets/scope_switcher_sheet.dart';
 import '../auth/auth_providers.dart';
 import '../auth/ui/auth_screen.dart';
+import '../household/household_actions.dart';
+import '../household/ui/household_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -77,7 +79,8 @@ class SettingsScreen extends ConsumerWidget {
                     leading: Icon(Icons.info_outline),
                     title: Text('Noch kein Haushalt'),
                     subtitle: Text(
-                      'Über den Kontext-Umschalter kannst du einen erstellen.',
+                      'Über den Kontext-Umschalter kannst du einen erstellen '
+                      'oder beitreten.',
                     ),
                   )
                 : Column(
@@ -87,10 +90,22 @@ class SettingsScreen extends ConsumerWidget {
                           leading: Icon(entry.role.icon),
                           title: Text(entry.household.name),
                           subtitle: Text(entry.role.label),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => HouseholdScreen.show(
+                            context,
+                            entry.household.id,
+                          ),
                         ),
                     ],
                   ),
           ),
+          if (ref.watch(currentUserProvider) != null)
+            ListTile(
+              leading: const Icon(Icons.group_add_rounded),
+              title: const Text('Haushalt beitreten'),
+              subtitle: const Text('Mit Einladungscode'),
+              onTap: () => showJoinHouseholdDialog(context, ref),
+            ),
           const Divider(),
           const _SectionHeader('Erinnerungen'),
           SwitchListTile(
@@ -166,7 +181,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.7.2'),
+            subtitle: Text('Version 0.8.0'),
           ),
         ],
       ),

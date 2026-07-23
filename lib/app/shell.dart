@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/scope_banner.dart';
+import '../features/household/household_providers.dart';
 import 'navigation.dart';
 
 /// Rahmen der App: Kontextbanner ganz oben, darunter die Navigation.
@@ -20,6 +21,9 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final width = MediaQuery.sizeOf(context).width;
     final useRail = width >= _railBreakpoint;
+
+    // Haelt den lokalen Haushalts-Cache mit dem Server im Takt.
+    ref.watch(householdSyncProvider);
 
     return Scaffold(
       body: Column(

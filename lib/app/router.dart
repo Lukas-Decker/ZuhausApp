@@ -10,12 +10,13 @@ import '../features/shopping/ui/shopping_screen.dart';
 import 'navigation.dart';
 import 'shell.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+/// Navigator-Schluessel der App, auch fuer Deep-Link-Dialoge nutzbar.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Jedes Modul bekommt einen eigenen Navigations-Zweig, damit der
 /// Navigationsverlauf beim Wechsel zwischen Modulen erhalten bleibt.
 final appRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: AppModule.inventory.path,
   routes: [
     StatefulShellRoute.indexedStack(
@@ -31,7 +32,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: settingsPath,
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
     ),
   ],

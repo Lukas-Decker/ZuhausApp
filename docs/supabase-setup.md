@@ -94,7 +94,32 @@ Admin-Rechte noetig) und leitet den Link an das laufende Fenster weiter. Der
 Eintrag zeigt auf die gerade gestartete exe; startest du die App aus einem
 anderen Pfad, wird er beim naechsten Start aktualisiert.
 
+## 6. Datenbank-Migration fuer Haushalte (ab v0.8)
+
+Fuer Haushalte, Rollen und Einladungen braucht das Projekt Tabellen, Row-Level-
+Security und einige Funktionen. Die liegen als SQL-Datei im Repo:
+
+`supabase/migrations/0001_households.sql`
+
+So einspielen:
+
+1. Im Supabase-Dashboard **SQL Editor** oeffnen.
+2. **New query**, den kompletten Inhalt der Datei einfuegen.
+3. **Run** druecken. Die Datei ist idempotent, wiederholtes Ausfuehren schadet
+   nicht.
+
+Danach kannst du in der App (angemeldet) ueber den Kontext-Umschalter einen
+Haushalt **erstellen**, per Code/Link **einladen** und **beitreten**. Die
+Verwaltung (Mitglieder, Rollen, Eigentuemer-Uebergabe) findest du in den
+Einstellungen unter dem jeweiligen Haushalt.
+
+Sicherheitsmodell: Lesen ist per RLS auf die eigenen Haushalte beschraenkt; alle
+Aenderungen laufen ueber serverseitige Funktionen, die die Rollenrechte
+durchsetzen. Ein Gast (nicht angemeldet) kann keine Haushalte anlegen; die App
+fuehrt dann zur Anmeldung.
+
 ## Hinweis
 
-Datenbank-Tabellen und Row-Level-Security fuer die Synchronisierung kommen in
-v0.8 (Haushalte/Rollen) und v0.9 (Sync-Engine) dazu.
+Die Synchronisierung der Modul-Inhalte (Inventar, Notizen usw.) zwischen Geraeten
+kommt in v0.9 (Sync-Engine) dazu. In v0.8 werden nur Haushalte und
+Mitgliedschaften geteilt.

@@ -114,6 +114,54 @@ class HouseholdRepository {
     });
   }
 
+  /// Ersetzt den lokalen Haushalts-Cache durch den Server-Stand.
+  ///
+  /// Die Haushalts- und Mitgliederliste gehoert ab v0.8 dem Server; lokal ist
+  /// sie nur ein Spiegel fuer Anzeige und Offline-Umschalten. Deshalb wird der
+  /// Cache atomar komplett neu geschrieben.
+  Future<void> mirror({
+    required List<({String id, String name, String ownerUserId})> households,
+    required List<
+      ({String householdId, String userId, String displayName, String role})
+    >
+    members,
+  }) async {
+    await _db.transaction(() async {
+      await _db.delete(_db.householdMembers).go();
+      await _db.delete(_db.households).go();
+
+      for (final h in households) {
+        await _db.into(_db.households).insert(
+          HouseholdsCompanion.insert(
+            id: Value(h.id),
+            name: h.name,
+            ownerUserId: h.ownerUserId,
+            isDirty: const Value(false),
+          ),
+        );
+      }
+      for (final m in members) {
+        await _db.into(_db.householdMembers).insert(
+          HouseholdMembersCompanion.insert(
+            householdId: m.householdId,
+            userId: m.userId,
+            displayName: m.displayName,
+            role: m.role,
+            isDirty: const Value(false),
+          ),
+        );
+      }
+    });
+  }
+
+  /// Leert den lokalen Cache (z.B. beim Abmelden).
+  Future<void> clearCache() async {
+    await _db.transaction(() async {
+      await _db.delete(_db.householdMembers).go();
+      await _db.delete(_db.households).go();
+    });
+  }
+
   static HouseholdRole _parseRole(String value) => HouseholdRole.values
       .firstWhere((r) => r.name == value, orElse: () => HouseholdRole.member);
 

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
+import '../../features/auth/auth_providers.dart';
+import '../../features/auth/ui/auth_screen.dart';
+import '../../features/household/household_actions.dart';
 import '../providers.dart';
 import '../scope/app_scope.dart';
 
@@ -58,10 +61,24 @@ class ScopeSwitcherSheet extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => _createHousehold(context, ref),
-              icon: const Icon(Icons.add_home_rounded),
-              label: const Text('Haushalt erstellen'),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _createHousehold(context, ref),
+                    icon: const Icon(Icons.add_home_rounded),
+                    label: const Text('Erstellen'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _joinHousehold(context, ref),
+                    icon: const Icon(Icons.group_add_rounded),
+                    label: const Text('Beitreten'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -70,6 +87,9 @@ class ScopeSwitcherSheet extends ConsumerWidget {
   }
 
   Future<void> _createHousehold(BuildContext context, WidgetRef ref) async {
+    if (!await _ensureSignedIn(context, ref)) return;
+    if (!context.mounted) return;
+
     final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
@@ -100,19 +120,76 @@ class ScopeSwitcherSheet extends ConsumerWidget {
     controller.dispose();
 
     final trimmed = name?.trim() ?? '';
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty || !context.mounted) return;
 
-    final identity = ref.read(identityProvider);
-    final household = await ref.read(householdRepositoryProvider).create(
-      name: trimmed,
-      userId: identity.userId,
-      displayName: identity.displayName,
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final householdId = await runHouseholdAction(
+      context,
+      ref,
+      () => ref
+          .read(householdActionsProvider)
+          .create(trimmed),
     );
+    if (householdId == null) return;
+
+    // Direkt in den neuen Haushalt wechseln.
     await ref
         .read(activeScopeProvider.notifier)
-        .select(AppScope.household(household.id, household.name));
+        .select(AppScope.household(householdId, trimmed));
+    messenger.showSnackBar(SnackBar(content: Text('Haushalt "$trimmed" erstellt')));
+    if (navigator.canPop()) navigator.pop();
+  }
 
-    if (context.mounted) Navigator.of(context).pop();
+  Future<void> _joinHousehold(BuildContext context, WidgetRef ref) async {
+    if (!await _ensureSignedIn(context, ref)) return;
+    if (!context.mounted) return;
+    await showJoinHouseholdDialog(context, ref);
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// Stellt sicher, dass der Nutzer angemeldet ist; fuehrt sonst zur Anmeldung.
+  Future<bool> _ensureSignedIn(BuildContext context, WidgetRef ref) async {
+    if (ref.read(currentUserProvider) != null) return true;
+
+    if (!ref.read(authConfiguredProvider)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Diese Version hat keinen Konto-Server. Haushalte sind deaktiviert.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.groups_rounded),
+        title: const Text('Konto erforderlich'),
+        content: const Text(
+          'Um einen Haushalt zu teilen, brauchst du ein Konto. Jetzt anmelden '
+          'oder registrieren?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Zur Anmeldung'),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true || !context.mounted) return false;
+
+    await AuthScreen.show(context);
+    return ref.read(currentUserProvider) != null;
   }
 }
 

@@ -1,3 +1,6 @@
+# Lokale Zugangsdaten (Supabase-URL + anon-Key). Vorlage: env.example.json
+env.json
+
 # Miscellaneous
 *.class
 *.log

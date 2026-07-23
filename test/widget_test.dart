@@ -6,6 +6,8 @@ import 'package:multiapp/core/providers.dart';
 import 'package:multiapp/data/db/app_database.dart';
 import 'package:multiapp/data/repositories/household_repository.dart';
 import 'package:multiapp/core/widgets/scope_banner.dart';
+import 'package:multiapp/features/auth/auth_providers.dart';
+import 'package:multiapp/features/auth/data/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Baut eine Haushalts-Zeile ohne Datenbank, nur für den Test.
@@ -28,6 +30,8 @@ Future<Widget> _boot({List<HouseholdWithRole> households = const []}) async {
   return ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
+      // Kein Supabase im Test: Gastmodus-Auth-Dienst.
+      authServiceProvider.overrideWithValue(AuthService.resolve()),
       householdsProvider.overrideWith((ref) => Stream.value(households)),
     ],
     child: const MaterialApp(home: Scaffold(body: ScopeBanner())),

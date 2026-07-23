@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers.dart';
 import '../../core/settings/app_settings.dart';
 import '../../core/widgets/scope_switcher_sheet.dart';
+import '../auth/auth_providers.dart';
+import '../auth/ui/auth_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -31,6 +33,26 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.edit_outlined),
             onTap: () => _editDisplayName(context, ref, identity.displayName),
           ),
+          if (identity.isLinkedToAccount)
+            ListTile(
+              leading: const Icon(Icons.logout_rounded),
+              title: const Text('Abmelden'),
+              subtitle: const Text(
+                'Lokale Daten bleiben auf diesem Gerät erhalten.',
+              ),
+              onTap: () => _signOut(context, ref),
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.login_rounded),
+              title: const Text('Anmelden oder Konto erstellen'),
+              subtitle: Text(
+                ref.watch(authConfiguredProvider)
+                    ? 'Fuer Familie und Synchronisierung zwischen Geräten.'
+                    : 'In dieser Version nicht verfügbar (Gastmodus).',
+              ),
+              onTap: () => AuthScreen.show(context),
+            ),
           const Divider(),
           const _SectionHeader('Kontext'),
           ListTile(
@@ -144,7 +166,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.6.1'),
+            subtitle: Text('Version 0.7.0'),
           ),
         ],
       ),
@@ -185,6 +207,31 @@ class SettingsScreen extends ConsumerWidget {
     final name = result?.trim() ?? '';
     if (name.isEmpty) return;
     await ref.read(identityProvider.notifier).setDisplayName(name);
+  }
+
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Abmelden?'),
+        content: const Text(
+          'Du wirst vom Konto abgemeldet. Die Daten auf diesem Gerät bleiben '
+          'erhalten und stehen im Gastmodus weiter zur Verfügung.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Abmelden'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(authServiceProvider).signOut();
   }
 }
 

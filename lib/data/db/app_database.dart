@@ -87,5 +87,48 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 
+  /// Alle Tabellen, deren Zeilen an einem Scope haengen (scope_kind/scope_id).
+  static const _scopedTables = [
+    'audit_entries',
+    'storage_locations',
+    'products',
+    'inventory_items',
+    'shopping_lists',
+    'shopping_items',
+    'notes',
+    'note_checklist_items',
+    'medication_plans',
+    'medication_logs',
+    'pets',
+    'pet_tasks',
+    'pet_task_logs',
+    'pet_health_entries',
+    'pet_weight_entries',
+  ];
+
+  /// Bindet die privaten Daten einer Gast-Identitaet an eine Konto-ID.
+  ///
+  /// Wird beim ersten Login aufgerufen: alle personal-Scope-Zeilen mit der
+  /// alten lokalen Nutzer-ID werden auf die Supabase-Nutzer-ID umgeschrieben,
+  /// damit vorhandene Vorraete, Notizen usw. erhalten bleiben. Zeilen werden
+  /// dabei als "dirty" markiert, damit die spaetere Sync-Engine sie hochlaedt.
+  Future<void> rebindPersonalScope(String oldUserId, String newUserId) async {
+    if (oldUserId == newUserId) return;
+    await transaction(() async {
+      for (final table in _scopedTables) {
+        await customUpdate(
+          'UPDATE $table SET scope_id = ?, is_dirty = 1, updated_at = ? '
+          "WHERE scope_kind = 'personal' AND scope_id = ?",
+          variables: [
+            Variable<String>(newUserId),
+            Variable<DateTime>(DateTime.now()),
+            Variable<String>(oldUserId),
+          ],
+          updateKind: UpdateKind.update,
+        );
+      }
+    });
+  }
+
   static QueryExecutor _open() => driftDatabase(name: 'multiapp');
 }

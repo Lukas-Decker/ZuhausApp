@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/db/app_database.dart';
 import '../data/repositories/household_repository.dart';
+import '../features/auth/auth_providers.dart';
+import '../features/auth/data/auth_service.dart';
 import 'identity/local_identity.dart';
 import 'scope/app_scope.dart';
 
@@ -26,12 +28,31 @@ final localIdentityStoreProvider = Provider<LocalIdentityStore>(
 
 class IdentityController extends Notifier<LocalIdentity> {
   @override
-  LocalIdentity build() => ref.watch(localIdentityStoreProvider).loadOrCreate();
+  LocalIdentity build() {
+    final user = ref.watch(currentUserProvider);
+    if (user != null) {
+      // Angemeldet: Identitaet kommt vom Konto.
+      return LocalIdentity(
+        userId: user.id,
+        displayName: displayNameFor(user),
+        isLinkedToAccount: true,
+      );
+    }
+    // Gastmodus: lokale Identitaet.
+    return ref.watch(localIdentityStoreProvider).loadOrCreate();
+  }
 
   Future<void> setDisplayName(String name) async {
-    final next = state.copyWith(displayName: name.trim());
-    await ref.read(localIdentityStoreProvider).save(next);
-    state = next;
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+    if (state.isLinkedToAccount) {
+      await ref.read(authServiceProvider).updateDisplayName(trimmed);
+      state = state.copyWith(displayName: trimmed);
+    } else {
+      final next = state.copyWith(displayName: trimmed);
+      await ref.read(localIdentityStoreProvider).save(next);
+      state = next;
+    }
   }
 }
 

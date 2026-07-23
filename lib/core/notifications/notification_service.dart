@@ -43,16 +43,14 @@ class NotificationService {
 
   bool get isSupported => _supported;
 
-  /// Auf welchen Plattformen das Paket ueberhaupt initialisiert werden kann.
-  ///
-  /// Windows ist eingeschlossen, damit die Initialisierung nicht crasht; die
-  /// eigentliche Unterstuetzung wird danach ueber [_supported] abgeschaltet.
+  /// Auf welchen Plattformen geplante Benachrichtigungen unterstuetzt werden.
   static bool get _platformSupported {
     if (kIsWeb) return false;
     return Platform.isAndroid ||
         Platform.isIOS ||
         Platform.isMacOS ||
-        Platform.isLinux;
+        Platform.isLinux ||
+        Platform.isWindows;
   }
 
   Future<void> init() async {
@@ -71,16 +69,19 @@ class NotificationService {
       const linuxInit = LinuxInitializationSettings(
         defaultActionName: 'Öffnen',
       );
+      const windowsInit = WindowsInitializationSettings(
+        appName: 'MultiApp',
+        appUserModelId: 'de.lukas.multiapp',
+        guid: 'a3f1c2d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d',
+      );
 
-      // Windows hat in dieser Paketreihe (17.x) kein natives Backend und wird
-      // von _platformSupported bereits ausgeschlossen; hier landen nur Android,
-      // iOS, macOS und Linux.
       await _plugin.initialize(
-        const InitializationSettings(
+        settings: const InitializationSettings(
           android: androidInit,
           iOS: darwinInit,
           macOS: darwinInit,
           linux: linuxInit,
+          windows: windowsInit,
         ),
       );
 
@@ -129,14 +130,12 @@ class NotificationService {
 
     try {
       await _plugin.zonedSchedule(
-        reminder.id,
-        reminder.title,
-        reminder.body,
-        tz.TZDateTime.from(reminder.when, tz.local),
-        _detailsFor(channel),
+        id: reminder.id,
+        title: reminder.title,
+        body: reminder.body,
+        scheduledDate: tz.TZDateTime.from(reminder.when, tz.local),
+        notificationDetails: _detailsFor(channel),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: reminder.payload,
       );
     } catch (error) {
@@ -147,7 +146,7 @@ class NotificationService {
   Future<void> cancel(int id) async {
     if (!_supported) return;
     try {
-      await _plugin.cancel(id);
+      await _plugin.cancel(id: id);
     } catch (_) {}
   }
 
@@ -181,6 +180,7 @@ class NotificationService {
       linux: LinuxNotificationDetails(
         urgency: LinuxNotificationUrgency.critical,
       ),
+      windows: const WindowsNotificationDetails(),
     );
   }
 

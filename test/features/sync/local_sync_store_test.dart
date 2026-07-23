@@ -116,6 +116,48 @@ void main() {
     });
   });
 
+  group('hasPendingChanges', () {
+    const synced = ['inventory_items'];
+
+    test('false, wenn nichts dirty ist und die Outbox leer ist', () async {
+      // Ein per applyRemote geschriebener (sauberer) Datensatz zaehlt nicht.
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await store.applyRemote('inventory_items', {
+        'id': 'r1',
+        'scope_kind': 'personal',
+        'scope_id': 'user-1',
+        'name': 'Server',
+        'quantity': 1.0,
+        'unit': 'piece',
+        'remind_on_expiry': 1,
+        'created_at': now,
+        'updated_at': now,
+      });
+      expect(await store.hasPendingChanges(synced), isFalse);
+    });
+
+    test('true bei einer lokal geaenderten (dirty) Zeile', () async {
+      await inventory.addItem(
+        scope: personalScope,
+        userId: 'u1',
+        name: 'Lokal',
+        quantity: 1,
+        unit: 'piece',
+      );
+      expect(await store.hasPendingChanges(synced), isTrue);
+    });
+
+    test('true bei ausstehendem Zaehler-Delta in der Outbox', () async {
+      await db.logCounterDelta(
+        table: 'inventory_items',
+        rowId: 'x',
+        field: 'quantity',
+        delta: -1,
+      );
+      expect(await store.hasPendingChanges(synced), isTrue);
+    });
+  });
+
   group('Meta', () {
     test('speichert und liest den Pull-Zeitstempel', () async {
       expect(await store.getMeta('lastPull'), isNull);

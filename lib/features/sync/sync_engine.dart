@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -41,8 +43,38 @@ class SyncEngine {
   ];
 
   static final Set<String> _knownTables = {for (final t in tables) t.name};
+  static final List<String> _tableNames = [for (final t in tables) t.name];
 
   bool _running = false;
+
+  /// True, wenn lokal noch nicht hochgeladene Aenderungen anstehen.
+  Future<bool> hasPendingChanges() => _store.hasPendingChanges(_tableNames);
+
+  /// Wendet einen per Realtime empfangenen sync_records-Datensatz direkt an.
+  ///
+  /// Spart den Pull-Roundtrip: das Event enthaelt bereits die geaenderte Zeile.
+  /// Idempotent und sicher dank Last-Write-Wins in [LocalSyncStore.applyRemote];
+  /// der periodische Voll-Pull bleibt als Sicherheitsnetz fuer verpasste Events.
+  Future<void> applyRealtimeRecord(Map<String, dynamic> record) async {
+    final table = record['table_name'] as String?;
+    if (table == null || !_knownTables.contains(table)) return;
+
+    var data = record['data'];
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {
+        return;
+      }
+    }
+    if (data is! Map) return;
+
+    try {
+      await _store.applyRemote(table, Map<String, dynamic>.from(data));
+    } catch (error) {
+      debugPrint('[sync] Realtime-Apply fehlgeschlagen: $error');
+    }
+  }
 
   /// Ein vollstaendiger Abgleich: erst hochladen, dann herunterladen.
   Future<void> sync() async {

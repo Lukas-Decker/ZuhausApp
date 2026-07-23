@@ -79,7 +79,8 @@ class SyncController extends Notifier<SyncStatus> {
     _timer?.cancel();
     _timer = Timer.periodic(_interval, (_) => syncNow());
 
-    // Eingehende Aenderungen anderer Geraete.
+    // Eingehende Aenderungen anderer Geraete: das Event-Payload direkt
+    // anwenden, statt einen Pull auszuloesen.
     _channel?.unsubscribe();
     _channel = Supabase.instance.client
         .channel('sync-records')
@@ -87,11 +88,17 @@ class SyncController extends Notifier<SyncStatus> {
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'sync_records',
-          callback: (_) => syncNow(),
+          callback: (payload) {
+            final record = payload.newRecord;
+            if (record.isEmpty) return;
+            ref
+                .read(syncEngineProvider)
+                ?.applyRealtimeRecord(Map<String, dynamic>.from(record));
+          },
         )
         .subscribe();
 
-    // Eigene lokale Aenderungen: kurz buendeln, dann abgleichen. So gehen
+    // Eigene lokale Aenderungen: kurz buendeln, dann hochladen. So gehen
     // Aenderungen fast sofort raus, ohne bei jedem Tastendruck zu funken.
     _localChanges?.cancel();
     _localChanges = db.tableUpdates().listen((updates) {
@@ -110,7 +117,18 @@ class SyncController extends Notifier<SyncStatus> {
 
   void _scheduleDebounced() {
     _debounce?.cancel();
-    _debounce = Timer(_debounceDelay, syncNow);
+    _debounce = Timer(_debounceDelay, _syncLocalIfPending);
+  }
+
+  /// Gleicht nur ab, wenn es wirklich lokale Aenderungen gibt. Das verhindert
+  /// eine Rueckkopplung: ein durch einen eingehenden Apply ausgeloestes
+  /// Tabellen-Update stoesst so keinen weiteren Abgleich an.
+  Future<void> _syncLocalIfPending() async {
+    final engine = ref.read(syncEngineProvider);
+    if (engine == null) return;
+    if (await engine.hasPendingChanges()) {
+      await syncNow();
+    }
   }
 
   /// Stoesst einen Abgleich an. Laeuft bereits einer, wird er danach einmal

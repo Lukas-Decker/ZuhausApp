@@ -38,6 +38,21 @@ class LocalSyncStore {
     await (_db.delete(_db.syncOutbox)..where((o) => o.id.isIn(ids))).go();
   }
 
+  /// True, wenn es lokal noch nicht hochgeladene Aenderungen gibt (dirty rows
+  /// oder Zaehler-Deltas). Damit ein durch einen Server-Apply ausgeloestes
+  /// Tabellen-Update keinen unnoetigen Abgleich anstoesst.
+  Future<bool> hasPendingChanges(List<String> tables) async {
+    final outbox = await (_db.select(_db.syncOutbox)..limit(1)).get();
+    if (outbox.isNotEmpty) return true;
+    for (final table in tables) {
+      final rows = await _db
+          .customSelect('SELECT 1 FROM $table WHERE is_dirty = 1 LIMIT 1')
+          .get();
+      if (rows.isNotEmpty) return true;
+    }
+    return false;
+  }
+
   /// Lokal geaenderte Zeilen einer Tabelle (fuer den Push).
   Future<List<Map<String, dynamic>>> dirtyRows(String table) async {
     final rows = await _db

@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/app_info.dart';
 import '../../core/providers.dart';
 import '../../core/security/app_lock.dart';
 import '../../core/settings/app_settings.dart';
 import '../../core/widgets/scope_switcher_sheet.dart';
 import '../auth/auth_providers.dart';
+import '../auth/data/auth_service.dart';
 import '../auth/ui/auth_screen.dart';
 import '../household/household_actions.dart';
 import '../household/ui/household_screen.dart';
+import '../privacy/privacy_providers.dart';
+import '../privacy/ui/audit_log_screen.dart';
+import '../privacy/ui/privacy_info_screen.dart';
 import '../sync/sync_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -214,21 +219,206 @@ class SettingsScreen extends ConsumerWidget {
             ),
             trailing: Switch(
               value: settings.healthDataConsent ?? false,
-              onChanged: ref
-                  .read(appSettingsProvider.notifier)
-                  .setHealthDataConsent,
+              onChanged: (value) {
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .setHealthDataConsent(value);
+                _logConsent(ref, 'Gesundheitsdaten', value);
+              },
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Datenschutz-Info'),
+            subtitle: const Text('Wie MultiApp mit deinen Daten umgeht.'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => PrivacyInfoScreen.show(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: const Text('Meine Daten exportieren'),
+            subtitle: const Text('Alle lokalen Daten als JSON-Datei.'),
+            onTap: () => _exportData(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.history_rounded),
+            title: const Text('Aktivitaetsprotokoll'),
+            subtitle: const Text('Datenschutzrelevante Aktionen auf diesem Geraet.'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => AuditLogScreen.show(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.auto_delete_outlined),
+            title: const Text('Aufbewahrung'),
+            subtitle: Text(
+              settings.retentionDays == 0
+                  ? 'Geloeschtes wird nicht automatisch entfernt.'
+                  : 'Geloeschtes und alte Protokolle nach '
+                        '${settings.retentionDays} Tagen entfernen.',
+            ),
+            onTap: () => _editRetention(context, ref, settings.retentionDays),
+          ),
+          if (identity.isLinkedToAccount)
+            ListTile(
+              leading: Icon(
+                Icons.no_accounts_outlined,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              title: Text(
+                'Konto und Daten loeschen',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              subtitle: const Text('Endgueltig, kann nicht rueckgaengig gemacht werden.'),
+              onTap: () => _deleteAccount(context, ref),
+            ),
           const Divider(),
-          const _SectionHeader('�ober'),
+          const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.11.0'),
+            subtitle: Text('Version $appVersion'),
           ),
         ],
       ),
     );
+  }
+
+  void _logConsent(WidgetRef ref, String what, bool granted) {
+    ref
+        .read(auditServiceProvider)
+        .log(
+          scope: ref.read(activeScopeProvider),
+          entityType: 'consent',
+          action: granted ? 'accept' : 'update',
+          summary: '$what: ${granted ? 'erteilt' : 'widerrufen'}',
+          actorName: ref.read(identityProvider).displayName,
+        );
+  }
+
+  Future<void> _exportData(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(dataExportServiceProvider)
+          .exportAndShare(appVersion: appVersion);
+      await ref
+          .read(auditServiceProvider)
+          .log(
+            scope: ref.read(activeScopeProvider),
+            entityType: 'data',
+            action: 'export',
+            summary: 'Datenexport erstellt',
+            actorName: ref.read(identityProvider).displayName,
+          );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Export fehlgeschlagen: $error')),
+      );
+    }
+  }
+
+  Future<void> _editRetention(
+    BuildContext context,
+    WidgetRef ref,
+    int current,
+  ) async {
+    const options = {
+      0: 'Nie automatisch loeschen',
+      30: 'Nach 30 Tagen',
+      90: 'Nach 90 Tagen',
+      180: 'Nach 180 Tagen',
+      365: 'Nach 365 Tagen',
+    };
+    final choice = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Aufbewahrung'),
+        children: [
+          for (final entry in options.entries)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(entry.key),
+              child: Row(
+                children: [
+                  Icon(
+                    entry.key == current
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(entry.value),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (choice == null) return;
+    await ref.read(appSettingsProvider.notifier).setRetentionDays(choice);
+  }
+
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Konto wirklich loeschen?'),
+        content: const Text(
+          'Dein Konto und alle Serverdaten werden endgueltig geloescht. Die '
+          'Daten auf diesem Geraet werden ebenfalls entfernt. Dieser Schritt '
+          'kann nicht rueckgaengig gemacht werden.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Endgueltig loeschen'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final result = await ref.read(authServiceProvider).deleteAccount();
+    if (!context.mounted) return;
+
+    switch (result) {
+      case DeleteAccountSuccess():
+        await ref.read(databaseProvider).wipeAllData();
+        await ref.read(authServiceProvider).signOut();
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Konto und Daten wurden geloescht.')),
+        );
+      case DeleteAccountNeedsTransfer(:final households):
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Eigentuemerschaft uebergeben'),
+            content: Text(
+              'Du bist noch Eigentuemer von: ${households.join(', ')}.\n\n'
+              'Uebergib die Eigentuemerschaft oder loese die Haushalte auf, '
+              'dann kannst du dein Konto loeschen.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Verstanden'),
+              ),
+            ],
+          ),
+        );
+      case DeleteAccountFailure(:final message):
+        messenger.showSnackBar(
+          SnackBar(content: Text('Loeschung fehlgeschlagen: $message')),
+        );
+    }
   }
 
   Future<void> _editDisplayName(

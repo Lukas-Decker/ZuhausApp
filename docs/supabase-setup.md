@@ -161,3 +161,31 @@ geschlossene App wird nicht geweckt - die Benachrichtigung erscheint, sobald die
 App wieder laeuft. In den Einstellungen unter "Familie" laesst sich jeder Kanal
 (Familien-Benachrichtigungen, Pillen-Eskalation, Fuetterung ueberfaellig)
 einzeln an- und abschalten.
+
+## 9. Kontoloeschung per Edge Function (ab v0.12)
+
+Fuer die endgueltige Kontoloeschung (DSGVO Recht auf Loeschung) braucht es eine
+Edge Function, weil das Entfernen eines Auth-Nutzers den Service-Role-Schluessel
+verlangt, der niemals in die App gehoert. Die Funktion liegt im Repo unter:
+
+`supabase/functions/delete-account/index.ts`
+
+So deployst du sie (Supabase CLI noetig, `supabase login` und
+`supabase link --project-ref <ref>` einmalig):
+
+```bash
+supabase functions deploy delete-account
+```
+
+Der Service-Role-Schluessel steht in Edge Functions automatisch als
+`SUPABASE_SERVICE_ROLE_KEY` bereit, du musst nichts eintragen.
+
+Was die Funktion tut: Sie ermittelt den Nutzer aus dem mitgeschickten Token.
+Ist er noch Eigentuemer eines Haushalts mit weiteren Mitgliedern, lehnt sie ab
+(die App fordert dann zur Uebergabe auf). Sonst loescht sie die
+personenbezogenen `sync_records` und den Auth-Nutzer; Haushalte, Mitgliedschaften
+und Familien-Ereignisse haengen per `on delete cascade` und verschwinden mit.
+Danach raeumt die App die lokale Datenbank auf.
+
+Ohne diese Funktion bleibt die App voll nutzbar; nur der Knopf "Konto und Daten
+loeschen" meldet dann einen Fehler.

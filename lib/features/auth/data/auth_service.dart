@@ -29,6 +29,27 @@ class AuthFailure extends AuthResult {
   final String message;
 }
 
+/// Ergebnis eines Kontoloeschungs-Versuchs.
+sealed class DeleteAccountResult {
+  const DeleteAccountResult();
+}
+
+class DeleteAccountSuccess extends DeleteAccountResult {
+  const DeleteAccountSuccess();
+}
+
+/// Loeschung abgelehnt: der Nutzer ist noch Eigentuemer von Haushalten mit
+/// weiteren Mitgliedern und muss die Eigentuemerschaft erst uebergeben.
+class DeleteAccountNeedsTransfer extends DeleteAccountResult {
+  const DeleteAccountNeedsTransfer(this.households);
+  final List<String> households;
+}
+
+class DeleteAccountFailure extends DeleteAccountResult {
+  const DeleteAccountFailure(this.message);
+  final String message;
+}
+
 /// Kapselt die Anmeldung ueber Supabase.
 ///
 /// Ist kein Supabase-Projekt konfiguriert (kein URL/Key), meldet der Dienst
@@ -180,6 +201,31 @@ class AuthService {
 
   Future<void> signOut() async {
     await _client?.auth.signOut();
+  }
+
+  /// Loescht das Konto samt Serverdaten endgueltig ueber die Edge Function
+  /// `delete-account`. Die lokale Datenbank raeumt der Aufrufer danach auf.
+  Future<DeleteAccountResult> deleteAccount() async {
+    final client = _client;
+    if (client == null) return const DeleteAccountFailure(_notConfigured);
+    try {
+      await client.functions.invoke('delete-account');
+      return const DeleteAccountSuccess();
+    } on FunctionException catch (error) {
+      final details = error.details;
+      if (details is Map && details['error'] == 'owner_transfer_required') {
+        final names =
+            (details['households'] as List?)?.map((e) => '$e').toList() ??
+            const <String>[];
+        return DeleteAccountNeedsTransfer(names);
+      }
+      final message = details is Map && details['error'] != null
+          ? '${details['error']}'
+          : (error.reasonPhrase ?? 'Loeschung fehlgeschlagen.');
+      return DeleteAccountFailure(message);
+    } catch (error) {
+      return DeleteAccountFailure('Unerwarteter Fehler: $error');
+    }
   }
 
   static const _notConfigured =

@@ -119,6 +119,23 @@ class AppDatabase extends _$AppDatabase {
     'pet_weight_entries',
   ];
 
+  /// Alle inhaltlichen Tabellen (ohne Sync-Interna), fuer Datenexport und die
+  /// Aufbewahrungs-Bereinigung. Haushalte und Mitglieder haengen nicht am
+  /// Scope, gehoeren aber zu den Daten.
+  static const dataTables = ['households', 'household_members', ..._scopedTables];
+
+  /// Loescht alle lokalen Daten endgueltig.
+  ///
+  /// Wird nach einer erfolgreichen Kontoloeschung aufgerufen, damit auf dem
+  /// Geraet nichts zurueckbleibt. Auch die Sync-Interna werden geleert.
+  Future<void> wipeAllData() async {
+    await transaction(() async {
+      for (final table in [...dataTables, 'sync_outbox', 'sync_meta']) {
+        await customStatement('DELETE FROM $table');
+      }
+    });
+  }
+
   /// Bindet die privaten Daten einer Gast-Identitaet an eine Konto-ID.
   ///
   /// Wird beim ersten Login aufgerufen: alle personal-Scope-Zeilen mit der

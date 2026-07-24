@@ -18,6 +18,8 @@ class AppSettings {
     required this.medEscalationEnabled,
     required this.petOverdueEnabled,
     required this.appLockEnabled,
+    required this.retentionDays,
+    required this.privacyAccepted,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -56,6 +58,13 @@ class AppSettings {
   /// Biometrisches App-Schloss (Windows Hello / Fingerabdruck / Gesicht).
   final bool appLockEnabled;
 
+  /// Aufbewahrungsfrist in Tagen: geloeschte Datensaetze und alte
+  /// Audit-Eintraege werden danach endgueltig entfernt. 0 bedeutet: nie.
+  final int retentionDays;
+
+  /// Ob der Datenschutz-Hinweis beim ersten Start bestaetigt wurde.
+  final bool privacyAccepted;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
@@ -67,6 +76,8 @@ class AppSettings {
     bool? medEscalationEnabled,
     bool? petOverdueEnabled,
     bool? appLockEnabled,
+    int? retentionDays,
+    bool? privacyAccepted,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
@@ -83,6 +94,8 @@ class AppSettings {
     medEscalationEnabled: medEscalationEnabled ?? this.medEscalationEnabled,
     petOverdueEnabled: petOverdueEnabled ?? this.petOverdueEnabled,
     appLockEnabled: appLockEnabled ?? this.appLockEnabled,
+    retentionDays: retentionDays ?? this.retentionDays,
+    privacyAccepted: privacyAccepted ?? this.privacyAccepted,
   );
 
   static const Object _unset = Object();
@@ -99,6 +112,8 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyMedEscalation = 'reminder.med.escalation';
   static const _keyPetOverdue = 'reminder.pet.overdue';
   static const _keyAppLock = 'security.applock.enabled';
+  static const _keyRetentionDays = 'privacy.retention.days';
+  static const _keyPrivacyAccepted = 'privacy.accepted';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -116,6 +131,8 @@ class AppSettingsController extends Notifier<AppSettings> {
       medEscalationEnabled: prefs.getBool(_keyMedEscalation) ?? true,
       petOverdueEnabled: prefs.getBool(_keyPetOverdue) ?? true,
       appLockEnabled: prefs.getBool(_keyAppLock) ?? false,
+      retentionDays: prefs.getInt(_keyRetentionDays) ?? 90,
+      privacyAccepted: prefs.getBool(_keyPrivacyAccepted) ?? false,
     );
   }
 
@@ -173,6 +190,16 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setAppLockEnabled(bool enabled) async {
     await _prefs.setBool(_keyAppLock, enabled);
     state = state.copyWith(appLockEnabled: enabled);
+  }
+
+  Future<void> setRetentionDays(int days) async {
+    await _prefs.setInt(_keyRetentionDays, days);
+    state = state.copyWith(retentionDays: days);
+  }
+
+  Future<void> setPrivacyAccepted(bool accepted) async {
+    await _prefs.setBool(_keyPrivacyAccepted, accepted);
+    state = state.copyWith(privacyAccepted: accepted);
   }
 }
 

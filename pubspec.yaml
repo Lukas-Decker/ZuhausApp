@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.11.0+18
+version: 0.12.0+19
 
 environment:
   sdk: ^3.12.2
@@ -41,6 +41,9 @@ dependencies:
   # 3.x wird gebraucht: zieht local_auth_windows 2.x mit dem modernen
   # C++20-<coroutine>-Header (1.x scheitert an neuem MSVC, Fehler STL1011).
   local_auth: ^3.0.2
+  # Datenexport (DSGVO): JSON-Datei speichern/teilen.
+  share_plus: ^13.3.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

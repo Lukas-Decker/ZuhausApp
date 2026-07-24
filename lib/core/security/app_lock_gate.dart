@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app_info.dart';
 import '../settings/app_settings.dart';
 import 'app_lock.dart';
 
@@ -106,7 +107,7 @@ class _LockScreen extends StatelessWidget {
               Icon(Icons.lock_rounded, size: 64, color: scheme.primary),
               const SizedBox(height: 24),
               Text(
-                'MultiApp ist gesperrt',
+                '$appName ist gesperrt',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),

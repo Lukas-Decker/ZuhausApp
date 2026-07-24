@@ -56,7 +56,17 @@ function Get-DefineArgs {
 function Invoke-Flutter {
   param([string[]]$FlutterArgs)
   Write-Host "flutter $($FlutterArgs -join ' ')" -ForegroundColor Cyan
-  & flutter @FlutterArgs
+  # flutter schreibt Warnungen (z.B. LNK4099 vom Firebase-SDK) auf stderr.
+  # Bei ErrorActionPreference=Stop wuerde PowerShell das faelschlich als
+  # Abbruch werten. Deshalb hier auf Continue schalten, die Ausgabe als Text
+  # durchreichen und allein am Exit-Code entscheiden.
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & flutter @FlutterArgs 2>&1 | ForEach-Object { Write-Host $_ }
+  } finally {
+    $ErrorActionPreference = $previous
+  }
   if ($LASTEXITCODE -ne 0) { throw "flutter build fehlgeschlagen (Exit $LASTEXITCODE)." }
 }
 

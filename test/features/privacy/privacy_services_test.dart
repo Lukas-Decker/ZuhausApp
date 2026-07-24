@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Variable, UpdateKind;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:multiapp/core/app_info.dart';
 import 'package:multiapp/data/db/app_database.dart';
 import 'package:multiapp/data/repositories/inventory_repository.dart';
 import 'package:multiapp/features/privacy/data/audit_service.dart';
@@ -51,7 +52,7 @@ void main() {
 
       final export = await DataExportService(db).build(appVersion: '0.12.0');
 
-      expect(export['app'], 'MultiApp');
+      expect(export['app'], appName);
       expect(export['version'], '0.12.0');
       final tables = export['tables'] as Map<String, dynamic>;
       // Jede Datentabelle ist vertreten, auch die leeren.

@@ -95,6 +95,14 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        // Toasts in der Kontextfarbe, damit sie klar zur App gehören.
+        backgroundColor: scheme.primary,
+        contentTextStyle: TextStyle(
+          color: scheme.onPrimary,
+          fontWeight: FontWeight.w500,
+        ),
+        actionTextColor: scheme.onPrimary,
+        insetPadding: const EdgeInsets.all(16),
       ),
     );
   }

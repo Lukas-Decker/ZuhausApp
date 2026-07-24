@@ -7,6 +7,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../app_info.dart';
+
 /// Eine geplante lokale Erinnerung.
 class ScheduledReminder {
   const ScheduledReminder({
@@ -101,7 +103,7 @@ class NotificationService {
         defaultActionName: 'Öffnen',
       );
       const windowsInit = WindowsInitializationSettings(
-        appName: 'MultiApp',
+        appName: appName,
         appUserModelId: 'de.lukas.multiapp',
         guid: 'a3f1c2d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d',
       );

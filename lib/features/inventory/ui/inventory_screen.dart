@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/app_info.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -168,8 +169,8 @@ Future<bool> _ensureOpenFoodFactsConsent(
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: const Text('Produktdaten abrufen?'),
-      content: const Text(
-        'Für unbekannte Codes kann MultiApp den Barcode an Open Food Facts '
+      content: Text(
+        'Für unbekannte Codes kann $appName den Barcode an Open Food Facts '
         'senden und Name, Marke und Größe übernehmen.\n\n'
         'Übertragen wird nur der Barcode, keine persönlichen Daten. Ohne '
         'Einwilligung legst du Produkte einfach selbst an. Du kannst die '

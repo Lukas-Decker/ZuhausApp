@@ -60,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
               title: const Text('Anmelden oder Konto erstellen'),
               subtitle: Text(
                 ref.watch(authConfiguredProvider)
-                    ? 'Fuer Familie und Synchronisierung zwischen Geräten.'
+                    ? 'Für Familie und Synchronisierung zwischen Geräten.'
                     : 'In dieser Version nicht verfügbar (Gastmodus).',
               ),
               onTap: () => AuthScreen.show(context),
@@ -231,7 +231,7 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.description_outlined),
             title: const Text('Datenschutz-Info'),
-            subtitle: const Text('Wie MultiApp mit deinen Daten umgeht.'),
+            subtitle: Text('Wie $appName mit deinen Daten umgeht.'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => PrivacyInfoScreen.show(context),
           ),
@@ -243,8 +243,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.history_rounded),
-            title: const Text('Aktivitaetsprotokoll'),
-            subtitle: const Text('Datenschutzrelevante Aktionen auf diesem Geraet.'),
+            title: const Text('Aktivitätsprotokoll'),
+            subtitle: const Text('Datenschutzrelevante Aktionen auf diesem Gerät.'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => AuditLogScreen.show(context),
           ),
@@ -253,8 +253,8 @@ class SettingsScreen extends ConsumerWidget {
             title: const Text('Aufbewahrung'),
             subtitle: Text(
               settings.retentionDays == 0
-                  ? 'Geloeschtes wird nicht automatisch entfernt.'
-                  : 'Geloeschtes und alte Protokolle nach '
+                  ? 'Gelöschtes wird nicht automatisch entfernt.'
+                  : 'Gelöschtes und alte Protokolle nach '
                         '${settings.retentionDays} Tagen entfernen.',
             ),
             onTap: () => _editRetention(context, ref, settings.retentionDays),
@@ -266,17 +266,17 @@ class SettingsScreen extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.error,
               ),
               title: Text(
-                'Konto und Daten loeschen',
+                'Konto und Daten löschen',
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              subtitle: const Text('Endgueltig, kann nicht rueckgaengig gemacht werden.'),
+              subtitle: const Text('Endgültig, kann nicht rückgängig gemacht werden.'),
               onTap: () => _deleteAccount(context, ref),
             ),
           const Divider(),
           const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('MultiApp'),
+            title: Text(appName),
             subtitle: Text('Version $appVersion'),
           ),
         ],
@@ -312,10 +312,18 @@ class SettingsScreen extends ConsumerWidget {
             actorName: ref.read(identityProvider).displayName,
           );
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('Export fehlgeschlagen: $error')),
-      );
+      if (!context.mounted) return;
+      messenger.showSnackBar(_errorSnackBar(context, 'Export fehlgeschlagen: $error'));
     }
+  }
+
+  /// Fehler-Toasts in Rot, damit sie sich von den normalen abheben.
+  SnackBar _errorSnackBar(BuildContext context, String message) {
+    final scheme = Theme.of(context).colorScheme;
+    return SnackBar(
+      backgroundColor: scheme.error,
+      content: Text(message, style: TextStyle(color: scheme.onError)),
+    );
   }
 
   Future<void> _editRetention(
@@ -324,7 +332,7 @@ class SettingsScreen extends ConsumerWidget {
     int current,
   ) async {
     const options = {
-      0: 'Nie automatisch loeschen',
+      0: 'Nie automatisch löschen',
       30: 'Nach 30 Tagen',
       90: 'Nach 90 Tagen',
       180: 'Nach 180 Tagen',
@@ -363,11 +371,11 @@ class SettingsScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Konto wirklich loeschen?'),
+        title: const Text('Konto wirklich löschen?'),
         content: const Text(
-          'Dein Konto und alle Serverdaten werden endgueltig geloescht. Die '
-          'Daten auf diesem Geraet werden ebenfalls entfernt. Dieser Schritt '
-          'kann nicht rueckgaengig gemacht werden.',
+          'Dein Konto und alle Serverdaten werden endgültig gelöscht. Die '
+          'Daten auf diesem Gerät werden ebenfalls entfernt. Dieser Schritt '
+          'kann nicht rückgängig gemacht werden.',
         ),
         actions: [
           TextButton(
@@ -379,7 +387,7 @@ class SettingsScreen extends ConsumerWidget {
               backgroundColor: Theme.of(dialogContext).colorScheme.error,
             ),
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Endgueltig loeschen'),
+            child: const Text('Endgültig löschen'),
           ),
         ],
       ),
@@ -395,17 +403,17 @@ class SettingsScreen extends ConsumerWidget {
         await ref.read(authServiceProvider).signOut();
         if (!context.mounted) return;
         messenger.showSnackBar(
-          const SnackBar(content: Text('Konto und Daten wurden geloescht.')),
+          const SnackBar(content: Text('Konto und Daten wurden gelöscht.')),
         );
       case DeleteAccountNeedsTransfer(:final households):
         await showDialog<void>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            title: const Text('Eigentuemerschaft uebergeben'),
+            title: const Text('Eigentümerschaft übergeben'),
             content: Text(
-              'Du bist noch Eigentuemer von: ${households.join(', ')}.\n\n'
-              'Uebergib die Eigentuemerschaft oder loese die Haushalte auf, '
-              'dann kannst du dein Konto loeschen.',
+              'Du bist noch Eigentümer von: ${households.join(', ')}.\n\n'
+              'Übergib die Eigentümerschaft oder löse die Haushalte auf, '
+              'dann kannst du dein Konto löschen.',
             ),
             actions: [
               TextButton(
@@ -417,7 +425,7 @@ class SettingsScreen extends ConsumerWidget {
         );
       case DeleteAccountFailure(:final message):
         messenger.showSnackBar(
-          SnackBar(content: Text('Loeschung fehlgeschlagen: $message')),
+          _errorSnackBar(context, 'Löschung fehlgeschlagen: $message'),
         );
     }
   }

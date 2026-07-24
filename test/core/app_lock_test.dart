@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:multiapp/core/app_info.dart';
 import 'package:multiapp/core/providers.dart';
 import 'package:multiapp/core/security/app_lock.dart';
 import 'package:multiapp/core/security/app_lock_gate.dart';
@@ -80,7 +81,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Geheimer Inhalt'), findsOneWidget);
-      expect(find.text('MultiApp ist gesperrt'), findsNothing);
+      expect(find.text('$appName ist gesperrt'), findsNothing);
       expect(lock.authCalls, 0);
     });
 
@@ -105,7 +106,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Startet gesperrt, der automatische Versuch schlug fehl.
-      expect(find.text('MultiApp ist gesperrt'), findsOneWidget);
+      expect(find.text('$appName ist gesperrt'), findsOneWidget);
       expect(lock.authCalls, greaterThanOrEqualTo(1));
 
       // Jetzt gelingt die Verifikation.
@@ -113,7 +114,7 @@ void main() {
       await tester.tap(find.text('Entsperren'));
       await tester.pumpAndSettle();
 
-      expect(find.text('MultiApp ist gesperrt'), findsNothing);
+      expect(find.text('$appName ist gesperrt'), findsNothing);
       expect(find.text('Geheimer Inhalt'), findsOneWidget);
     });
   });

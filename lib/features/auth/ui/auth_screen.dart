@@ -71,8 +71,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           const SizedBox(height: 8),
                           Text(
                             _isSignUp
-                                ? 'Konto fuer Familie und Sync'
-                                : 'Willkommen zurueck',
+                                ? 'Konto für Familie und Sync'
+                                : 'Willkommen zurück',
                             textAlign: TextAlign.center,
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
@@ -257,7 +257,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _busy = false);
     _snack(
       result is AuthSuccess
-          ? 'E-Mail zum Zuruecksetzen gesendet, falls das Konto existiert.'
+          ? 'E-Mail zum Zurücksetzen gesendet, falls das Konto existiert.'
           : (result as AuthFailure).message,
     );
   }
@@ -280,16 +280,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         icon: const Icon(Icons.mark_email_unread_outlined),
-        title: const Text('E-Mail noch nicht bestaetigt'),
+        title: const Text('E-Mail noch nicht bestätigt'),
         content: Text(
-          'Fuer $email steht die Bestaetigung noch aus. Oeffne den Link aus '
-          'der Bestaetigungs-Mail und melde dich dann erneut an. Keine Mail '
+          'Für $email steht die Bestätigung noch aus. Öffne den Link aus '
+          'der Bestätigungs-Mail und melde dich dann erneut an. Keine Mail '
           'erhalten?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Schliessen'),
+            child: const Text('Schließen'),
           ),
           FilledButton(
             onPressed: () async {
@@ -299,7 +299,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               if (!mounted) return;
               _snack(
                 result is AuthSuccess
-                    ? 'Bestaetigungs-Mail erneut gesendet an $email.'
+                    ? 'Bestätigungs-Mail erneut gesendet an $email.'
                     : (result as AuthFailure).message,
               );
             },
@@ -317,8 +317,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         icon: const Icon(Icons.mark_email_read_outlined),
         title: const Text('Fast geschafft'),
         content: Text(
-          'Wir haben eine Bestaetigungs-Mail an $email geschickt. Bitte '
-          'oeffne den Link darin und melde dich danach an.',
+          'Wir haben eine Bestätigungs-Mail an $email geschickt. Bitte '
+          'öffne den Link darin und melde dich danach an.',
         ),
         actions: [
           FilledButton(

@@ -18,7 +18,7 @@ class AuditLogScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final entries = ref.watch(auditLogProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Aktivitaetsprotokoll')),
+      appBar: AppBar(title: const Text('Aktivitätsprotokoll')),
       body: entries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Fehler: $error')),
@@ -28,7 +28,7 @@ class AuditLogScreen extends ConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.all(32),
                 child: Text(
-                  'Noch keine Eintraege. Datenschutzrelevante Aktionen '
+                  'Noch keine Einträge. Datenschutzrelevante Aktionen '
                   'erscheinen hier.',
                   textAlign: TextAlign.center,
                 ),

@@ -80,10 +80,10 @@ class HouseholdScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.error,
                 ),
                 title: Text(
-                  'Haushalt aufloesen',
+                  'Haushalt auflösen',
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
-                subtitle: const Text('Fuer alle Mitglieder unwiderruflich.'),
+                subtitle: const Text('Für alle Mitglieder unwiderruflich.'),
                 onTap: () => _delete(context, ref, entry.household.name),
               ),
             const SizedBox(height: 24),
@@ -142,8 +142,8 @@ class HouseholdScreen extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Haushalt verlassen?'),
         content: Text(
-          'Du verlaesst "$name". Als Eigentuemer musst du vorher die '
-          'Eigentuemerschaft uebergeben oder den Haushalt aufloesen.',
+          'Du verlässt "$name". Als Eigentümer musst du vorher die '
+          'Eigentümerschaft übergeben oder den Haushalt auflösen.',
         ),
         actions: [
           TextButton(
@@ -180,10 +180,10 @@ class HouseholdScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Haushalt aufloesen?'),
+        title: const Text('Haushalt auflösen?'),
         content: Text(
-          '"$name" wird fuer ALLE Mitglieder geloescht. Das laesst sich nicht '
-          'rueckgaengig machen.',
+          '"$name" wird für ALLE Mitglieder gelöscht. Das lässt sich nicht '
+          'rückgängig machen.',
         ),
         actions: [
           TextButton(
@@ -273,7 +273,7 @@ class _MemberTile extends ConsumerWidget {
                       children: [
                         Icon(Icons.workspace_premium_rounded, size: 18),
                         SizedBox(width: 10),
-                        Text('Zum Eigentuemer machen'),
+                        Text('Zum Eigentümer machen'),
                       ],
                     ),
                   ),
@@ -319,10 +319,10 @@ class _MemberTile extends ConsumerWidget {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('Eigentuemerschaft uebergeben?'),
+          title: const Text('Eigentümerschaft übergeben?'),
           content: Text(
-            '${member.displayName} wird Eigentuemer. Du wirst zum Admin. Das '
-            'kann nur der neue Eigentuemer rueckgaengig machen.',
+            '${member.displayName} wird Eigentümer. Du wirst zum Admin. Das '
+            'kann nur der neue Eigentümer rückgängig machen.',
           ),
           actions: [
             TextButton(
@@ -331,7 +331,7 @@ class _MemberTile extends ConsumerWidget {
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Uebergeben'),
+              child: const Text('Übergeben'),
             ),
           ],
         ),

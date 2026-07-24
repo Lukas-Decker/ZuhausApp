@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "de.lukas" "\0"
-            VALUE "FileDescription", "multiapp" "\0"
+            VALUE "FileDescription", "Zuhaus" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "multiapp" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 de.lukas. All rights reserved." "\0"
             VALUE "OriginalFilename", "multiapp.exe" "\0"
-            VALUE "ProductName", "multiapp" "\0"
+            VALUE "ProductName", "Zuhaus" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

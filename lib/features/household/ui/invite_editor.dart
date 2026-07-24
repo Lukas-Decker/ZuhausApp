@@ -208,7 +208,7 @@ class _InviteEditorState extends ConsumerState<InviteEditor> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Teile den Code oder den Link. Auf einem Geraet mit der App oeffnet '
+          'Teile den Code oder den Link. Auf einem Gerät mit der App öffnet '
           'der Link direkt den Beitritt.',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall,

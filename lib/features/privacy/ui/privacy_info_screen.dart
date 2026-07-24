@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Zusammenfassung, wie MultiApp mit Daten umgeht (DSGVO-Transparenz).
+/// Zusammenfassung, wie die App mit Daten umgeht (DSGVO-Transparenz).
 class PrivacyInfoScreen extends StatelessWidget {
   const PrivacyInfoScreen({super.key});
 
@@ -20,14 +20,14 @@ class PrivacyInfoScreen extends StatelessWidget {
           _Section(
             title: 'Offline-first',
             body:
-                'Die App funktioniert vollstaendig ohne Konto. Alle Daten '
-                'liegen zunaechst nur auf deinem Geraet.',
+                'Die App funktioniert vollständig ohne Konto. Alle Daten '
+                'liegen zunächst nur auf deinem Gerät.',
           ),
           _Section(
             title: 'Konto und Synchronisierung',
             body:
                 'Nur wenn du dich anmeldest, werden Daten zum Abgleich an '
-                'unseren Anbieter Supabase uebertragen und dort gespeichert. '
+                'unseren Anbieter Supabase übertragen und dort gespeichert. '
                 'Das Hosting liegt in der EU.',
           ),
           _Section(
@@ -40,30 +40,30 @@ class PrivacyInfoScreen extends StatelessWidget {
             title: 'Gesundheitsdaten',
             body:
                 'Der Pillen-Tracker verarbeitet besondere Daten (DSGVO Art. 9) '
-                'nur mit deiner ausdruecklichen Einwilligung und standardmaessig '
+                'nur mit deiner ausdrücklichen Einwilligung und standardmäßig '
                 'privat. Eine Freigabe an Betreuer erfolgt pro Plan.',
           ),
           _Section(
             title: 'Barcode-Abfrage',
             body:
                 'Beim Scannen wird nur der Barcode an Open Food Facts '
-                'uebertragen, und auch das nur nach deiner Einwilligung.',
+                'übertragen, und auch das nur nach deiner Einwilligung.',
           ),
           _Section(
             title: 'Deine Rechte',
             body:
                 'Du kannst deine Daten jederzeit exportieren (Auskunft und '
-                'Mitnahme) und dein Konto samt Serverdaten endgueltig loeschen. '
+                'Mitnahme) und dein Konto samt Serverdaten endgültig löschen. '
                 'Beides findest du in den Einstellungen unter Datenschutz.',
           ),
           _Section(
             title: 'Aufbewahrung',
             body:
-                'Geloeschte Eintraege und alte Protokolleintraege werden nach '
-                'der eingestellten Frist (Standard 90 Tage) endgueltig entfernt.',
+                'Gelöschte Einträge und alte Protokolleinträge werden nach '
+                'der eingestellten Frist (Standard 90 Tage) endgültig entfernt.',
           ),
           _Section(
-            title: 'Aktivitaetsprotokoll',
+            title: 'Aktivitätsprotokoll',
             body:
                 'Datenschutzrelevante Handlungen (Einwilligungen, Export, '
                 'App-Schloss) werden lokal protokolliert, damit du sie '

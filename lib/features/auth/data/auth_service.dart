@@ -238,18 +238,18 @@ class AuthService {
       return 'E-Mail oder Passwort ist falsch.';
     }
     if (message.contains('email not confirmed')) {
-      return 'Bitte bestaetige zuerst deine E-Mail-Adresse.';
+      return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
     }
     if (message.contains('user already registered') ||
         message.contains('already been registered')) {
-      return 'Fuer diese E-Mail gibt es bereits ein Konto.';
+      return 'Für diese E-Mail gibt es bereits ein Konto.';
     }
     if (message.contains('password should be at least')) {
       return 'Das Passwort ist zu kurz (mindestens 6 Zeichen).';
     }
     if (message.contains('unable to validate email') ||
         message.contains('invalid email')) {
-      return 'Die E-Mail-Adresse ist ungueltig.';
+      return 'Die E-Mail-Adresse ist ungültig.';
     }
     if (message.contains('rate limit') || message.contains('too many')) {
       return 'Zu viele Versuche. Bitte warte einen Moment.';

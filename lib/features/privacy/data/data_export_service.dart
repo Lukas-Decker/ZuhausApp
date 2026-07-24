@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/app_info.dart';
 import '../../../data/db/app_database.dart';
 
 /// Erstellt einen vollstaendigen Export aller lokalen Daten (DSGVO-Auskunft
@@ -25,12 +26,12 @@ class DataExportService {
       tables[table] = [for (final row in rows) row.data];
     }
     return {
-      'app': 'MultiApp',
+      'app': appName,
       'version': appVersion,
       'exportedAt': DateTime.now().toIso8601String(),
       'note':
-          'Zeitstempel sind Unix-Sekunden. Dieser Export enthaelt alle auf '
-          'diesem Geraet gespeicherten Daten.',
+          'Zeitstempel sind Unix-Sekunden. Dieser Export enthält alle auf '
+          'diesem Gerät gespeicherten Daten.',
       'tables': tables,
     };
   }
@@ -49,8 +50,8 @@ class DataExportService {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'MultiApp Datenexport',
-        title: 'MultiApp Datenexport',
+        subject: '$appName Datenexport',
+        title: '$appName Datenexport',
       ),
     );
   }

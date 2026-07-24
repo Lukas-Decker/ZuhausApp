@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_info.dart';
 import '../../core/notifications/notification_service.dart';
 
 /// Hintergrund-Handler fuer FCM. Muss eine Top-Level-Funktion sein.
@@ -53,7 +54,7 @@ class FcmService {
       if (notification == null) return;
       _notifications.show(
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title: notification.title ?? 'MultiApp',
+        title: notification.title ?? appName,
         body: notification.body ?? '',
       );
     });

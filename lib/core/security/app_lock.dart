@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../app_info.dart';
+
 /// Biometrisches App-Schloss.
 ///
 /// Bewusst rein lokal: die Entsperrung passiert ueber die Geraete-Biometrie
@@ -40,7 +42,7 @@ class LocalAuthAppLock implements AppLock {
   Future<bool> authenticate() async {
     try {
       return await _auth.authenticate(
-        localizedReason: 'Zum Entsperren von MultiApp bestaetigen',
+        localizedReason: 'Zum Entsperren von $appName bestätigen',
         // Bei App-Wechsel nicht abbrechen, sondern beim Zurueckkehren erneut
         // versuchen.
         persistAcrossBackgrounding: true,

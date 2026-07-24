@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/app_info.dart';
 import '../core/providers.dart';
 import '../core/security/app_lock_gate.dart';
 import '../features/household/join_link_listener.dart';
@@ -19,7 +20,7 @@ class MultiApp extends ConsumerWidget {
 
     return JoinLinkListener(
       child: MaterialApp.router(
-        title: 'MultiApp',
+        title: appName,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(scopeKind),
         darkTheme: AppTheme.dark(scopeKind),

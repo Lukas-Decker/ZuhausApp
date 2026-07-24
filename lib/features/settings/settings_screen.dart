@@ -15,6 +15,7 @@ import '../household/ui/household_screen.dart';
 import '../privacy/privacy_providers.dart';
 import '../privacy/ui/audit_log_screen.dart';
 import '../privacy/ui/privacy_info_screen.dart';
+import '../push/push_providers.dart';
 import '../sync/sync_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -479,6 +480,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
+    // Vor dem Abmelden den Push-Token dieses Geraets entfernen (nur Android).
+    await ref.read(fcmServiceProvider).deleteToken();
     await ref.read(authServiceProvider).signOut();
   }
 }

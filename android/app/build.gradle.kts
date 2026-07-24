@@ -4,6 +4,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase (FCM) nur einbinden, wenn eine google-services.json vorliegt. So
+// bleibt der Android-Build ohne Firebase-Konfiguration weiterhin baubar; ohne
+// die Datei ist der Push schlicht inaktiv.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "de.lukas.multiapp"
     compileSdk = flutter.compileSdkVersion

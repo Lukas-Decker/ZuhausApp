@@ -8,6 +8,7 @@ import '../features/household/household_providers.dart';
 import '../features/inventory/inventory_providers.dart';
 import '../features/meds/notification_action_handler.dart';
 import '../features/privacy/privacy_providers.dart';
+import '../features/push/push_providers.dart';
 import '../features/sync/sync_providers.dart';
 import 'navigation.dart';
 
@@ -40,6 +41,8 @@ class AppShell extends ConsumerWidget {
     ref.watch(familyEventCheckerProvider);
     // Bereinigt abgelaufene Grabsteine und alte Audit-Eintraege beim Start.
     ref.watch(retentionRunnerProvider);
+    // Registriert FCM fuer Push bei geschlossener App (nur Android).
+    ref.watch(fcmInitProvider);
 
     // Beim Tab-Wechsel einen Abgleich anstossen.
     void onNavigate() =>

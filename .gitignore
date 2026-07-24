@@ -4,6 +4,10 @@ env.json
 # Verpackte Build-Artefakte (tool/package.ps1): Windows-<version>.zip, APK ...
 /dist/
 
+# Firebase-Konfiguration (FCM). Enthaelt projektbezogene Schluessel.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # Miscellaneous
 *.class
 *.log

@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 3.14)
 project(multiapp LANGUAGES CXX)
 
+# Aeltere mitgelieferte CMake-Projekte (z.B. das Firebase-C++-SDK) verlangen ein
+# cmake_minimum_required < 3.5, das neuere CMake als Fehler ablehnt. Diese
+# Policy-Variable erlaubt die Konfiguration solcher Unterprojekte trotzdem.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "multiapp")

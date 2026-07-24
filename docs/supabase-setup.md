@@ -189,3 +189,57 @@ Danach raeumt die App die lokale Datenbank auf.
 
 Ohne diese Funktion bleibt die App voll nutzbar; nur der Knopf "Konto und Daten
 loeschen" meldet dann einen Fehler.
+
+## 10. Echter Push bei geschlossener App per FCM (ab v0.13, nur Android)
+
+Der Realtime-Weg (Abschnitt 8) erreicht nur laufende Apps. Fuer einen Push, der
+auch eine komplett geschlossene Android-App weckt, braucht es Firebase Cloud
+Messaging (FCM). Auf dem Desktop gibt es das nicht; dort bleibt es beim
+Realtime-Weg. Firebase ist optional: ohne die folgende Einrichtung laeuft die
+App normal weiter, nur der geschlossene-App-Push fehlt.
+
+Datenschutz-Hinweis: FCM fuehrt Google als zusaetzlichen Auftragsverarbeiter ein.
+Der Push enthaelt nur Titel und kurzen Text des Ereignisses, keine
+Gesundheitsinhalte.
+
+### a) Firebase-Projekt und App
+
+1. Auf https://console.firebase.google.com ein Projekt anlegen.
+2. Eine **Android-App** mit dem Paketnamen `de.lukas.multiapp` hinzufuegen.
+3. Die **google-services.json** herunterladen und nach
+   `android/app/google-services.json` legen. Erst dann bindet der Build Firebase
+   ein (siehe `android/app/build.gradle.kts`). Die Datei gehoert nicht ins Repo.
+4. Unter **Project settings -> Service accounts** eine neue **Private key**
+   (Service-Account-JSON) fuer das Firebase Admin SDK erzeugen.
+
+### b) Datenbank und Function
+
+1. Migration einspielen: `supabase/migrations/0005_device_tokens.sql` (Tabelle
+   `device_tokens` + RPCs, wie die anderen im SQL Editor ausfuehren).
+2. Das Service-Account-JSON als Function-Secret hinterlegen (Supabase CLI):
+
+   ```bash
+   supabase secrets set FIREBASE_SERVICE_ACCOUNT="$(cat service-account.json)"
+   # optional, empfohlen: gemeinsames Geheimnis fuer den Webhook
+   supabase secrets set FCM_WEBHOOK_SECRET=ein-langes-zufalls-geheimnis
+   ```
+
+3. Function deployen:
+
+   ```bash
+   supabase functions deploy notify-fcm --no-verify-jwt
+   ```
+
+### c) Webhook auf household_events
+
+Im Dashboard unter **Database -> Webhooks** einen Webhook anlegen:
+
+- Tabelle: `public.household_events`, Ereignis: **INSERT**.
+- Typ: **Supabase Edge Function** -> `notify-fcm`.
+- Falls gesetzt, den Header `x-webhook-secret` = `FCM_WEBHOOK_SECRET` mitgeben.
+
+Damit laeuft die Kette: ein Geraet legt ein Familien-Ereignis an ->
+`household_events` bekommt eine Zeile -> der Webhook ruft `notify-fcm` ->
+die Function liest die Tokens der Zielpersonen (alle Mitglieder ausser dem
+Ausloeser, oder gezielt eine Person) und schickt den Push. Der Client meldet
+seinen Token nach dem Login automatisch an und beim Abmelden wieder ab.

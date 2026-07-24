@@ -25,15 +25,20 @@ class ModuleScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showSettingsAction =
-        MediaQuery.sizeOf(context).width < 700;
+    // Auf schmalen (mobilen) Layouts eine kompakte Kopfzeile, damit oben mehr
+    // Platz fuer Inhalt bleibt; auf breiten Fenstern die Standardhoehe.
+    final isCompact = MediaQuery.sizeOf(context).width < 700;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        toolbarHeight: isCompact ? 44 : null,
+        titleTextStyle: isCompact
+            ? Theme.of(context).appBarTheme.titleTextStyle?.copyWith(fontSize: 18)
+            : null,
         actions: [
           ...actions,
-          if (showSettingsAction)
+          if (isCompact)
             IconButton(
               tooltip: 'Einstellungen',
               onPressed: () => context.push(settingsPath),

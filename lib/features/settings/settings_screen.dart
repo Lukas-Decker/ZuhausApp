@@ -506,7 +506,9 @@ class _SyncTile extends ConsumerWidget {
       SyncPhase.syncing => (Icons.sync_rounded, 'Wird synchronisiert ...'),
       SyncPhase.error => (
         Icons.sync_problem_rounded,
-        'Letzter Abgleich fehlgeschlagen',
+        status.error == null
+            ? 'Letzter Abgleich fehlgeschlagen'
+            : 'Fehlgeschlagen: ${status.error}',
       ),
       SyncPhase.offline => (Icons.cloud_off_rounded, 'Kein Konto'),
       SyncPhase.idle => (
@@ -518,6 +520,7 @@ class _SyncTile extends ConsumerWidget {
     };
 
     return ListTile(
+      isThreeLine: status.phase == SyncPhase.error,
       leading: status.isSyncing
           ? const SizedBox(
               width: 24,
@@ -526,7 +529,7 @@ class _SyncTile extends ConsumerWidget {
             )
           : Icon(icon),
       title: const Text('Synchronisierung'),
-      subtitle: Text(text),
+      subtitle: Text(text, maxLines: 4, overflow: TextOverflow.ellipsis),
       trailing: IconButton(
         tooltip: 'Jetzt abgleichen',
         onPressed: status.isSyncing

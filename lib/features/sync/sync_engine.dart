@@ -59,18 +59,11 @@ class SyncEngine {
     final table = record['table_name'] as String?;
     if (table == null || !_knownTables.contains(table)) return;
 
-    var data = record['data'];
-    if (data is String) {
-      try {
-        data = jsonDecode(data);
-      } catch (_) {
-        return;
-      }
-    }
-    if (data is! Map) return;
+    final data = _asData(record['data']);
+    if (data == null) return;
 
     try {
-      await _store.applyRemote(table, Map<String, dynamic>.from(data));
+      await _store.applyRemote(table, data);
     } catch (error) {
       debugPrint('[sync] Realtime-Apply fehlgeschlagen: $error');
     }
@@ -94,36 +87,39 @@ class SyncEngine {
   Future<void> push() async {
     for (final table in tables) {
       final dirty = await _store.dirtyRows(table.name);
-      for (final data in dirty) {
-        final id = data['id'] as String;
-        final localUpdatedAt = data['updated_at'] as int;
-
-        final deltas = table.counters.isEmpty
-            ? (values: <String, double>{}, ids: <String>[])
-            : await _store.pendingDeltas(table.name, id);
-
-        data.remove('is_dirty');
-
+      for (final row in dirty) {
+        // Alles pro Datensatz absichern: ein einzelner Fehler (Netz, Cast,
+        // Serverfehler) darf den gesamten Abgleich nicht abbrechen lassen.
         try {
+          final id = row['id'] as String;
+          final localUpdatedAt = (row['updated_at'] as num).toInt();
+
+          final deltas = table.counters.isEmpty
+              ? (values: <String, double>{}, ids: <String>[])
+              : await _store.pendingDeltas(table.name, id);
+
+          final payload = Map<String, dynamic>.from(row)..remove('is_dirty');
+          final deletedAt = payload['deleted_at'];
+
           await _client.rpc(
             'push_record',
             params: {
               '_table': table.name,
               '_id': id,
-              '_scope_kind': data['scope_kind'],
-              '_scope_id': data['scope_id'],
+              '_scope_kind': payload['scope_kind'],
+              '_scope_id': payload['scope_id'],
               '_updated_at': _secondsToIso(localUpdatedAt),
-              '_deleted_at': data['deleted_at'] == null
+              '_deleted_at': deletedAt == null
                   ? null
-                  : _secondsToIso(data['deleted_at'] as int),
-              '_data': data,
+                  : _secondsToIso((deletedAt as num).toInt()),
+              '_data': payload,
               '_counter_deltas': deltas.values,
             },
           );
           await _store.markSynced(table.name, id, localUpdatedAt);
           await _store.clearOutbox(deltas.ids);
         } catch (error) {
-          debugPrint('[sync] Push ${table.name}/$id fehlgeschlagen: $error');
+          debugPrint('[sync] Push ${table.name} fehlgeschlagen: $error');
         }
       }
     }
@@ -132,22 +128,47 @@ class SyncEngine {
   Future<void> pull() async {
     final lastPull = await _store.getMeta('lastPull') ?? '1970-01-01T00:00:00Z';
 
+    // Aufsteigend: der zuletzt gelesene Satz ist der neueste, daraus wird der
+    // Wasserstand. (Der Standard von .order() ist absteigend!)
     final records = await _client
         .from('sync_records')
         .select()
         .gt('synced_at', lastPull)
-        .order('synced_at');
+        .order('synced_at', ascending: true);
 
     String? maxSynced;
     for (final record in records as List) {
-      final map = record as Map<String, dynamic>;
-      maxSynced = map['synced_at'] as String;
-      final table = map['table_name'] as String;
-      if (!_knownTables.contains(table)) continue;
-      await _store.applyRemote(table, Map<String, dynamic>.from(map['data'] as Map));
+      final map = Map<String, dynamic>.from(record as Map);
+      // Wasserstand immer mitziehen, auch wenn das Anwenden scheitert, sonst
+      // wuerde ein einzelner problematischer Satz den Pull dauerhaft blockieren.
+      final synced = map['synced_at'];
+      if (synced is String) maxSynced = synced;
+      try {
+        final table = map['table_name'] as String?;
+        if (table == null || !_knownTables.contains(table)) continue;
+        final data = _asData(map['data']);
+        if (data != null) await _store.applyRemote(table, data);
+      } catch (error) {
+        debugPrint('[sync] Pull-Datensatz uebersprungen: $error');
+      }
     }
 
     if (maxSynced != null) await _store.setMeta('lastPull', maxSynced);
+  }
+
+  /// Bringt das jsonb-Feld `data` in eine Map, egal ob es schon als Map oder
+  /// (je nach Transport) als JSON-String ankommt.
+  static Map<String, dynamic>? _asData(dynamic data) {
+    var value = data;
+    if (value is String) {
+      try {
+        value = jsonDecode(value);
+      } catch (_) {
+        return null;
+      }
+    }
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return null;
   }
 
   static String _secondsToIso(int seconds) =>

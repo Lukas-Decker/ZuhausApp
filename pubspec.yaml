@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.13.1+21
+version: 0.13.2+22
 
 environment:
   sdk: ^3.12.2
@@ -55,6 +55,22 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.34.0
   build_runner: ^2.15.1
+  # App-Icon: Quellgrafik zeichnen (image) und auf die Plattformen verteilen.
+  image: ^4.3.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
+
+# App-Icon (weisses Haus auf blauem Grund). Neu erzeugen mit:
+#   dart run tool/generate_icon.dart
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  adaptive_icon_background: "#2563EB"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 256

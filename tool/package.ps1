@@ -89,8 +89,14 @@ function New-WindowsPackage {
 
   $zip = Join-Path $distDir "Windows-$Version.zip"
   if (Test-Path $zip) { Remove-Item $zip -Force }
+
+  # Reine Build-Nebenprodukte nicht mitpacken; zur Laufzeit werden nur die
+  # Exe, die DLLs und der data-Ordner gebraucht.
+  $junk = @('.lib', '.exp', '.pdb', '.ilk')
+  $items = Get-ChildItem $releaseDir | Where-Object { $junk -notcontains $_.Extension }
+
   Write-Host "Packe $releaseDir -> $zip" -ForegroundColor Green
-  Compress-Archive -Path (Join-Path $releaseDir '*') -DestinationPath $zip -CompressionLevel Optimal
+  Compress-Archive -Path $items.FullName -DestinationPath $zip -CompressionLevel Optimal
 }
 
 function New-AndroidPackage {

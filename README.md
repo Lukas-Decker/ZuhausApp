@@ -84,6 +84,20 @@ Nur eine Plattform bzw. nur neu zippen ohne Bauen:
 ./tool/package.ps1 -Target android -SkipBuild
 ```
 
+## App-Icon
+
+Das Icon (weisses Haus auf blauem, abgerundetem Grund) ist selbst gezeichnet und
+damit frei verwendbar. Die Quellgrafiken liegen unter `assets/icon/`. Neu
+erzeugen (z.B. nach einer Farb- oder Formaenderung in `tool/generate_icon.dart`):
+
+```bash
+dart run tool/generate_icon.dart
+dart run flutter_launcher_icons
+```
+
+Der erste Befehl zeichnet die PNGs, der zweite verteilt sie auf Android
+(Mipmaps + adaptive Icons) und Windows (`.ico`).
+
 ## Fahrplan
 
 | Version | Inhalt |

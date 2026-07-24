@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers.dart';
+import '../core/security/app_lock_gate.dart';
 import '../features/household/join_link_listener.dart';
 import 'router.dart';
 import 'theme.dart';
@@ -23,6 +24,9 @@ class MultiApp extends ConsumerWidget {
         darkTheme: AppTheme.dark(scopeKind),
         themeMode: ThemeMode.system,
         routerConfig: appRouter,
+        // Legt bei aktivem App-Schloss eine Sperre ueber die gesamte App.
+        builder: (context, child) =>
+            AppLockGate(child: child ?? const SizedBox.shrink()),
         locale: const Locale('de'),
         supportedLocales: const [Locale('de'), Locale('en')],
         localizationsDelegates: const [

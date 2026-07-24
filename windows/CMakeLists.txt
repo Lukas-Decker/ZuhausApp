@@ -32,6 +32,12 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# local_auth_windows zieht ueber <pplawait.h> den alten
+# <experimental/coroutine>-Header. Neuere MSVC-Versionen werten das als harten
+# Fehler (STL1011). Das vom Compiler vorgeschlagene Makro entschaerft das
+# projektweit, auch fuer die spaeter eingebundenen Plugin-Targets.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by

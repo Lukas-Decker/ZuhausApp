@@ -1,6 +1,9 @@
 # Lokale Zugangsdaten (Supabase-URL + anon-Key). Vorlage: env.example.json
 env.json
 
+# Verpackte Build-Artefakte (tool/package.ps1): Windows-<version>.zip, APK ...
+/dist/
+
 # Miscellaneous
 *.class
 *.log

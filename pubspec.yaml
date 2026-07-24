@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.10.0+17
+version: 0.11.0+18
 
 environment:
   sdk: ^3.12.2
@@ -37,6 +37,10 @@ dependencies:
   supabase_flutter: ^2.16.0
   app_links: ^7.2.1
   win32_registry: ^3.0.3
+  # Biometrisches App-Schloss (Windows Hello / Fingerabdruck / Gesicht).
+  # 3.x wird gebraucht: zieht local_auth_windows 2.x mit dem modernen
+  # C++20-<coroutine>-Header (1.x scheitert an neuem MSVC, Fehler STL1011).
+  local_auth: ^3.0.2
 
 dev_dependencies:
   flutter_test:

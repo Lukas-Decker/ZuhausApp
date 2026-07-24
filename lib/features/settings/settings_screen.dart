@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers.dart';
+import '../../core/security/app_lock.dart';
 import '../../core/settings/app_settings.dart';
 import '../../core/widgets/scope_switcher_sheet.dart';
 import '../auth/auth_providers.dart';
@@ -180,6 +181,9 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
+          const _SectionHeader('Sicherheit'),
+          const _AppLockTile(),
+          const Divider(),
           const _SectionHeader('Datenschutz'),
           ListTile(
             leading: const Icon(Icons.cloud_outlined),
@@ -220,7 +224,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('MultiApp'),
-            subtitle: Text('Version 0.10.0'),
+            subtitle: Text('Version 0.11.0'),
           ),
         ],
       ),
@@ -328,6 +332,53 @@ class _SyncTile extends ConsumerWidget {
             ? null
             : () => ref.read(syncControllerProvider.notifier).syncNow(),
         icon: const Icon(Icons.refresh_rounded),
+      ),
+    );
+  }
+}
+
+/// Schalter fuer das biometrische App-Schloss.
+///
+/// Wird nur aktiv, wenn das Geraet eine Nutzer-Verifikation anbietet
+/// (Windows Hello am Desktop, Fingerabdruck/Gesicht auf Android). Auf
+/// Plattformen ohne Unterstuetzung bleibt der Schalter deaktiviert.
+class _AppLockTile extends ConsumerWidget {
+  const _AppLockTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      appSettingsProvider.select((s) => s.appLockEnabled),
+    );
+    final supported = ref.watch(appLockSupportedProvider);
+    final isSupported = supported.value ?? false;
+
+    return SwitchListTile(
+      secondary: const Icon(Icons.lock_rounded),
+      value: enabled && isSupported,
+      onChanged: isSupported
+          ? (value) async {
+              // Vor dem Aktivieren einmal verifizieren, damit niemand ein
+              // Schloss setzt, das er selbst nicht oeffnen kann.
+              if (value) {
+                final ok = await ref.read(appLockProvider).authenticate();
+                if (!ok) return;
+              }
+              await ref
+                  .read(appSettingsProvider.notifier)
+                  .setAppLockEnabled(value);
+            }
+          : null,
+      title: const Text('App-Schloss'),
+      subtitle: Text(
+        switch (supported) {
+          AsyncData(value: false) =>
+            'Auf diesem Gerät nicht verfügbar (keine Biometrie/PIN).',
+          AsyncLoading() => 'Wird geprüft ...',
+          _ =>
+            'Beim Öffnen per Windows Hello bzw. Fingerabdruck/Gesicht '
+                'entsperren.',
+        },
       ),
     );
   }

@@ -62,6 +62,28 @@ Starten:
 flutter run -d windows
 ```
 
+## Verpacken (dist/)
+
+Fertige Artefakte landen im Ordner `dist/` im Projekt-Root. Das Skript liest
+die Version aus `pubspec.yaml` und legt ab:
+
+- `dist/Windows-<version>.zip` (gezippter Release-Ordner)
+- `dist/Android-<version>.apk` (Release-APK)
+
+Liegt eine `env.json` vor, wird sie in den Build uebernommen, sonst baut es im
+Gastmodus (ohne Supabase).
+
+```powershell
+./tool/package.ps1
+```
+
+Nur eine Plattform bzw. nur neu zippen ohne Bauen:
+
+```powershell
+./tool/package.ps1 -Target windows
+./tool/package.ps1 -Target android -SkipBuild
+```
+
 ## Fahrplan
 
 | Version | Inhalt |
@@ -76,5 +98,6 @@ flutter run -d windows
 | 0.8 | Haushalte, Rollen, Einladungen |
 | 0.9 | Sync-Engine |
 | 0.10 | Push an Familiengeräte und Eskalation |
-| 0.11 | Passkeys |
-| 1.0 | Datenschutzpaket und Release |
+| 0.11 | Biometrisches App-Schloss (Windows Hello, Fingerabdruck/Gesicht) |
+| 0.12 | Datenschutzpaket (Export, Kontolöschung, Consent, Audit-Log) |
+| 0.13 | FCM-Push (weckt geschlossene App) |

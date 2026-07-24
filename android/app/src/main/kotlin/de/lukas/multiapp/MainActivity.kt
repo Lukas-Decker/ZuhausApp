@@ -1,5 +1,7 @@
 package de.lukas.multiapp
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// FlutterFragmentActivity statt FlutterActivity: local_auth braucht eine
+// FragmentActivity, um den Biometrie-Dialog anzeigen zu koennen.
+class MainActivity : FlutterFragmentActivity()

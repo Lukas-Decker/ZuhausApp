@@ -8,6 +8,8 @@
     <!-- Kamera fuer den Barcode-Scanner (mobile_scanner). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Biometrisches App-Schloss (local_auth). -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:label="MultiApp"

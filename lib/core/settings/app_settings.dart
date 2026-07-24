@@ -17,6 +17,7 @@ class AppSettings {
     required this.familyPushEnabled,
     required this.medEscalationEnabled,
     required this.petOverdueEnabled,
+    required this.appLockEnabled,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -52,6 +53,9 @@ class AppSettings {
   /// Meldung überfälliger Tier-Aufgaben an den Haushalt.
   final bool petOverdueEnabled;
 
+  /// Biometrisches App-Schloss (Windows Hello / Fingerabdruck / Gesicht).
+  final bool appLockEnabled;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
@@ -62,6 +66,7 @@ class AppSettings {
     bool? familyPushEnabled,
     bool? medEscalationEnabled,
     bool? petOverdueEnabled,
+    bool? appLockEnabled,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
@@ -77,6 +82,7 @@ class AppSettings {
     familyPushEnabled: familyPushEnabled ?? this.familyPushEnabled,
     medEscalationEnabled: medEscalationEnabled ?? this.medEscalationEnabled,
     petOverdueEnabled: petOverdueEnabled ?? this.petOverdueEnabled,
+    appLockEnabled: appLockEnabled ?? this.appLockEnabled,
   );
 
   static const Object _unset = Object();
@@ -92,6 +98,7 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyFamilyPush = 'reminder.family.enabled';
   static const _keyMedEscalation = 'reminder.med.escalation';
   static const _keyPetOverdue = 'reminder.pet.overdue';
+  static const _keyAppLock = 'security.applock.enabled';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -108,6 +115,7 @@ class AppSettingsController extends Notifier<AppSettings> {
       familyPushEnabled: prefs.getBool(_keyFamilyPush) ?? true,
       medEscalationEnabled: prefs.getBool(_keyMedEscalation) ?? true,
       petOverdueEnabled: prefs.getBool(_keyPetOverdue) ?? true,
+      appLockEnabled: prefs.getBool(_keyAppLock) ?? false,
     );
   }
 
@@ -160,6 +168,11 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setPetOverdueEnabled(bool enabled) async {
     await _prefs.setBool(_keyPetOverdue, enabled);
     state = state.copyWith(petOverdueEnabled: enabled);
+  }
+
+  Future<void> setAppLockEnabled(bool enabled) async {
+    await _prefs.setBool(_keyAppLock, enabled);
+    state = state.copyWith(appLockEnabled: enabled);
   }
 }
 

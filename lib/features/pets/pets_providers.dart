@@ -17,6 +17,15 @@ final petsProvider = StreamProvider<List<Pet>>((ref) {
   return ref.watch(petRepositoryProvider).watchPets(scope);
 });
 
+/// Korrigiert einmalig alte Aufgaben-Titel ohne Umlaute. In der AppShell
+/// beobachtet, laeuft beim Start.
+final petTaskTitleRepairProvider = Provider<void>((ref) {
+  final userId = ref.watch(identityProvider).userId;
+  Future.microtask(
+    () => ref.read(petRepositoryProvider).fixLegacyTaskTitles(userId),
+  );
+});
+
 final petProvider = StreamProvider.family<Pet?, String>((ref, id) {
   return ref.watch(petRepositoryProvider).watchPet(id);
 });

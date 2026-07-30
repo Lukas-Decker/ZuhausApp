@@ -184,28 +184,70 @@ class PetRepository {
     );
   }
 
+  /// Einmalige Korrektur alter Aufgaben-Titel ohne echte Umlaute (aus fruehen
+  /// Versionen gespeichert). Idempotent: nach dem ersten Lauf passt nichts mehr.
+  Future<void> fixLegacyTaskTitles(String userId) async {
+    const fixes = {'Fuettern': 'Füttern', 'Buersten': 'Bürsten'};
+    for (final entry in fixes.entries) {
+      await (_db.update(_db.petTasks)..where((t) => t.title.equals(entry.key)))
+          .write(
+        PetTasksCompanion(
+          title: Value(entry.value),
+          updatedAt: Value(DateTime.now()),
+          updatedBy: Value(userId),
+          isDirty: const Value(true),
+        ),
+      );
+    }
+  }
+
   /// Aufgaben eines Tieres mit dem heutigen Erledigungsstand.
+  ///
+  /// Beobachtet Aufgaben UND Erledigungen (Join mit .watch()), damit ein
+  /// „Erledigt"/Rueckgaengig sofort durchschlaegt - nicht erst nach Neustart.
   Stream<List<PetTaskStatus>> watchTaskStatus(String petId, DateTime day) {
     final start = DateTime(day.year, day.month, day.day);
     final end = start.add(const Duration(days: 1));
 
-    return watchTasks(petId).asyncMap((tasks) async {
-      final logs = await (_db.select(_db.petTaskLogs)
-            ..where((l) => l.petId.equals(petId))
-            ..where((l) => l.deletedAt.isNull())
-            ..where((l) => l.doneAt.isBiggerOrEqualValue(start))
-            ..where((l) => l.doneAt.isSmallerThanValue(end))
-            ..orderBy([(l) => OrderingTerm.asc(l.doneAt)]))
-          .get();
+    final tasks = _db.petTasks;
+    final logs = _db.petTaskLogs;
 
-      return tasks.map((task) {
-        final taskLogs = logs.where((l) => l.taskId == task.id).toList();
-        return PetTaskStatus(
-          task: task,
-          doneToday: taskLogs.length,
-          logs: taskLogs,
-        );
-      }).toList();
+    final query = _db.select(tasks).join([
+      leftOuterJoin(
+        logs,
+        logs.taskId.equalsExp(tasks.id) &
+            logs.deletedAt.isNull() &
+            logs.doneAt.isBiggerOrEqualValue(start) &
+            logs.doneAt.isSmallerThanValue(end),
+      ),
+    ])
+      ..where(
+        tasks.petId.equals(petId) &
+            tasks.deletedAt.isNull() &
+            tasks.isActive.equals(true),
+      )
+      ..orderBy([OrderingTerm.asc(tasks.sortOrder)]);
+
+    return query.watch().map((rows) {
+      final byTask = <String, PetTask>{};
+      final logsByTask = <String, List<PetTaskLog>>{};
+      for (final row in rows) {
+        final task = row.readTable(tasks);
+        byTask[task.id] = task;
+        final log = row.readTableOrNull(logs);
+        if (log != null) {
+          logsByTask.putIfAbsent(task.id, () => []).add(log);
+        }
+      }
+      return [
+        for (final task in byTask.values)
+          PetTaskStatus(
+            task: task,
+            doneToday: logsByTask[task.id]?.length ?? 0,
+            logs: (logsByTask[task.id] ?? <PetTaskLog>[])
+              ..sort((a, b) => a.doneAt.compareTo(b.doneAt)),
+          ),
+      ];
     });
   }
 

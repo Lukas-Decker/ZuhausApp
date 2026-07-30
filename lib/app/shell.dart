@@ -7,6 +7,7 @@ import '../features/family/family_providers.dart';
 import '../features/household/household_providers.dart';
 import '../features/inventory/inventory_providers.dart';
 import '../features/meds/notification_action_handler.dart';
+import '../features/pets/pets_providers.dart';
 import '../features/privacy/privacy_providers.dart';
 import '../features/push/push_providers.dart';
 import '../features/sync/sync_providers.dart';
@@ -43,12 +44,18 @@ class AppShell extends ConsumerWidget {
     ref.watch(retentionRunnerProvider);
     // Registriert FCM fuer Push bei geschlossener App (nur Android).
     ref.watch(fcmInitProvider);
+    // Korrigiert einmalig alte Aufgaben-Titel ohne Umlaute.
+    ref.watch(petTaskTitleRepairProvider);
 
     // Beim Tab-Wechsel einen Abgleich anstossen.
     void onNavigate() =>
         ref.read(syncControllerProvider.notifier).syncNow();
 
     return Scaffold(
+      // Die Tastatur-Anpassung uebernimmt allein das innere ModuleScaffold;
+      // sonst rechnen beide Scaffolds die Tastaturhoehe an und das Eingabefeld
+      // rutscht hinter die Kopfzeile.
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           const SafeArea(bottom: false, child: ScopeBanner()),

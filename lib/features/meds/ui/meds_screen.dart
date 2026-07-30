@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/notifications/notification_providers.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
+import '../../../core/widgets/add_fab.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
@@ -42,10 +43,9 @@ class MedsScreen extends ConsumerWidget {
             Tab(text: 'Pläne'),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: AddFab(
           onPressed: () => MedicationPlanEditor.show(context),
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Medikament'),
+          label: 'Medikament',
         ),
         body: const TabBarView(
           children: [_DayTab(), _PlansTab()],
@@ -224,71 +224,115 @@ class _DoseTile extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
       color: bg,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: scheme.surface,
-                  child: Icon(form.icon, color: scheme.primary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        plan.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: fg,
+            // Linke Seite: Inhalt oben, "Genommen" als volle Leiste unten.
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: scheme.surface,
+                          child: Icon(form.icon, color: scheme.primary),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                plan.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: fg,
+                                ),
+                              ),
+                              Text(
+                                [
+                                  ScheduleTimes.formatTime(time),
+                                  if (plan.dosage.trim().isNotEmpty)
+                                    plan.dosage.trim(),
+                                ].join(' · '),
+                                style: TextStyle(
+                                  color: fg.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (logStatus != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Icon(logStatus.icon, color: fg),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Material(
+                    color: scheme.primary,
+                    child: InkWell(
+                      onTap: () => _record(ref, IntakeStatus.taken),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check_rounded,
+                              size: 20,
+                              color: scheme.onPrimary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Genommen',
+                              style: TextStyle(
+                                color: scheme.onPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        [
-                          ScheduleTimes.formatTime(time),
-                          if (plan.dosage.trim().isNotEmpty) plan.dosage.trim(),
-                        ].join(' · '),
-                        style: TextStyle(color: fg.withValues(alpha: 0.8)),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                if (logStatus != null)
-                  Chip(
-                    avatar: Icon(logStatus.icon, size: 18, color: fg),
-                    label: Text(logStatus.label),
-                    backgroundColor: scheme.surface.withValues(alpha: 0.4),
-                  ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            // Wrap statt Row: auf schmalen Geräten rutscht "Genommen" sonst aus
-            // der Karte.
-            Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _record(ref, IntakeStatus.skipped),
-                  icon: const Icon(Icons.cancel_outlined, size: 18),
-                  label: const Text('Ausgelassen'),
-                ),
-                TextButton.icon(
-                  onPressed: () => _record(ref, IntakeStatus.postponed),
-                  icon: const Icon(Icons.snooze_rounded, size: 18),
-                  label: const Text('Später'),
-                ),
-                FilledButton.icon(
-                  onPressed: () => _record(ref, IntakeStatus.taken),
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: const Text('Genommen'),
-                ),
-              ],
+            // Rechte Leiste: Snooze oben, Auslassen unten.
+            SizedBox(
+              width: 64,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _SideAction(
+                      icon: Icons.snooze_rounded,
+                      tooltip: 'Später',
+                      color: fg,
+                      onTap: () => _record(ref, IntakeStatus.postponed),
+                    ),
+                  ),
+                  Divider(
+                    height: 1,
+                    color: scheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                  Expanded(
+                    child: _SideAction(
+                      icon: Icons.cancel_outlined,
+                      tooltip: 'Ausgelassen',
+                      color: fg,
+                      onTap: () => _record(ref, IntakeStatus.skipped),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -306,6 +350,35 @@ class _DoseTile extends ConsumerWidget {
           scheduledFor: this.status.occurrence.scheduledFor,
           status: status.key,
         );
+  }
+}
+
+/// Ein Icon-Knopf in der rechten Leiste der Dosis-Karte (Snooze/Auslassen).
+class _SideAction extends StatelessWidget {
+  const _SideAction({
+    required this.icon,
+    required this.tooltip,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.35),
+      child: InkWell(
+        onTap: onTap,
+        child: Tooltip(
+          message: tooltip,
+          child: Center(child: Icon(icon, color: color)),
+        ),
+      ),
+    );
   }
 }
 

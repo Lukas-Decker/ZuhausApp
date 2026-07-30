@@ -11,6 +11,7 @@ import '../features/pets/pets_providers.dart';
 import '../features/privacy/privacy_providers.dart';
 import '../features/push/push_providers.dart';
 import '../features/sync/sync_providers.dart';
+import 'module_add.dart';
 import 'navigation.dart';
 
 /// Rahmen der App: Kontextbanner ganz oben, darunter die Navigation.
@@ -51,6 +52,10 @@ class AppShell extends ConsumerWidget {
     void onNavigate() =>
         ref.read(syncControllerProvider.notifier).syncNow();
 
+    // Der Hinzufuegen-Eintrag in der Navigation oeffnet den zum aktiven Modul
+    // passenden Dialog, statt die Ansicht zu wechseln.
+    void onAdd() => openAddForModule(context, ref, navigationShell.currentIndex);
+
     return Scaffold(
       // Die Tastatur-Anpassung uebernimmt allein das innere ModuleScaffold;
       // sonst rechnen beide Scaffolds die Tastaturhoehe an und das Eingabefeld
@@ -73,6 +78,7 @@ class AppShell extends ConsumerWidget {
                           navigationShell: navigationShell,
                           extended: width >= _extendedRailBreakpoint,
                           onNavigate: onNavigate,
+                          onAdd: onAdd,
                         ),
                         const VerticalDivider(width: 1),
                         Expanded(child: navigationShell),
@@ -88,6 +94,7 @@ class AppShell extends ConsumerWidget {
           : _ModuleBottomBar(
               navigationShell: navigationShell,
               onNavigate: onNavigate,
+              onAdd: onAdd,
             ),
     );
   }
@@ -97,16 +104,23 @@ class _ModuleBottomBar extends StatelessWidget {
   const _ModuleBottomBar({
     required this.navigationShell,
     required this.onNavigate,
+    required this.onAdd,
   });
 
   final StatefulNavigationShell navigationShell;
   final VoidCallback onNavigate;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
       selectedIndex: navigationShell.currentIndex,
       onDestinationSelected: (index) {
+        // Der letzte Eintrag ist die Hinzufuegen-Aktion, kein Ziel.
+        if (index == AppModule.values.length) {
+          onAdd();
+          return;
+        }
         onNavigate();
         navigationShell.goBranch(index, initialLocation: false);
       },
@@ -117,6 +131,11 @@ class _ModuleBottomBar extends StatelessWidget {
             selectedIcon: Icon(module.selectedIcon),
             label: module.label,
           ),
+        const NavigationDestination(
+          icon: Icon(Icons.add_circle_outline_rounded),
+          selectedIcon: Icon(Icons.add_circle_rounded),
+          label: 'Neu',
+        ),
       ],
     );
   }
@@ -127,11 +146,13 @@ class _ModuleRail extends StatelessWidget {
     required this.navigationShell,
     required this.extended,
     required this.onNavigate,
+    required this.onAdd,
   });
 
   final StatefulNavigationShell navigationShell;
   final bool extended;
   final VoidCallback onNavigate;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +168,10 @@ class _ModuleRail extends StatelessWidget {
                   : NavigationRailLabelType.all,
               selectedIndex: navigationShell.currentIndex,
               onDestinationSelected: (index) {
+                if (index == AppModule.values.length) {
+                  onAdd();
+                  return;
+                }
                 onNavigate();
                 navigationShell.goBranch(index, initialLocation: false);
               },
@@ -157,6 +182,11 @@ class _ModuleRail extends StatelessWidget {
                     selectedIcon: Icon(module.selectedIcon),
                     label: Text(module.label),
                   ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.add_circle_outline_rounded),
+                  selectedIcon: Icon(Icons.add_circle_rounded),
+                  label: Text('Hinzufügen'),
+                ),
               ],
               trailing: Expanded(
                 child: Align(

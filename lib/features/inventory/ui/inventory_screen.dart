@@ -38,10 +38,6 @@ class InventoryScreen extends ConsumerWidget {
           icon: const Icon(Icons.shelves),
         ),
       ],
-      floatingActionButton: _AddMenu(
-        onScan: () => addItemByScan(context, ref),
-        onManual: () => InventoryItemEditor.show(context),
-      ),
       body: Column(
         children: [
           _SearchAndFilterBar(filter: filter, search: search),
@@ -222,43 +218,6 @@ Future<ProductLookupResult?> _lookupWithProgress(
 }
 
 // --- Bausteine --------------------------------------------------------------
-
-class _AddMenu extends StatelessWidget {
-  const _AddMenu({required this.onScan, required this.onManual});
-
-  final VoidCallback onScan;
-  final VoidCallback onManual;
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuAnchor(
-      builder: (context, controller, _) => FloatingActionButton.extended(
-        onPressed: () =>
-            controller.isOpen ? controller.close() : controller.open(),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Hinzufügen'),
-      ),
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: Icon(
-            isCameraScanSupported
-                ? Icons.qr_code_scanner_rounded
-                : Icons.keyboard_alt_outlined,
-          ),
-          onPressed: onScan,
-          child: Text(
-            isCameraScanSupported ? 'Barcode scannen' : 'Barcode eingeben',
-          ),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.edit_outlined),
-          onPressed: onManual,
-          child: const Text('Manuell erfassen'),
-        ),
-      ],
-    );
-  }
-}
 
 class _SearchAndFilterBar extends ConsumerStatefulWidget {
   const _SearchAndFilterBar({required this.filter, required this.search});

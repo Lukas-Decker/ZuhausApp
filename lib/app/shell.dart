@@ -52,20 +52,27 @@ class AppShell extends ConsumerWidget {
       body: Column(
         children: [
           const SafeArea(bottom: false, child: ScopeBanner()),
+          // Der Kontextbanner hat die Statusleiste oben bereits abgedeckt.
+          // Ohne dieses removeTop wuerde die Modul-Kopfzeile die Statusleisten-
+          // Hoehe ein zweites Mal reservieren (leerer Streifen ueber dem Titel).
           Expanded(
-            child: useRail
-                ? Row(
-                    children: [
-                      _ModuleRail(
-                        navigationShell: navigationShell,
-                        extended: width >= _extendedRailBreakpoint,
-                        onNavigate: onNavigate,
-                      ),
-                      const VerticalDivider(width: 1),
-                      Expanded(child: navigationShell),
-                    ],
-                  )
-                : navigationShell,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: useRail
+                  ? Row(
+                      children: [
+                        _ModuleRail(
+                          navigationShell: navigationShell,
+                          extended: width >= _extendedRailBreakpoint,
+                          onNavigate: onNavigate,
+                        ),
+                        const VerticalDivider(width: 1),
+                        Expanded(child: navigationShell),
+                      ],
+                    )
+                  : navigationShell,
+            ),
           ),
         ],
       ),

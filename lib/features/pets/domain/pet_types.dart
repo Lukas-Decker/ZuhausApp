@@ -17,12 +17,12 @@ const Map<String, ({String label, IconData icon})> petSpecies = {
 
 /// Symbole fuer Tagesaufgaben.
 const Map<String, ({String label, IconData icon})> petTaskIcons = {
-  'food': (label: 'Fuettern', icon: Icons.restaurant_rounded),
+  'food': (label: 'Füttern', icon: Icons.restaurant_rounded),
   'water': (label: 'Wasser', icon: Icons.water_drop_rounded),
   'walk': (label: 'Gassi', icon: Icons.directions_walk_rounded),
   'litter': (label: 'Katzenklo', icon: Icons.cleaning_services_rounded),
   'play': (label: 'Spielen', icon: Icons.sports_baseball_rounded),
-  'brush': (label: 'Buersten', icon: Icons.brush_rounded),
+  'brush': (label: 'Bürsten', icon: Icons.brush_rounded),
   'clean': (label: 'Gehege', icon: Icons.home_work_rounded),
   'paw': (label: 'Sonstiges', icon: Icons.pets_rounded),
 };
@@ -34,17 +34,17 @@ const Map<String, ({String label, IconData icon})> petTaskIcons = {
 const Map<String, List<({String title, String iconKey, int timesPerDay, bool food})>>
 petDefaultTasks = {
   'dog': [
-    (title: 'Fuettern', iconKey: 'food', timesPerDay: 2, food: true),
+    (title: 'Füttern', iconKey: 'food', timesPerDay: 2, food: true),
     (title: 'Gassi', iconKey: 'walk', timesPerDay: 3, food: false),
     (title: 'Wasser', iconKey: 'water', timesPerDay: 1, food: false),
   ],
   'cat': [
-    (title: 'Fuettern', iconKey: 'food', timesPerDay: 2, food: true),
+    (title: 'Füttern', iconKey: 'food', timesPerDay: 2, food: true),
     (title: 'Katzenklo', iconKey: 'litter', timesPerDay: 1, food: false),
     (title: 'Wasser', iconKey: 'water', timesPerDay: 1, food: false),
   ],
   'other': [
-    (title: 'Fuettern', iconKey: 'food', timesPerDay: 1, food: true),
+    (title: 'Füttern', iconKey: 'food', timesPerDay: 1, food: true),
   ],
 };
 

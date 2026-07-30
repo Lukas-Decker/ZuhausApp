@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.16.3+30
+version: 0.17.0+31
 
 environment:
   sdk: ^3.12.2
@@ -44,6 +44,8 @@ dependencies:
   # Datenexport (DSGVO): JSON-Datei speichern/teilen.
   share_plus: ^13.3.0
   path_provider: ^2.1.5
+  # Erkennt, ob das Ghost-"Hinzufuegen"-Element sichtbar ist (fuer den FAB).
+  visibility_detector: ^0.4.0+2
   # Push bei geschlossener App (nur Android). Firebase ist optional: ohne
   # google-services.json bleibt es inert, der Rest der App laeuft normal.
   firebase_core: ^3.6.0

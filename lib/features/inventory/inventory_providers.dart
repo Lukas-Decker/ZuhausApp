@@ -48,6 +48,18 @@ final openFoodFactsServiceProvider = Provider<OpenFoodFactsService>((ref) {
   return service;
 });
 
+/// Ob das Ghost-„Hinzufuegen"-Element gerade sichtbar ist. Der schwebende FAB
+/// erscheint nur, wenn es NICHT sichtbar ist (z.B. weit nach unten gescrollt).
+class GhostVisibleController extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool value) => state = value;
+}
+
+final inventoryGhostVisibleProvider =
+    NotifierProvider<GhostVisibleController, bool>(GhostVisibleController.new);
+
 final productImageCacheProvider = Provider<ProductImageCache>((ref) {
   final cache = ProductImageCache();
   ref.onDispose(cache.dispose);

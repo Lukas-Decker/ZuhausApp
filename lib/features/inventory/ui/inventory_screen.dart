@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../core/app_info.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
+import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
@@ -38,10 +40,7 @@ class InventoryScreen extends ConsumerWidget {
           icon: const Icon(Icons.shelves),
         ),
       ],
-      floatingActionButton: _AddMenu(
-        onScan: () => addItemByScan(context, ref),
-        onManual: () => InventoryItemEditor.show(context),
-      ),
+      floatingActionButton: const _InventoryAddFab(),
       body: Column(
         children: [
           _SearchAndFilterBar(filter: filter, search: search),
@@ -223,39 +222,75 @@ Future<ProductLookupResult?> _lookupWithProgress(
 
 // --- Bausteine --------------------------------------------------------------
 
-class _AddMenu extends StatelessWidget {
-  const _AddMenu({required this.onScan, required this.onManual});
+/// Oeffnet die Hinzufuegen-Auswahl fuers Inventar (Scannen oder manuell).
+Future<void> openInventoryAdd(BuildContext context, WidgetRef ref) async {
+  final choice = await showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(
+              isCameraScanSupported
+                  ? Icons.qr_code_scanner_rounded
+                  : Icons.keyboard_alt_outlined,
+            ),
+            title: Text(
+              isCameraScanSupported ? 'Barcode scannen' : 'Barcode eingeben',
+            ),
+            onTap: () => Navigator.of(sheetContext).pop('scan'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_outlined),
+            title: const Text('Manuell erfassen'),
+            onTap: () => Navigator.of(sheetContext).pop('manual'),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
+  if (!context.mounted || choice == null) return;
+  if (choice == 'scan') {
+    await addItemByScan(context, ref);
+  } else {
+    await InventoryItemEditor.show(context);
+  }
+}
 
-  final VoidCallback onScan;
-  final VoidCallback onManual;
+/// Das Ghost-„Hinzufuegen"-Element; meldet ueber den VisibilityDetector, ob es
+/// sichtbar ist (steuert den schwebenden FAB).
+Widget _inventoryAddGhost(WidgetRef ref) {
+  return VisibilityDetector(
+    key: const Key('inventory-add-ghost'),
+    onVisibilityChanged: (info) {
+      ref
+          .read(inventoryGhostVisibleProvider.notifier)
+          .set(info.visibleFraction > 0.15);
+    },
+    child: Builder(
+      builder: (context) => AddGhostTile(
+        label: 'Vorrat hinzufügen',
+        onTap: () => openInventoryAdd(context, ref),
+      ),
+    ),
+  );
+}
+
+/// Schwebender FAB, nur sichtbar wenn das Ghost-Element nicht auf dem Schirm ist.
+class _InventoryAddFab extends ConsumerWidget {
+  const _InventoryAddFab();
 
   @override
-  Widget build(BuildContext context) {
-    return MenuAnchor(
-      builder: (context, controller, _) => FloatingActionButton.extended(
-        onPressed: () =>
-            controller.isOpen ? controller.close() : controller.open(),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Hinzufügen'),
-      ),
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: Icon(
-            isCameraScanSupported
-                ? Icons.qr_code_scanner_rounded
-                : Icons.keyboard_alt_outlined,
-          ),
-          onPressed: onScan,
-          child: Text(
-            isCameraScanSupported ? 'Barcode scannen' : 'Barcode eingeben',
-          ),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.edit_outlined),
-          onPressed: onManual,
-          child: const Text('Manuell erfassen'),
-        ),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ghostVisible = ref.watch(inventoryGhostVisibleProvider);
+    if (ghostVisible) return const SizedBox.shrink();
+    return FloatingActionButton(
+      onPressed: () => openInventoryAdd(context, ref),
+      tooltip: 'Hinzufügen',
+      child: const Icon(Icons.add_rounded),
     );
   }
 }
@@ -337,39 +372,47 @@ class _SearchAndFilterBarState extends ConsumerState<_SearchAndFilterBar> {
   }
 }
 
-class _EmptyInventory extends StatelessWidget {
+class _EmptyInventory extends ConsumerWidget {
   const _EmptyInventory({required this.filter, required this.hasSearch});
 
   final InventoryFilter filter;
   final bool hasSearch;
 
   @override
-  Widget build(BuildContext context) {
-    if (hasSearch) {
-      return const EmptyState(
-        icon: Icons.search_off_rounded,
-        title: 'Nichts gefunden',
-        message: 'Kein Vorrat passt zu deiner Suche.',
-      );
-    }
-    return switch (filter) {
-      InventoryFilter.low => const EmptyState(
-        icon: Icons.thumb_up_outlined,
-        title: 'Nichts wird knapp',
-        message: 'Alle Vorräte mit Mindestbestand sind ausreichend gefüllt.',
-      ),
-      InventoryFilter.expiring => const EmptyState(
-        icon: Icons.event_available_rounded,
-        title: 'Nichts läuft ab',
-        message: 'In den nächsten Tagen verfällt nichts.',
-      ),
-      InventoryFilter.all => const EmptyState(
-        icon: Icons.kitchen_outlined,
-        title: 'Noch nichts erfasst',
-        message:
-            'Scanne einen Barcode oder lege den ersten Vorrat von Hand an.',
-      ),
-    };
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Widget message = hasSearch
+        ? const EmptyState(
+            icon: Icons.search_off_rounded,
+            title: 'Nichts gefunden',
+            message: 'Kein Vorrat passt zu deiner Suche.',
+          )
+        : switch (filter) {
+            InventoryFilter.low => const EmptyState(
+              icon: Icons.thumb_up_outlined,
+              title: 'Nichts wird knapp',
+              message:
+                  'Alle Vorräte mit Mindestbestand sind ausreichend gefüllt.',
+            ),
+            InventoryFilter.expiring => const EmptyState(
+              icon: Icons.event_available_rounded,
+              title: 'Nichts läuft ab',
+              message: 'In den nächsten Tagen verfällt nichts.',
+            ),
+            InventoryFilter.all => const EmptyState(
+              icon: Icons.kitchen_outlined,
+              title: 'Noch nichts erfasst',
+              message:
+                  'Scanne einen Barcode oder lege den ersten Vorrat von Hand an.',
+            ),
+          };
+
+    return Column(
+      children: [
+        Expanded(child: message),
+        _inventoryAddGhost(ref),
+        const SizedBox(height: 96),
+      ],
+    );
   }
 }
 
@@ -395,8 +438,10 @@ class _InventoryList extends ConsumerWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 96),
-      itemCount: ordered.length,
+      itemCount: ordered.length + 1,
       itemBuilder: (context, index) {
+        // Letztes Element: das Ghost-„Hinzufuegen".
+        if (index == ordered.length) return _inventoryAddGhost(ref);
         final group = ordered[index];
         final location = group.value.first.location;
         return Column(

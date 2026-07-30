@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/repositories/notes_repository.dart';
@@ -18,6 +19,10 @@ class NotesScreen extends ConsumerWidget {
 
     return ModuleScaffold(
       title: 'Notizen',
+      floatingActionButton: _AddMenu(
+        onNote: () => _create(context, ref, checklist: false),
+        onChecklist: () => _create(context, ref, checklist: true),
+      ),
       body: Column(
         children: [
           _SearchBar(search: search),
@@ -54,6 +59,54 @@ class NotesScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _create(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool checklist,
+  }) async {
+    final id = await ref
+        .read(notesRepositoryProvider)
+        .createNote(
+          scope: ref.read(activeScopeProvider),
+          userId: ref.read(identityProvider).userId,
+          isChecklist: checklist,
+        );
+    if (!context.mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => NoteEditorScreen(noteId: id)),
+    );
+  }
+}
+
+class _AddMenu extends StatelessWidget {
+  const _AddMenu({required this.onNote, required this.onChecklist});
+
+  final VoidCallback onNote;
+  final VoidCallback onChecklist;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, _) => FloatingActionButton.extended(
+        onPressed: () =>
+            controller.isOpen ? controller.close() : controller.open(),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Neu'),
+      ),
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.notes_rounded),
+          onPressed: onNote,
+          child: const Text('Notiz'),
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.checklist_rounded),
+          onPressed: onChecklist,
+          child: const Text('Checkliste'),
+        ),
+      ],
+    );
+  }
 }
 
 class _SearchBar extends ConsumerStatefulWidget {

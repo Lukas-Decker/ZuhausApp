@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/notifications/notification_providers.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
+import '../../../core/widgets/add_fab.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
@@ -41,6 +42,10 @@ class MedsScreen extends ConsumerWidget {
             Tab(text: 'Heute'),
             Tab(text: 'Pläne'),
           ],
+        ),
+        floatingActionButton: AddFab(
+          onPressed: () => MedicationPlanEditor.show(context),
+          label: 'Medikament',
         ),
         body: const TabBarView(
           children: [_DayTab(), _PlansTab()],

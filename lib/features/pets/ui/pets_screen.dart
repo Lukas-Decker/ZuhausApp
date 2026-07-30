@@ -11,6 +11,7 @@ import '../../../data/repositories/pet_repository.dart';
 import '../domain/pet_types.dart';
 import '../pets_providers.dart';
 import 'pet_detail_screen.dart';
+import 'pet_editor.dart';
 
 class PetsScreen extends ConsumerWidget {
   const PetsScreen({super.key});
@@ -21,6 +22,11 @@ class PetsScreen extends ConsumerWidget {
 
     return ModuleScaffold(
       title: 'Tiere',
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => PetEditor.show(context),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Tier'),
+      ),
       body: pets.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => EmptyState(

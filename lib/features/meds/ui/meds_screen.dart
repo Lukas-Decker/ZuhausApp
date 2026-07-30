@@ -266,8 +266,12 @@ class _DoseTile extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            // Wrap statt Row: auf schmalen Geräten rutscht "Genommen" sonst aus
+            // der Karte.
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 4,
+              runSpacing: 4,
               children: [
                 TextButton.icon(
                   onPressed: () => _record(ref, IntakeStatus.skipped),
@@ -279,7 +283,6 @@ class _DoseTile extends ConsumerWidget {
                   icon: const Icon(Icons.snooze_rounded, size: 18),
                   label: const Text('Später'),
                 ),
-                const SizedBox(width: 4),
                 FilledButton.icon(
                   onPressed: () => _record(ref, IntakeStatus.taken),
                   icon: const Icon(Icons.check_rounded, size: 18),

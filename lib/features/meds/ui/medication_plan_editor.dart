@@ -203,10 +203,7 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                         ],
-                        decoration: const InputDecoration(
-                          labelText: 'Bestand',
-                          helperText: 'Sinkt bei jeder Einnahme',
-                        ),
+                        decoration: const InputDecoration(labelText: 'Bestand'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -225,6 +222,12 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Der Bestand sinkt bei jeder Einnahme; bei der Warnschwelle '
+                  'wird er knapp.',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

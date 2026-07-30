@@ -25,6 +25,7 @@ part 'app_database.g.dart';
     StorageLocations,
     Products,
     InventoryItems,
+    InventoryBatches,
     ShoppingLists,
     ShoppingItems,
     Notes,
@@ -52,8 +53,9 @@ class AppDatabase extends _$AppDatabase {
   /// 5: Medikamentenpläne und Einnahme-Log (v0.5)
   /// 6: Tiere, Aufgaben, Gesundheit, Gewicht (v0.6)
   /// 7: Sync-Outbox und -Metadaten (v0.9)
+  /// 8: Inventar-Chargen mit eigenem MHD (v0.15)
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +91,9 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(syncOutbox);
         await m.createTable(syncMeta);
       }
+      if (from < 8) {
+        await m.createTable(inventoryBatches);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -106,6 +111,7 @@ class AppDatabase extends _$AppDatabase {
     'storage_locations',
     'products',
     'inventory_items',
+    'inventory_batches',
     'shopping_lists',
     'shopping_items',
     'notes',

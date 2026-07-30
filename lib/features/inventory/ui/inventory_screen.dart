@@ -462,6 +462,8 @@ class _InventoryTile extends ConsumerWidget {
     final item = entry.item;
     final unit = MeasurementUnit.parse(item.unit);
     final scheme = Theme.of(context).colorScheme;
+    final batchCount =
+        ref.watch(batchAggregatesProvider).value?[item.id]?.count ?? 0;
 
     return Dismissible(
       key: ValueKey(item.id),
@@ -481,7 +483,7 @@ class _InventoryTile extends ConsumerWidget {
         onTap: () => InventoryItemEditor.show(context, item: item),
         leading: ProductThumbnail(imageUrl: entry.imageUrl),
         title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: _Badges(entry: entry),
+        subtitle: _Badges(entry: entry, batchCount: batchCount),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -494,8 +496,10 @@ class _InventoryTile extends ConsumerWidget {
               )
             else
               _CompactIconButton(
-                tooltip: 'Weniger',
-                onPressed: () => _adjust(ref, -1),
+                tooltip: batchCount > 0 ? 'Älteste Charge verbrauchen' : 'Weniger',
+                onPressed: () => batchCount > 0
+                    ? _consumeFifo(ref)
+                    : _adjust(ref, -1),
                 icon: Icons.remove_circle_outline_rounded,
               ),
             ConstrainedBox(
@@ -527,6 +531,15 @@ class _InventoryTile extends ConsumerWidget {
           id: entry.item.id,
           userId: ref.read(identityProvider).userId,
           delta: delta,
+        );
+  }
+
+  void _consumeFifo(WidgetRef ref) {
+    ref
+        .read(inventoryRepositoryProvider)
+        .consumeEarliest(
+          itemId: entry.item.id,
+          userId: ref.read(identityProvider).userId,
         );
   }
 
@@ -595,14 +608,25 @@ class _CompactIconButton extends StatelessWidget {
 }
 
 class _Badges extends StatelessWidget {
-  const _Badges({required this.entry});
+  const _Badges({required this.entry, this.batchCount = 0});
 
   final InventoryEntry entry;
+  final int batchCount;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final badges = <Widget>[];
+
+    if (batchCount > 0) {
+      badges.add(
+        _Badge(
+          icon: Icons.inventory_rounded,
+          text: '$batchCount ${batchCount == 1 ? 'Charge' : 'Chargen'}',
+          color: scheme.primary,
+        ),
+      );
+    }
 
     final days = entry.daysUntilExpiry;
     if (days != null) {

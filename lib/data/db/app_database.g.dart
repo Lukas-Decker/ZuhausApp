@@ -4663,6 +4663,720 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   }
 }
 
+class $InventoryBatchesTable extends InventoryBatches
+    with TableInfo<$InventoryBatchesTable, InventoryBatch> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryBatchesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: uuid.v4,
+  );
+  static const VerificationMeta _scopeKindMeta = const VerificationMeta(
+    'scopeKind',
+  );
+  @override
+  late final GeneratedColumn<String> scopeKind = GeneratedColumn<String>(
+    'scope_kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 16,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeIdMeta = const VerificationMeta(
+    'scopeId',
+  );
+  @override
+  late final GeneratedColumn<String> scopeId = GeneratedColumn<String>(
+    'scope_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES inventory_items (id)',
+    ),
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    scopeKind,
+    scopeId,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    createdBy,
+    updatedBy,
+    isDirty,
+    itemId,
+    quantity,
+    expiresAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_batches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryBatch> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('scope_kind')) {
+      context.handle(
+        _scopeKindMeta,
+        scopeKind.isAcceptableOrUnknown(data['scope_kind']!, _scopeKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeKindMeta);
+    }
+    if (data.containsKey('scope_id')) {
+      context.handle(
+        _scopeIdMeta,
+        scopeId.isAcceptableOrUnknown(data['scope_id']!, _scopeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryBatch map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryBatch(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      scopeKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_kind'],
+      )!,
+      scopeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      ),
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      ),
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_at'],
+      ),
+    );
+  }
+
+  @override
+  $InventoryBatchesTable createAlias(String alias) {
+    return $InventoryBatchesTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryBatch extends DataClass implements Insertable<InventoryBatch> {
+  final String id;
+
+  /// 'personal' oder 'household'.
+  final String scopeKind;
+
+  /// Nutzer-ID bei personal, Haushalts-ID bei household.
+  final String scopeId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String? createdBy;
+  final String? updatedBy;
+
+  /// Wurde lokal geändert und noch nicht zum Server geschickt.
+  final bool isDirty;
+  final String itemId;
+
+  /// Additiver Zaehler wie die Artikelmenge (deltabasierter Sync).
+  final double quantity;
+  final DateTime? expiresAt;
+  const InventoryBatch({
+    required this.id,
+    required this.scopeKind,
+    required this.scopeId,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    this.createdBy,
+    this.updatedBy,
+    required this.isDirty,
+    required this.itemId,
+    required this.quantity,
+    this.expiresAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['scope_kind'] = Variable<String>(scopeKind);
+    map['scope_id'] = Variable<String>(scopeId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    if (!nullToAbsent || updatedBy != null) {
+      map['updated_by'] = Variable<String>(updatedBy);
+    }
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['item_id'] = Variable<String>(itemId);
+    map['quantity'] = Variable<double>(quantity);
+    if (!nullToAbsent || expiresAt != null) {
+      map['expires_at'] = Variable<DateTime>(expiresAt);
+    }
+    return map;
+  }
+
+  InventoryBatchesCompanion toCompanion(bool nullToAbsent) {
+    return InventoryBatchesCompanion(
+      id: Value(id),
+      scopeKind: Value(scopeKind),
+      scopeId: Value(scopeId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      createdBy: createdBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdBy),
+      updatedBy: updatedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedBy),
+      isDirty: Value(isDirty),
+      itemId: Value(itemId),
+      quantity: Value(quantity),
+      expiresAt: expiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiresAt),
+    );
+  }
+
+  factory InventoryBatch.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryBatch(
+      id: serializer.fromJson<String>(json['id']),
+      scopeKind: serializer.fromJson<String>(json['scopeKind']),
+      scopeId: serializer.fromJson<String>(json['scopeId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      updatedBy: serializer.fromJson<String?>(json['updatedBy']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      expiresAt: serializer.fromJson<DateTime?>(json['expiresAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'scopeKind': serializer.toJson<String>(scopeKind),
+      'scopeId': serializer.toJson<String>(scopeId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'createdBy': serializer.toJson<String?>(createdBy),
+      'updatedBy': serializer.toJson<String?>(updatedBy),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'itemId': serializer.toJson<String>(itemId),
+      'quantity': serializer.toJson<double>(quantity),
+      'expiresAt': serializer.toJson<DateTime?>(expiresAt),
+    };
+  }
+
+  InventoryBatch copyWith({
+    String? id,
+    String? scopeKind,
+    String? scopeId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> createdBy = const Value.absent(),
+    Value<String?> updatedBy = const Value.absent(),
+    bool? isDirty,
+    String? itemId,
+    double? quantity,
+    Value<DateTime?> expiresAt = const Value.absent(),
+  }) => InventoryBatch(
+    id: id ?? this.id,
+    scopeKind: scopeKind ?? this.scopeKind,
+    scopeId: scopeId ?? this.scopeId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    updatedBy: updatedBy.present ? updatedBy.value : this.updatedBy,
+    isDirty: isDirty ?? this.isDirty,
+    itemId: itemId ?? this.itemId,
+    quantity: quantity ?? this.quantity,
+    expiresAt: expiresAt.present ? expiresAt.value : this.expiresAt,
+  );
+  InventoryBatch copyWithCompanion(InventoryBatchesCompanion data) {
+    return InventoryBatch(
+      id: data.id.present ? data.id.value : this.id,
+      scopeKind: data.scopeKind.present ? data.scopeKind.value : this.scopeKind,
+      scopeId: data.scopeId.present ? data.scopeId.value : this.scopeId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryBatch(')
+          ..write('id: $id, ')
+          ..write('scopeKind: $scopeKind, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('itemId: $itemId, ')
+          ..write('quantity: $quantity, ')
+          ..write('expiresAt: $expiresAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    scopeKind,
+    scopeId,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    createdBy,
+    updatedBy,
+    isDirty,
+    itemId,
+    quantity,
+    expiresAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryBatch &&
+          other.id == this.id &&
+          other.scopeKind == this.scopeKind &&
+          other.scopeId == this.scopeId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedBy == this.updatedBy &&
+          other.isDirty == this.isDirty &&
+          other.itemId == this.itemId &&
+          other.quantity == this.quantity &&
+          other.expiresAt == this.expiresAt);
+}
+
+class InventoryBatchesCompanion extends UpdateCompanion<InventoryBatch> {
+  final Value<String> id;
+  final Value<String> scopeKind;
+  final Value<String> scopeId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> createdBy;
+  final Value<String?> updatedBy;
+  final Value<bool> isDirty;
+  final Value<String> itemId;
+  final Value<double> quantity;
+  final Value<DateTime?> expiresAt;
+  final Value<int> rowid;
+  const InventoryBatchesCompanion({
+    this.id = const Value.absent(),
+    this.scopeKind = const Value.absent(),
+    this.scopeId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryBatchesCompanion.insert({
+    this.id = const Value.absent(),
+    required String scopeKind,
+    required String scopeId,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    required String itemId,
+    this.quantity = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : scopeKind = Value(scopeKind),
+       scopeId = Value(scopeId),
+       itemId = Value(itemId);
+  static Insertable<InventoryBatch> custom({
+    Expression<String>? id,
+    Expression<String>? scopeKind,
+    Expression<String>? scopeId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? createdBy,
+    Expression<String>? updatedBy,
+    Expression<bool>? isDirty,
+    Expression<String>? itemId,
+    Expression<double>? quantity,
+    Expression<DateTime>? expiresAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (scopeKind != null) 'scope_kind': scopeKind,
+      if (scopeId != null) 'scope_id': scopeId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (itemId != null) 'item_id': itemId,
+      if (quantity != null) 'quantity': quantity,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryBatchesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? scopeKind,
+    Value<String>? scopeId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? createdBy,
+    Value<String?>? updatedBy,
+    Value<bool>? isDirty,
+    Value<String>? itemId,
+    Value<double>? quantity,
+    Value<DateTime?>? expiresAt,
+    Value<int>? rowid,
+  }) {
+    return InventoryBatchesCompanion(
+      id: id ?? this.id,
+      scopeKind: scopeKind ?? this.scopeKind,
+      scopeId: scopeId ?? this.scopeId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
+      isDirty: isDirty ?? this.isDirty,
+      itemId: itemId ?? this.itemId,
+      quantity: quantity ?? this.quantity,
+      expiresAt: expiresAt ?? this.expiresAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (scopeKind.present) {
+      map['scope_kind'] = Variable<String>(scopeKind.value);
+    }
+    if (scopeId.present) {
+      map['scope_id'] = Variable<String>(scopeId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryBatchesCompanion(')
+          ..write('id: $id, ')
+          ..write('scopeKind: $scopeKind, ')
+          ..write('scopeId: $scopeId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('itemId: $itemId, ')
+          ..write('quantity: $quantity, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ShoppingListsTable extends ShoppingLists
     with TableInfo<$ShoppingListsTable, ShoppingList> {
   @override
@@ -15515,6 +16229,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $ProductsTable products = $ProductsTable(this);
   late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
+  late final $InventoryBatchesTable inventoryBatches = $InventoryBatchesTable(
+    this,
+  );
   late final $ShoppingListsTable shoppingLists = $ShoppingListsTable(this);
   late final $ShoppingItemsTable shoppingItems = $ShoppingItemsTable(this);
   late final $NotesTable notes = $NotesTable(this);
@@ -15546,6 +16263,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     storageLocations,
     products,
     inventoryItems,
+    inventoryBatches,
     shoppingLists,
     shoppingItems,
     notes,
@@ -17774,6 +18492,26 @@ final class $$InventoryItemsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$InventoryBatchesTable, List<InventoryBatch>>
+  _inventoryBatchesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.inventoryBatches,
+    aliasName: 'inventory_items__id__inventory_batches__item_id',
+  );
+
+  $$InventoryBatchesTableProcessedTableManager get inventoryBatchesRefs {
+    final manager = $$InventoryBatchesTableTableManager(
+      $_db,
+      $_db.inventoryBatches,
+    ).filter((f) => f.itemId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _inventoryBatchesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$ShoppingItemsTable, List<ShoppingItem>>
   _shoppingItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.shoppingItems,
@@ -17949,6 +18687,31 @@ class $$InventoryItemsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> inventoryBatchesRefs(
+    Expression<bool> Function($$InventoryBatchesTableFilterComposer f) f,
+  ) {
+    final $$InventoryBatchesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inventoryBatches,
+      getReferencedColumn: (t) => t.itemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryBatchesTableFilterComposer(
+            $db: $db,
+            $table: $db.inventoryBatches,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> shoppingItemsRefs(
@@ -18253,6 +19016,31 @@ class $$InventoryItemsTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> inventoryBatchesRefs<T extends Object>(
+    Expression<T> Function($$InventoryBatchesTableAnnotationComposer a) f,
+  ) {
+    final $$InventoryBatchesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.inventoryBatches,
+      getReferencedColumn: (t) => t.itemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryBatchesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.inventoryBatches,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> shoppingItemsRefs<T extends Object>(
     Expression<T> Function($$ShoppingItemsTableAnnotationComposer a) f,
   ) {
@@ -18320,6 +19108,7 @@ class $$InventoryItemsTableTableManager
           PrefetchHooks Function({
             bool productId,
             bool locationId,
+            bool inventoryBatchesRefs,
             bool shoppingItemsRefs,
             bool petsRefs,
           })
@@ -18437,12 +19226,14 @@ class $$InventoryItemsTableTableManager
               ({
                 productId = false,
                 locationId = false,
+                inventoryBatchesRefs = false,
                 shoppingItemsRefs = false,
                 petsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (inventoryBatchesRefs) db.inventoryBatches,
                     if (shoppingItemsRefs) db.shoppingItems,
                     if (petsRefs) db.pets,
                   ],
@@ -18497,6 +19288,27 @@ class $$InventoryItemsTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (inventoryBatchesRefs)
+                        await $_getPrefetchedData<
+                          InventoryItem,
+                          $InventoryItemsTable,
+                          InventoryBatch
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InventoryItemsTableReferences
+                              ._inventoryBatchesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InventoryItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).inventoryBatchesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.itemId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (shoppingItemsRefs)
                         await $_getPrefetchedData<
                           InventoryItem,
@@ -18562,9 +19374,470 @@ typedef $$InventoryItemsTableProcessedTableManager =
       PrefetchHooks Function({
         bool productId,
         bool locationId,
+        bool inventoryBatchesRefs,
         bool shoppingItemsRefs,
         bool petsRefs,
       })
+    >;
+typedef $$InventoryBatchesTableCreateCompanionBuilder =
+    InventoryBatchesCompanion Function({
+      Value<String> id,
+      required String scopeKind,
+      required String scopeId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String?> createdBy,
+      Value<String?> updatedBy,
+      Value<bool> isDirty,
+      required String itemId,
+      Value<double> quantity,
+      Value<DateTime?> expiresAt,
+      Value<int> rowid,
+    });
+typedef $$InventoryBatchesTableUpdateCompanionBuilder =
+    InventoryBatchesCompanion Function({
+      Value<String> id,
+      Value<String> scopeKind,
+      Value<String> scopeId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String?> createdBy,
+      Value<String?> updatedBy,
+      Value<bool> isDirty,
+      Value<String> itemId,
+      Value<double> quantity,
+      Value<DateTime?> expiresAt,
+      Value<int> rowid,
+    });
+
+final class $$InventoryBatchesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $InventoryBatchesTable, InventoryBatch> {
+  $$InventoryBatchesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $InventoryItemsTable _itemIdTable(_$AppDatabase db) => db
+      .inventoryItems
+      .createAlias('inventory_batches__item_id__inventory_items__id');
+
+  $$InventoryItemsTableProcessedTableManager get itemId {
+    final $_column = $_itemColumn<String>('item_id')!;
+
+    final manager = $$InventoryItemsTableTableManager(
+      $_db,
+      $_db.inventoryItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_itemIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InventoryBatchesTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTable> {
+  $$InventoryBatchesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeKind => $composableBuilder(
+    column: $table.scopeKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InventoryItemsTableFilterComposer get itemId {
+    final $$InventoryItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.inventoryItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.inventoryItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryBatchesTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTable> {
+  $$InventoryBatchesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeKind => $composableBuilder(
+    column: $table.scopeKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeId => $composableBuilder(
+    column: $table.scopeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InventoryItemsTableOrderingComposer get itemId {
+    final $$InventoryItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.inventoryItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.inventoryItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryBatchesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTable> {
+  $$InventoryBatchesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeKind =>
+      $composableBuilder(column: $table.scopeKind, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeId =>
+      $composableBuilder(column: $table.scopeId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  $$InventoryItemsTableAnnotationComposer get itemId {
+    final $$InventoryItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.itemId,
+      referencedTable: $db.inventoryItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InventoryItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.inventoryItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InventoryBatchesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryBatchesTable,
+          InventoryBatch,
+          $$InventoryBatchesTableFilterComposer,
+          $$InventoryBatchesTableOrderingComposer,
+          $$InventoryBatchesTableAnnotationComposer,
+          $$InventoryBatchesTableCreateCompanionBuilder,
+          $$InventoryBatchesTableUpdateCompanionBuilder,
+          (InventoryBatch, $$InventoryBatchesTableReferences),
+          InventoryBatch,
+          PrefetchHooks Function({bool itemId})
+        > {
+  $$InventoryBatchesTableTableManager(
+    _$AppDatabase db,
+    $InventoryBatchesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryBatchesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryBatchesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryBatchesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> scopeKind = const Value.absent(),
+                Value<String> scopeId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> updatedBy = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryBatchesCompanion(
+                id: id,
+                scopeKind: scopeKind,
+                scopeId: scopeId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                createdBy: createdBy,
+                updatedBy: updatedBy,
+                isDirty: isDirty,
+                itemId: itemId,
+                quantity: quantity,
+                expiresAt: expiresAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                required String scopeKind,
+                required String scopeId,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> updatedBy = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                required String itemId,
+                Value<double> quantity = const Value.absent(),
+                Value<DateTime?> expiresAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryBatchesCompanion.insert(
+                id: id,
+                scopeKind: scopeKind,
+                scopeId: scopeId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                createdBy: createdBy,
+                updatedBy: updatedBy,
+                isDirty: isDirty,
+                itemId: itemId,
+                quantity: quantity,
+                expiresAt: expiresAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InventoryBatchesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({itemId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (itemId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.itemId,
+                                referencedTable:
+                                    $$InventoryBatchesTableReferences
+                                        ._itemIdTable(db),
+                                referencedColumn:
+                                    $$InventoryBatchesTableReferences
+                                        ._itemIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InventoryBatchesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryBatchesTable,
+      InventoryBatch,
+      $$InventoryBatchesTableFilterComposer,
+      $$InventoryBatchesTableOrderingComposer,
+      $$InventoryBatchesTableAnnotationComposer,
+      $$InventoryBatchesTableCreateCompanionBuilder,
+      $$InventoryBatchesTableUpdateCompanionBuilder,
+      (InventoryBatch, $$InventoryBatchesTableReferences),
+      InventoryBatch,
+      PrefetchHooks Function({bool itemId})
     >;
 typedef $$ShoppingListsTableCreateCompanionBuilder =
     ShoppingListsCompanion Function({
@@ -25464,6 +26737,8 @@ class $AppDatabaseManager {
       $$ProductsTableTableManager(_db, _db.products);
   $$InventoryItemsTableTableManager get inventoryItems =>
       $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
+  $$InventoryBatchesTableTableManager get inventoryBatches =>
+      $$InventoryBatchesTableTableManager(_db, _db.inventoryBatches);
   $$ShoppingListsTableTableManager get shoppingLists =>
       $$ShoppingListsTableTableManager(_db, _db.shoppingLists);
   $$ShoppingItemsTableTableManager get shoppingItems =>

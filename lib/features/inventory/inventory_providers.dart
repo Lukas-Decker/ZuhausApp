@@ -59,6 +59,19 @@ final productImageProvider = FutureProvider.family<File?, String>(
   (ref, url) => ref.watch(productImageCacheProvider).resolve(url),
 );
 
+/// Chargen-Zusammenfassung je Artikel im aktiven Kontext (fuer die Anzeige
+/// "N Chargen" in der Liste).
+final batchAggregatesProvider =
+    StreamProvider<Map<String, BatchAggregate>>((ref) {
+  final scope = ref.watch(activeScopeProvider);
+  return ref.watch(inventoryRepositoryProvider).watchBatchAggregates(scope);
+});
+
+/// Chargen eines einzelnen Artikels (fuer den Editor).
+final itemBatchesProvider = StreamProvider.family<List<InventoryBatch>, String>(
+  (ref, itemId) => ref.watch(inventoryRepositoryProvider).watchBatches(itemId),
+);
+
 /// Lagerorte des aktiven Kontexts. Legt beim ersten Zugriff die Standardorte an.
 final storageLocationsProvider = StreamProvider<List<StorageLocation>>((ref) {
   final scope = ref.watch(activeScopeProvider);

@@ -7,13 +7,23 @@ import '../db/tables/common.dart';
 
 /// Ein Vorrat samt seinem Lagerort, so wie ihn die Liste braucht.
 class InventoryEntry {
-  const InventoryEntry({required this.item, this.location, this.imageUrl});
+  const InventoryEntry({
+    required this.item,
+    this.location,
+    this.imageUrl,
+    this.batchCount = 0,
+  });
 
   final InventoryItem item;
   final StorageLocation? location;
 
   /// Bild-URL des verknuepften Produkts (aus Open Food Facts), falls vorhanden.
   final String? imageUrl;
+
+  /// Anzahl Chargen mit eigenem MHD. 0 = einfacher Vorrat wie bisher.
+  final int batchCount;
+
+  bool get hasBatches => batchCount > 0;
 
   /// Vorrat unter dem gesetzten Mindestbestand.
   bool get isLow {
@@ -37,6 +47,19 @@ class InventoryEntry {
     final left = daysUntilExpiry;
     return left != null && left >= 0 && left <= days;
   }
+}
+
+/// Zusammenfassung der Chargen eines Artikels (Gesamtmenge, fruehestes MHD).
+class BatchAggregate {
+  const BatchAggregate({
+    required this.total,
+    this.earliest,
+    required this.count,
+  });
+
+  final double total;
+  final DateTime? earliest;
+  final int count;
 }
 
 enum InventoryFilter {
@@ -407,6 +430,217 @@ class InventoryRepository {
         isDirty: const Value(true),
       ),
     );
+  }
+
+  // --- Chargen (MHD) -------------------------------------------------------
+
+  /// Chargen eines Artikels, zuerst ablaufende oben.
+  Stream<List<InventoryBatch>> watchBatches(String itemId) {
+    return (_db.select(_db.inventoryBatches)
+          ..where((b) => b.itemId.equals(itemId) & b.deletedAt.isNull())
+          ..orderBy([
+            (b) => OrderingTerm.asc(b.expiresAt),
+            (b) => OrderingTerm.asc(b.createdAt),
+          ]))
+        .watch();
+  }
+
+  /// Legt eine Charge an. Ihre Menge erhoeht additiv den Artikel-Gesamtbestand
+  /// (datierter Zugang), und das fruehste MHD wird am Artikel zusammengefasst.
+  Future<String> addBatch({
+    required AppScope scope,
+    required String userId,
+    required String itemId,
+    double quantity = 1,
+    DateTime? expiresAt,
+  }) async {
+    final id = uuid.v4();
+    await _db.transaction(() async {
+      final now = DateTime.now();
+      await _db.into(_db.inventoryBatches).insert(
+        InventoryBatchesCompanion.insert(
+          id: Value(id),
+          scopeKind: scope.kind.name,
+          scopeId: scope.id,
+          itemId: itemId,
+          quantity: Value(quantity),
+          expiresAt: Value(expiresAt),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+          createdBy: Value(userId),
+          updatedBy: Value(userId),
+        ),
+      );
+      await _mirrorToItem(itemId, userId, quantity);
+      await _recomputeItemExpiry(itemId, userId);
+    });
+    return id;
+  }
+
+  /// Verändert die Menge einer Charge additiv und spiegelt die Änderung auf den
+  /// Artikel-Gesamtbestand. Gibt die neue Chargenmenge zurück.
+  Future<double> adjustBatchQuantity({
+    required String id,
+    required String userId,
+    required double delta,
+  }) async {
+    return _db.transaction(() async {
+      final batch = await (_db.select(_db.inventoryBatches)
+            ..where((b) => b.id.equals(id)))
+          .getSingle();
+      final next = (batch.quantity + delta).clamp(0.0, double.maxFinite);
+      final applied = next - batch.quantity;
+      await (_db.update(_db.inventoryBatches)..where((b) => b.id.equals(id)))
+          .write(
+        InventoryBatchesCompanion(
+          quantity: Value(next),
+          updatedAt: Value(DateTime.now()),
+          updatedBy: Value(userId),
+          isDirty: const Value(true),
+        ),
+      );
+      await _db.logCounterDelta(
+        table: 'inventory_batches',
+        rowId: id,
+        field: 'quantity',
+        delta: applied,
+      );
+      await _mirrorToItem(batch.itemId, userId, applied);
+      await _recomputeItemExpiry(batch.itemId, userId);
+      return next;
+    });
+  }
+
+  /// Entfernt eine Charge und zieht ihre Restmenge vom Artikel ab.
+  Future<void> deleteBatch(String id, String userId) async {
+    await _db.transaction(() async {
+      final batch = await (_db.select(_db.inventoryBatches)
+            ..where((b) => b.id.equals(id)))
+          .getSingleOrNull();
+      if (batch == null || batch.deletedAt != null) return;
+      final now = DateTime.now();
+      await (_db.update(_db.inventoryBatches)..where((b) => b.id.equals(id)))
+          .write(
+        InventoryBatchesCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+          updatedBy: Value(userId),
+          isDirty: const Value(true),
+        ),
+      );
+      await _mirrorToItem(batch.itemId, userId, -batch.quantity);
+      await _recomputeItemExpiry(batch.itemId, userId);
+    });
+  }
+
+  /// Verbraucht [amount] Einheiten aus den zuerst ablaufenden Chargen (FIFO).
+  /// Der Artikel-Gesamtbestand sinkt ueber die Spiegelung mit; leergewordene
+  /// Chargen werden entfernt.
+  Future<void> consumeEarliest({
+    required String itemId,
+    required String userId,
+    double amount = 1,
+  }) async {
+    var remaining = amount;
+    final batches = await (_db.select(_db.inventoryBatches)
+          ..where((b) =>
+              b.itemId.equals(itemId) &
+              b.deletedAt.isNull() &
+              b.quantity.isBiggerThanValue(0))
+          ..orderBy([
+            (b) => OrderingTerm.asc(b.expiresAt),
+            (b) => OrderingTerm.asc(b.createdAt),
+          ]))
+        .get();
+    for (final batch in batches) {
+      if (remaining <= 0) break;
+      final take = remaining < batch.quantity ? remaining : batch.quantity;
+      final next =
+          await adjustBatchQuantity(id: batch.id, userId: userId, delta: -take);
+      if (next <= 0) await deleteBatch(batch.id, userId);
+      remaining -= take;
+    }
+  }
+
+  /// Spiegelt eine Mengenaenderung additiv auf den Artikel-Gesamtbestand
+  /// (innerhalb der aufrufenden Transaktion).
+  Future<void> _mirrorToItem(String itemId, String userId, double delta) async {
+    if (delta == 0) return;
+    final item = await (_db.select(_db.inventoryItems)
+          ..where((i) => i.id.equals(itemId)))
+        .getSingleOrNull();
+    if (item == null) return;
+    final next = (item.quantity + delta).clamp(0.0, double.maxFinite);
+    final applied = next - item.quantity;
+    await (_db.update(_db.inventoryItems)..where((i) => i.id.equals(itemId)))
+        .write(
+      InventoryItemsCompanion(
+        quantity: Value(next),
+        updatedAt: Value(DateTime.now()),
+        updatedBy: Value(userId),
+        isDirty: const Value(true),
+      ),
+    );
+    await _db.logCounterDelta(
+      table: 'inventory_items',
+      rowId: itemId,
+      field: 'quantity',
+      delta: applied,
+    );
+  }
+
+  /// Schreibt das fruehste Chargen-MHD als Zusammenfassung ans Artikel-MHD,
+  /// damit Filter und Ablauf-Benachrichtigung Chargen ohne Umbau beruecksichtigen.
+  Future<void> _recomputeItemExpiry(String itemId, String userId) async {
+    final batches = await (_db.select(_db.inventoryBatches)
+          ..where((b) =>
+              b.itemId.equals(itemId) &
+              b.deletedAt.isNull() &
+              b.quantity.isBiggerThanValue(0)))
+        .get();
+    if (batches.isEmpty) return;
+    DateTime? earliest;
+    for (final b in batches) {
+      earliest = _earlier(earliest, b.expiresAt);
+    }
+    await (_db.update(_db.inventoryItems)..where((i) => i.id.equals(itemId)))
+        .write(
+      InventoryItemsCompanion(
+        expiresAt: Value(earliest),
+        updatedAt: Value(DateTime.now()),
+        updatedBy: Value(userId),
+        isDirty: const Value(true),
+      ),
+    );
+  }
+
+  /// Fasst je Artikel die Chargen zusammen: Gesamtmenge, fruehestes MHD, Anzahl.
+  Stream<Map<String, BatchAggregate>> watchBatchAggregates(AppScope scope) {
+    return (_db.select(_db.inventoryBatches)
+          ..where((b) =>
+              b.scopeKind.equals(scope.kind.name) &
+              b.scopeId.equals(scope.id) &
+              b.deletedAt.isNull() &
+              b.quantity.isBiggerThanValue(0)))
+        .watch()
+        .map((batches) {
+      final map = <String, BatchAggregate>{};
+      for (final b in batches) {
+        final prev = map[b.itemId];
+        map[b.itemId] = BatchAggregate(
+          total: (prev?.total ?? 0) + b.quantity,
+          earliest: _earlier(prev?.earliest, b.expiresAt),
+          count: (prev?.count ?? 0) + 1,
+        );
+      }
+      return map;
+    });
+  }
+
+  static DateTime? _earlier(DateTime? a, DateTime? b) {
+    if (a == null) return b;
+    if (b == null) return a;
+    return a.isBefore(b) ? a : b;
   }
 
   // --- Produkte ------------------------------------------------------------

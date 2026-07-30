@@ -29,6 +29,7 @@ class SyncEngine {
     (name: 'storage_locations', counters: <String>[]),
     (name: 'products', counters: <String>[]),
     (name: 'inventory_items', counters: ['quantity']),
+    (name: 'inventory_batches', counters: ['quantity']),
     (name: 'shopping_lists', counters: <String>[]),
     (name: 'shopping_items', counters: <String>[]),
     (name: 'notes', counters: <String>[]),

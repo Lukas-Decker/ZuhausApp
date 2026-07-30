@@ -103,6 +103,13 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
     final locations = ref.watch(storageLocationsProvider).value ?? const [];
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
+    // Hat der Artikel Chargen, verwalten diese Menge und MHD automatisch.
+    final batches = _isEdit
+        ? (ref.watch(itemBatchesProvider(widget.item!.id)).value ??
+            const <InventoryBatch>[])
+        : const <InventoryBatch>[];
+    final hasBatches = batches.isNotEmpty;
+
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: SingleChildScrollView(
@@ -157,6 +164,7 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
                       flex: 2,
                       child: TextFormField(
                         controller: _quantity,
+                        enabled: !hasBatches,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -165,10 +173,15 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
                             RegExp(r'[0-9.,]'),
                           ),
                         ],
-                        decoration: const InputDecoration(labelText: 'Menge'),
-                        validator: (value) => _parseNumber(value ?? '') == null
-                            ? 'Zahl eingeben'
-                            : null,
+                        decoration: InputDecoration(
+                          labelText: 'Menge',
+                          helperText: hasBatches ? 'Über Chargen' : null,
+                        ),
+                        validator: (value) => hasBatches
+                            ? null
+                            : (_parseNumber(value ?? '') == null
+                                  ? 'Zahl eingeben'
+                                  : null),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -216,9 +229,10 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
                 const SizedBox(height: 12),
                 _ExpiryField(
                   value: _expiresAt,
+                  enabled: !hasBatches,
                   onChanged: (value) => setState(() => _expiresAt = value),
                 ),
-                if (_expiresAt != null)
+                if (_expiresAt != null && !hasBatches)
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: _remindOnExpiry,
@@ -230,6 +244,10 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
                       'Einstellungen.',
                     ),
                   ),
+                if (_isEdit) ...[
+                  const SizedBox(height: 12),
+                  _BatchesSection(itemId: widget.item!.id),
+                ],
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _minQuantity,
@@ -329,14 +347,19 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
     final note = _note.text.trim().isEmpty ? null : _note.text.trim();
 
     if (_isEdit) {
+      final id = widget.item!.id;
+      // Bei Chargen bestimmen diese Menge und MHD; nicht ueberschreiben.
+      final batches = await repository.watchBatches(id).first;
+      final fresh = await repository.findById(id);
+      final withBatches = batches.isNotEmpty && fresh != null;
       await repository.updateItem(
-        id: widget.item!.id,
+        id: id,
         userId: userId,
         name: _name.text.trim(),
-        quantity: quantity,
+        quantity: withBatches ? fresh.quantity : quantity,
         unit: _unit.name,
         locationId: Value(_locationId),
-        expiresAt: Value(_expiresAt),
+        expiresAt: Value(withBatches ? fresh.expiresAt : _expiresAt),
         minQuantity: Value(minQuantity),
         note: Value(note),
         remindOnExpiry: _remindOnExpiry,
@@ -391,10 +414,15 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
 }
 
 class _ExpiryField extends StatelessWidget {
-  const _ExpiryField({required this.value, required this.onChanged});
+  const _ExpiryField({
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   final DateTime? value;
   final ValueChanged<DateTime?> onChanged;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -403,11 +431,15 @@ class _ExpiryField extends StatelessWidget {
         : DateFormat('dd.MM.yyyy', 'de').format(value!);
 
     return InputDecorator(
-      decoration: const InputDecoration(labelText: 'Haltbar bis'),
+      decoration: InputDecoration(
+        labelText: 'Haltbar bis',
+        enabled: enabled,
+        helperText: enabled ? null : 'Über Chargen',
+      ),
       child: Row(
         children: [
           Expanded(child: Text(formatted)),
-          if (value != null)
+          if (enabled && value != null)
             IconButton(
               tooltip: 'Datum entfernen',
               onPressed: () => onChanged(null),
@@ -415,20 +447,198 @@ class _ExpiryField extends StatelessWidget {
             ),
           IconButton(
             tooltip: 'Datum wählen',
-            onPressed: () async {
-              final now = DateTime.now();
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: value ?? now.add(const Duration(days: 7)),
-                firstDate: DateTime(now.year - 1),
-                lastDate: DateTime(now.year + 10),
-              );
-              if (picked != null) onChanged(picked);
-            },
+            onPressed: enabled
+                ? () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: value ?? now.add(const Duration(days: 7)),
+                      firstDate: DateTime(now.year - 1),
+                      lastDate: DateTime(now.year + 10),
+                    );
+                    if (picked != null) onChanged(picked);
+                  }
+                : null,
             icon: const Icon(Icons.event_rounded),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Verwaltung der Chargen (datierte Teilmengen) eines Artikels.
+class _BatchesSection extends ConsumerWidget {
+  const _BatchesSection({required this.itemId});
+
+  final String itemId;
+
+  static String _fmt(double value) => value == value.roundToDouble()
+      ? value.round().toString()
+      : value.toString().replaceAll('.', ',');
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final batches = ref.watch(itemBatchesProvider(itemId)).value ?? const [];
+    final df = DateFormat('dd.MM.yyyy', 'de');
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.inventory_rounded, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Chargen mit MHD',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Datierte Teilmengen. „–" in der Liste verbraucht die zuerst '
+            'ablaufende Charge.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          for (final batch in batches)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: const Icon(Icons.event_rounded),
+              title: Text(
+                batch.expiresAt == null
+                    ? 'Ohne Datum'
+                    : 'Haltbar bis ${df.format(batch.expiresAt!)}',
+              ),
+              subtitle: Text('Menge: ${_fmt(batch.quantity)}'),
+              trailing: IconButton(
+                tooltip: 'Charge entfernen',
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => ref
+                    .read(inventoryRepositoryProvider)
+                    .deleteBatch(batch.id, ref.read(identityProvider).userId),
+              ),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Charge hinzufügen'),
+              onPressed: () => _addBatch(context, ref),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addBatch(BuildContext context, WidgetRef ref) async {
+    final result = await showDialog<({double quantity, DateTime? date})>(
+      context: context,
+      builder: (_) => const _AddBatchDialog(),
+    );
+    if (result == null) return;
+    await ref.read(inventoryRepositoryProvider).addBatch(
+          scope: ref.read(activeScopeProvider),
+          userId: ref.read(identityProvider).userId,
+          itemId: itemId,
+          quantity: result.quantity,
+          expiresAt: result.date,
+        );
+  }
+}
+
+/// Dialog zum Anlegen einer Charge (Menge + MHD).
+class _AddBatchDialog extends StatefulWidget {
+  const _AddBatchDialog();
+
+  @override
+  State<_AddBatchDialog> createState() => _AddBatchDialogState();
+}
+
+class _AddBatchDialogState extends State<_AddBatchDialog> {
+  final _quantity = TextEditingController(text: '1');
+  DateTime? _date = DateTime.now().add(const Duration(days: 7));
+
+  @override
+  void dispose() {
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final df = DateFormat('dd.MM.yyyy', 'de');
+    return AlertDialog(
+      title: const Text('Charge hinzufügen'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _quantity,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+            ],
+            decoration: const InputDecoration(labelText: 'Menge'),
+          ),
+          const SizedBox(height: 8),
+          InputDecorator(
+            decoration: const InputDecoration(labelText: 'Haltbar bis'),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(_date == null ? 'Kein Datum' : df.format(_date!)),
+                ),
+                if (_date != null)
+                  IconButton(
+                    tooltip: 'Datum entfernen',
+                    onPressed: () => setState(() => _date = null),
+                    icon: const Icon(Icons.clear_rounded),
+                  ),
+                IconButton(
+                  tooltip: 'Datum wählen',
+                  onPressed: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _date ?? now.add(const Duration(days: 7)),
+                      firstDate: DateTime(now.year - 1),
+                      lastDate: DateTime(now.year + 10),
+                    );
+                    if (picked != null) setState(() => _date = picked);
+                  },
+                  icon: const Icon(Icons.event_rounded),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final qty =
+                double.tryParse(_quantity.text.trim().replaceAll(',', '.'));
+            if (qty == null || qty <= 0) return;
+            Navigator.of(context).pop((quantity: qty, date: _date));
+          },
+          child: const Text('Hinzufügen'),
+        ),
+      ],
     );
   }
 }

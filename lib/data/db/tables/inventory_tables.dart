@@ -29,6 +29,20 @@ class Products extends Table with SyncedRecord {
   TextColumn get source => text().withDefault(const Constant('local'))();
 }
 
+/// Eine datierte Teilmenge eines Vorrats: eine Menge mit eigenem MHD.
+///
+/// Damit kann ein Produkt mehrere Chargen mit unterschiedlichem
+/// Mindesthaltbarkeitsdatum fuehren (z.B. drei Joghurts, zwei Daten). Vorraete
+/// ohne Chargen verhalten sich unveraendert (eigene Menge + ein MHD am Artikel).
+@DataClassName('InventoryBatch')
+class InventoryBatches extends Table with SyncedRecord {
+  TextColumn get itemId => text().references(InventoryItems, #id)();
+
+  /// Additiver Zaehler wie die Artikelmenge (deltabasierter Sync).
+  RealColumn get quantity => real().withDefault(const Constant(1))();
+  DateTimeColumn get expiresAt => dateTime().nullable()();
+}
+
 /// Ein konkreter Vorrat an einem Ort.
 class InventoryItems extends Table with SyncedRecord {
   TextColumn get productId =>

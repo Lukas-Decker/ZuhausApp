@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../core/app_info.dart';
 import '../../../core/providers.dart';
@@ -260,33 +259,22 @@ Future<void> openInventoryAdd(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// Das Ghost-„Hinzufuegen"-Element; meldet ueber den VisibilityDetector, ob es
-/// sichtbar ist (steuert den schwebenden FAB).
+/// Das Ghost-„Hinzufuegen"-Element am Listenende bzw. im Leerzustand.
 Widget _inventoryAddGhost(WidgetRef ref) {
-  return VisibilityDetector(
-    key: const Key('inventory-add-ghost'),
-    onVisibilityChanged: (info) {
-      ref
-          .read(inventoryGhostVisibleProvider.notifier)
-          .set(info.visibleFraction > 0.15);
-    },
-    child: Builder(
-      builder: (context) => AddGhostTile(
-        label: 'Vorrat hinzufügen',
-        onTap: () => openInventoryAdd(context, ref),
-      ),
+  return Builder(
+    builder: (context) => AddGhostTile(
+      label: 'Vorrat hinzufügen',
+      onTap: () => openInventoryAdd(context, ref),
     ),
   );
 }
 
-/// Schwebender FAB, nur sichtbar wenn das Ghost-Element nicht auf dem Schirm ist.
+/// Schwebender FAB, immer sichtbar.
 class _InventoryAddFab extends ConsumerWidget {
   const _InventoryAddFab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ghostVisible = ref.watch(inventoryGhostVisibleProvider);
-    if (ghostVisible) return const SizedBox.shrink();
     return FloatingActionButton(
       onPressed: () => openInventoryAdd(context, ref),
       tooltip: 'Hinzufügen',

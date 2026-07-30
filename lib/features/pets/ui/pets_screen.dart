@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
@@ -35,17 +36,33 @@ class PetsScreen extends ConsumerWidget {
           message: '$error',
         ),
         data: (list) => list.isEmpty
-            ? const EmptyState(
-                icon: Icons.pets_outlined,
-                title: 'Noch keine Tiere',
-                message:
-                    'Lege ein Tier an, um Fütterung, Arznei und Gewicht zu '
-                    'verfolgen.',
+            ? Column(
+                children: [
+                  const Expanded(
+                    child: EmptyState(
+                      icon: Icons.pets_outlined,
+                      title: 'Noch keine Tiere',
+                      message:
+                          'Lege ein Tier an, um Fütterung, Arznei und Gewicht '
+                          'zu verfolgen.',
+                    ),
+                  ),
+                  AddGhostTile(
+                    label: 'Tier hinzufügen',
+                    onTap: () => PetEditor.show(context),
+                  ),
+                  const SizedBox(height: 96),
+                ],
               )
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-                itemCount: list.length,
-                itemBuilder: (context, index) => _PetCard(pet: list[index]),
+                itemCount: list.length + 1,
+                itemBuilder: (context, index) => index == list.length
+                    ? AddGhostTile(
+                        label: 'Tier hinzufügen',
+                        onTap: () => PetEditor.show(context),
+                      )
+                    : _PetCard(pet: list[index]),
               ),
       ),
     );

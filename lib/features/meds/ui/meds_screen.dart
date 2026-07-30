@@ -6,6 +6,7 @@ import '../../../core/notifications/notification_providers.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/widgets/add_fab.dart';
+import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
@@ -396,16 +397,33 @@ class _PlansTab extends ConsumerWidget {
       error: (error, _) =>
           EmptyState(icon: Icons.error_outline, title: 'Fehler', message: '$error'),
       data: (list) => list.isEmpty
-          ? const EmptyState(
-              icon: Icons.medication_outlined,
-              title: 'Noch keine Pläne',
-              message: 'Lege dein erstes Medikament mit Einnahmezeiten an.',
+          ? Column(
+              children: [
+                const Expanded(
+                  child: EmptyState(
+                    icon: Icons.medication_outlined,
+                    title: 'Noch keine Pläne',
+                    message:
+                        'Lege dein erstes Medikament mit Einnahmezeiten an.',
+                  ),
+                ),
+                AddGhostTile(
+                  label: 'Medikament hinzufügen',
+                  onTap: () => MedicationPlanEditor.show(context),
+                ),
+                const SizedBox(height: 96),
+              ],
             )
           : ListView.separated(
               padding: const EdgeInsets.only(bottom: 96),
-              itemCount: list.length,
+              itemCount: list.length + 1,
               separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) => _PlanTile(plan: list[index]),
+              itemBuilder: (context, index) => index == list.length
+                  ? AddGhostTile(
+                      label: 'Medikament hinzufügen',
+                      onTap: () => MedicationPlanEditor.show(context),
+                    )
+                  : _PlanTile(plan: list[index]),
             ),
     );
   }

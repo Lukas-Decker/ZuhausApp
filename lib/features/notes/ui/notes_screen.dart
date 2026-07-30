@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/repositories/notes_repository.dart';
@@ -35,8 +36,20 @@ class NotesScreen extends ConsumerWidget {
                 message: '$error',
               ),
               data: (list) => list.isEmpty
-                  ? _empty(search)
-                  : _NotesGrid(notes: list),
+                  ? Column(
+                      children: [
+                        Expanded(child: _empty(search)),
+                        AddGhostTile(
+                          label: 'Notiz hinzufügen',
+                          onTap: () => _create(context, ref, checklist: false),
+                        ),
+                        const SizedBox(height: 96),
+                      ],
+                    )
+                  : _NotesGrid(
+                      notes: list,
+                      onAdd: () => _create(context, ref, checklist: false),
+                    ),
             ),
           ),
         ],
@@ -153,16 +166,17 @@ class _SearchBarState extends ConsumerState<_SearchBar> {
 }
 
 class _NotesGrid extends StatelessWidget {
-  const _NotesGrid({required this.notes});
+  const _NotesGrid({required this.notes, required this.onAdd});
 
   final List<NoteWithItems> notes;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = (constraints.maxWidth / 260).floor().clamp(1, 5);
-        return MasonryGrid(columns: columns, notes: notes);
+        return MasonryGrid(columns: columns, notes: notes, onAdd: onAdd);
       },
     );
   }
@@ -170,10 +184,16 @@ class _NotesGrid extends StatelessWidget {
 
 /// Einfaches versetztes Raster ("Masonry") über gleichmäßig gefüllte Spalten.
 class MasonryGrid extends StatelessWidget {
-  const MasonryGrid({super.key, required this.columns, required this.notes});
+  const MasonryGrid({
+    super.key,
+    required this.columns,
+    required this.notes,
+    this.onAdd,
+  });
 
   final int columns;
   final List<NoteWithItems> notes;
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -184,21 +204,28 @@ class MasonryGrid extends StatelessWidget {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final bucket in buckets)
-            Expanded(
-              child: Column(
-                children: [
-                  for (final entry in bucket)
-                    Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: NoteCard(entry: entry),
-                    ),
-                ],
-              ),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final bucket in buckets)
+                Expanded(
+                  child: Column(
+                    children: [
+                      for (final entry in bucket)
+                        Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: NoteCard(entry: entry),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          if (onAdd != null)
+            AddGhostTile(label: 'Notiz hinzufügen', onTap: onAdd!),
         ],
       ),
     );

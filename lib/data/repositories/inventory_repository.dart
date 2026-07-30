@@ -643,6 +643,33 @@ class InventoryRepository {
     return a.isBefore(b) ? a : b;
   }
 
+  /// Namensvorschlaege aus bekannten Produkten und vorhandenen Vorraeten des
+  /// Kontexts, passend zur Eingabe. Grundlage der Einkaufs-Autovervollstaendigung.
+  Future<List<String>> suggestNames(
+    AppScope scope,
+    String query, {
+    int limit = 8,
+  }) async {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const [];
+    final rows = await _db.customSelect(
+      'SELECT name FROM ('
+      '  SELECT name FROM products'
+      '    WHERE scope_kind = ?1 AND scope_id = ?2 AND deleted_at IS NULL'
+      '  UNION'
+      '  SELECT name FROM inventory_items'
+      '    WHERE scope_kind = ?1 AND scope_id = ?2 AND deleted_at IS NULL'
+      ') WHERE lower(name) LIKE ?3 ORDER BY name LIMIT ?4',
+      variables: [
+        Variable<String>(scope.kind.name),
+        Variable<String>(scope.id),
+        Variable<String>('%$q%'),
+        Variable<int>(limit),
+      ],
+    ).get();
+    return [for (final row in rows) row.read<String>('name')];
+  }
+
   // --- Produkte ------------------------------------------------------------
 
   Future<Product?> findProduct(AppScope scope, String barcode) {

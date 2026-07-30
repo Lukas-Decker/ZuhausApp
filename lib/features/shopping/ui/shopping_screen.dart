@@ -117,15 +117,24 @@ class _QuickAddBarState extends ConsumerState<_QuickAddBar> {
   final _focus = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    // Tipp-Vorschlaege aktualisieren, waehrend getippt wird.
+    _controller.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _focus.dispose();
     super.dispose();
   }
 
-  Future<void> _add() async {
-    final name = _controller.text.trim();
-    if (name.isEmpty) return;
+  Future<void> _add() => _addNamed(_controller.text);
+
+  Future<void> _addNamed(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
 
     await ref
         .read(shoppingRepositoryProvider)
@@ -133,8 +142,8 @@ class _QuickAddBarState extends ConsumerState<_QuickAddBar> {
           scope: ref.read(activeScopeProvider),
           listId: widget.listId,
           userId: ref.read(identityProvider).userId,
-          name: name,
-          category: ShoppingCategory.guess(name).name,
+          name: trimmed,
+          category: ShoppingCategory.guess(trimmed).name,
         );
 
     _controller.clear();
@@ -147,35 +156,81 @@ class _QuickAddBarState extends ConsumerState<_QuickAddBar> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focus,
-              textInputAction: TextInputAction.done,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.add_rounded),
-                hintText: scope.isPersonal
-                    ? 'Auf meine Liste setzen'
-                    : 'Auf die Liste von ${scope.label}',
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focus,
+                  textInputAction: TextInputAction.done,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.add_rounded),
+                    hintText: scope.isPersonal
+                        ? 'Auf meine Liste setzen'
+                        : 'Auf die Liste von ${scope.label}',
+                  ),
+                  onSubmitted: (_) => _add(),
+                ),
               ),
-              onSubmitted: (_) => _add(),
+              const SizedBox(width: 8),
+              IconButton.filled(
+                tooltip: 'Mit Details anlegen',
+                onPressed: () => ShoppingItemEditor.show(
+                  context,
+                  listId: widget.listId,
+                  initialName: _controller.text.trim(),
+                ).then((created) {
+                  if (created == true) _controller.clear();
+                }),
+                icon: const Icon(Icons.tune_rounded),
+              ),
+            ],
+          ),
+          _TypeAheadSuggestions(
+            query: _controller.text.trim(),
+            onPick: _addNamed,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tipp-Vorschlaege unter der Schnell-Eingabe: passende Namen aus Produkten
+/// und vorhandenen Vorraeten. Ein Tipp legt den Posten direkt an.
+class _TypeAheadSuggestions extends ConsumerWidget {
+  const _TypeAheadSuggestions({required this.query, required this.onPick});
+
+  final String query;
+  final void Function(String) onPick;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (query.length < 2) return const SizedBox.shrink();
+    final suggestions =
+        ref.watch(nameSuggestionsProvider(query)).value ?? const [];
+    final filtered = suggestions
+        .where((s) => s.toLowerCase() != query.toLowerCase())
+        .take(6)
+        .toList();
+    if (filtered.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          for (final name in filtered)
+            ActionChip(
+              avatar: const Icon(Icons.add_rounded, size: 16),
+              label: Text(name),
+              onPressed: () => onPick(name),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton.filled(
-            tooltip: 'Mit Details anlegen',
-            onPressed: () => ShoppingItemEditor.show(
-              context,
-              listId: widget.listId,
-              initialName: _controller.text.trim(),
-            ).then((created) {
-              if (created == true) _controller.clear();
-            }),
-            icon: const Icon(Icons.tune_rounded),
-          ),
         ],
       ),
     );

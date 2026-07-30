@@ -62,6 +62,14 @@ final shoppingItemsProvider = StreamProvider<List<ShoppingItem>>((ref) {
   return ref.watch(shoppingRepositoryProvider).watchItems(list.id);
 });
 
+/// Tipp-Vorschläge beim Eingeben: passende Namen aus bekannten Produkten und
+/// vorhandenen Vorräten des Kontexts.
+final nameSuggestionsProvider =
+    FutureProvider.autoDispose.family<List<String>, String>((ref, query) {
+  final scope = ref.watch(activeScopeProvider);
+  return ref.watch(inventoryRepositoryProvider).suggestNames(scope, query);
+});
+
 /// Knappe Vorräte, die noch nicht offen auf der Liste stehen.
 final shoppingSuggestionsProvider = Provider<List<({String id, String name})>>((
   ref,

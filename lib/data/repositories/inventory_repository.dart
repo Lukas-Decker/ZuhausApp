@@ -7,10 +7,13 @@ import '../db/tables/common.dart';
 
 /// Ein Vorrat samt seinem Lagerort, so wie ihn die Liste braucht.
 class InventoryEntry {
-  const InventoryEntry({required this.item, this.location});
+  const InventoryEntry({required this.item, this.location, this.imageUrl});
 
   final InventoryItem item;
   final StorageLocation? location;
+
+  /// Bild-URL des verknuepften Produkts (aus Open Food Facts), falls vorhanden.
+  final String? imageUrl;
 
   /// Vorrat unter dem gesetzten Mindestbestand.
   bool get isLow {
@@ -175,6 +178,10 @@ class InventoryRepository {
         _db.storageLocations,
         _db.storageLocations.id.equalsExp(_db.inventoryItems.locationId),
       ),
+      leftOuterJoin(
+        _db.products,
+        _db.products.id.equalsExp(_db.inventoryItems.productId),
+      ),
     ])
       ..where(
         _db.inventoryItems.scopeKind.equals(scope.kind.name) &
@@ -193,6 +200,7 @@ class InventoryRepository {
         return InventoryEntry(
           item: row.readTable(_db.inventoryItems),
           location: row.readTableOrNull(_db.storageLocations),
+          imageUrl: row.readTableOrNull(_db.products)?.imageUrl,
         );
       });
 

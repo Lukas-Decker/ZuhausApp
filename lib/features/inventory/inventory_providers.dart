@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/notifications/notification_providers.dart';
@@ -7,6 +9,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/inventory_repository.dart';
 import 'data/expiry_notification_scheduler.dart';
 import 'data/open_food_facts_service.dart';
+import 'data/product_image_cache.dart';
 
 final inventoryRepositoryProvider = Provider<InventoryRepository>(
   (ref) => InventoryRepository(ref.watch(databaseProvider)),
@@ -44,6 +47,17 @@ final openFoodFactsServiceProvider = Provider<OpenFoodFactsService>((ref) {
   ref.onDispose(service.dispose);
   return service;
 });
+
+final productImageCacheProvider = Provider<ProductImageCache>((ref) {
+  final cache = ProductImageCache();
+  ref.onDispose(cache.dispose);
+  return cache;
+});
+
+/// Lokale Bilddatei zu einer Produkt-URL (laedt bei Bedarf, `null` = kein Bild).
+final productImageProvider = FutureProvider.family<File?, String>(
+  (ref, url) => ref.watch(productImageCacheProvider).resolve(url),
+);
 
 /// Lagerorte des aktiven Kontexts. Legt beim ersten Zugriff die Standardorte an.
 final storageLocationsProvider = StreamProvider<List<StorageLocation>>((ref) {

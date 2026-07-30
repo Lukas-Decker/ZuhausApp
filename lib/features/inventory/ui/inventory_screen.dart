@@ -13,6 +13,7 @@ import '../data/open_food_facts_service.dart';
 import '../domain/measurement_unit.dart';
 import '../domain/storage_icons.dart';
 import '../inventory_providers.dart';
+import 'product_thumbnail.dart';
 import 'barcode_scan.dart';
 import 'inventory_item_editor.dart';
 import 'storage_locations_screen.dart';
@@ -474,29 +475,31 @@ class _InventoryTile extends ConsumerWidget {
       confirmDismiss: (_) => _confirmDelete(context, item.name),
       onDismissed: (_) => _delete(context, ref),
       child: ListTile(
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
         onTap: () => InventoryItemEditor.show(context, item: item),
-        title: Text(item.name),
+        leading: ProductThumbnail(imageUrl: entry.imageUrl),
+        title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: _Badges(entry: entry),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (item.quantity <= 0)
-              IconButton(
+              _CompactIconButton(
                 tooltip: 'Löschen',
                 onPressed: () => _confirmAndDelete(context, ref),
-                icon: Icon(
-                  Icons.delete_outline_rounded,
-                  color: scheme.error,
-                ),
+                icon: Icons.delete_outline_rounded,
+                color: scheme.error,
               )
             else
-              IconButton(
+              _CompactIconButton(
                 tooltip: 'Weniger',
                 onPressed: () => _adjust(ref, -1),
-                icon: const Icon(Icons.remove_circle_outline_rounded),
+                icon: Icons.remove_circle_outline_rounded,
               ),
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 62),
+              constraints: const BoxConstraints(minWidth: 48),
               child: Text(
                 unit.format(item.quantity),
                 textAlign: TextAlign.center,
@@ -506,10 +509,10 @@ class _InventoryTile extends ConsumerWidget {
                 ),
               ),
             ),
-            IconButton(
+            _CompactIconButton(
               tooltip: 'Mehr',
               onPressed: () => _adjust(ref, 1),
-              icon: const Icon(Icons.add_circle_outline_rounded),
+              icon: Icons.add_circle_outline_rounded,
             ),
           ],
         ),
@@ -561,6 +564,33 @@ class _InventoryTile extends ConsumerWidget {
     if (await _confirmDelete(context, entry.item.name) && context.mounted) {
       _delete(context, ref);
     }
+  }
+}
+
+/// Kompakter Icon-Button fuer die schlanken Inventar-Zeilen.
+class _CompactIconButton extends StatelessWidget {
+  const _CompactIconButton({
+    required this.icon,
+    required this.onPressed,
+    required this.tooltip,
+    this.color,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String tooltip;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, color: color),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+    );
   }
 }
 

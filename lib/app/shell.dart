@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/notifications/notification_providers.dart';
 import '../core/widgets/scope_banner.dart';
 import '../features/family/family_providers.dart';
 import '../features/household/household_providers.dart';
@@ -46,6 +47,8 @@ class AppShell extends ConsumerWidget {
     ref.watch(fcmInitProvider);
     // Korrigiert einmalig alte Aufgaben-Titel ohne Umlaute.
     ref.watch(petTaskTitleRepairProvider);
+    // Holt die Android-Benachrichtigungsberechtigung, falls sie noch fehlt.
+    ref.watch(notificationPermissionRequestProvider);
 
     // Beim Tab-Wechsel einen Abgleich anstossen.
     void onNavigate() =>

@@ -14,6 +14,7 @@ import '../../../data/repositories/medication_repository.dart';
 import '../domain/medication_schedule.dart';
 import '../meds_providers.dart';
 import 'medication_plan_editor.dart';
+import 'supplement_info_screen.dart';
 
 class MedsScreen extends ConsumerWidget {
   const MedsScreen({super.key});
@@ -38,6 +39,13 @@ class MedsScreen extends ConsumerWidget {
       length: 2,
       child: ModuleScaffold(
         title: 'Pillen',
+        actions: [
+          IconButton(
+            tooltip: 'Supplement-Infothek',
+            onPressed: () => SupplementInfoScreen.show(context),
+            icon: const Icon(Icons.menu_book_outlined),
+          ),
+        ],
         bottom: const TabBar(
           tabs: [
             Tab(text: 'Heute'),

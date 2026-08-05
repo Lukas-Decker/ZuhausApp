@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/app_info.dart';
+import '../../core/notifications/notification_providers.dart';
 import '../../core/providers.dart';
 import '../../core/security/app_lock.dart';
 import '../../core/settings/app_settings.dart';
@@ -118,6 +119,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           const Divider(),
           const _SectionHeader('Erinnerungen'),
+          const _NotificationPermissionTile(),
           SwitchListTile(
             secondary: const Icon(Icons.medication_rounded),
             value: settings.medicationRemindersEnabled,
@@ -537,6 +539,72 @@ class _SyncTile extends ConsumerWidget {
             : () => ref.read(syncControllerProvider.notifier).syncNow(),
         icon: const Icon(Icons.refresh_rounded),
       ),
+    );
+  }
+}
+
+/// Zeigt, ob die Systemrechte fuer Erinnerungen vorliegen, und holt sie nach.
+///
+/// Ohne die Benachrichtigungsberechtigung kommt gar nichts an; ohne "Alarme &
+/// Erinnerungen" (Android 12+) kommen zeitgenaue Erinnerungen nicht puenktlich.
+class _NotificationPermissionTile extends ConsumerWidget {
+  const _NotificationPermissionTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(notificationPermissionsProvider);
+    final scheme = Theme.of(context).colorScheme;
+
+    return status.when(
+      loading: () => const ListTile(
+        leading: Icon(Icons.notifications_outlined),
+        title: Text('Berechtigungen'),
+        subtitle: Text('Wird geprüft ...'),
+      ),
+      error: (error, _) => ListTile(
+        leading: const Icon(Icons.notifications_outlined),
+        title: const Text('Berechtigungen'),
+        subtitle: Text('$error'),
+      ),
+      data: (data) {
+        final allOk = data.notificationsAllowed && data.exactAlarmsAllowed;
+        if (allOk) {
+          return ListTile(
+            leading: Icon(Icons.notifications_active_rounded, color: scheme.primary),
+            title: const Text('Berechtigungen erteilt'),
+            subtitle: const Text('Erinnerungen dürfen angezeigt werden.'),
+          );
+        }
+        final missing = [
+          if (!data.notificationsAllowed) 'Benachrichtigungen',
+          if (!data.exactAlarmsAllowed) 'Alarme & Erinnerungen',
+        ].join(' und ');
+        return ListTile(
+          leading: Icon(Icons.notifications_off_rounded, color: scheme.error),
+          title: Text(
+            'Berechtigung fehlt',
+            style: TextStyle(color: scheme.error),
+          ),
+          subtitle: Text(
+            '$missing nicht erlaubt. Ohne diese Rechte kommen keine '
+            'Erinnerungen an.',
+          ),
+          isThreeLine: true,
+          trailing: FilledButton(
+            onPressed: () async {
+              final service = ref.read(notificationServiceProvider);
+              if (!data.notificationsAllowed) {
+                await service.requestPermission();
+              }
+              if (!data.exactAlarmsAllowed) {
+                await service.requestExactAlarms();
+              }
+              ref.invalidate(notificationPermissionsProvider);
+            },
+            child: const Text('Erlauben'),
+          ),
+        );
+      },
     );
   }
 }

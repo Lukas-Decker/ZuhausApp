@@ -87,27 +87,31 @@ class _PetCard extends ConsumerWidget {
           MaterialPageRoute(builder: (_) => PetDetailScreen(petId: pet.id)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
             children: [
-              _PetAvatar(pet: pet, icon: species.icon, radius: 28),
-              const SizedBox(width: 14),
+              _PetAvatar(pet: pet, icon: species.icon, radius: 18),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      pet.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      // Art nur nennen, wenn eine Rasse fehlt: sonst doppelt.
+                      [
+                        pet.name,
+                        if (pet.breed != null && pet.breed!.isNotEmpty)
+                          pet.breed!
+                        else
+                          species.label,
+                      ].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(
-                      [species.label, if (pet.breed != null) pet.breed!]
-                          .join(' · '),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     tasks.maybeWhen(
                       data: (list) => _TaskSummary(statuses: list),
                       orElse: () => const SizedBox(height: 4),
@@ -115,7 +119,7 @@ class _PetCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded),
+              const Icon(Icons.chevron_right_rounded, size: 20),
             ],
           ),
         ),

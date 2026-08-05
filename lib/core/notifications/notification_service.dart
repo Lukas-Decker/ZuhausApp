@@ -153,6 +153,50 @@ class NotificationService {
     return null;
   }
 
+  /// Aktueller Stand der Android-Systemrechte fuer Erinnerungen.
+  ///
+  /// [notificationsAllowed] ist die POST_NOTIFICATIONS-Berechtigung (Android
+  /// 13+), [exactAlarmsAllowed] das Recht "Alarme & Erinnerungen" (Android
+  /// 12+). Ohne letzteres kommen zeitgenaue Erinnerungen nicht an.
+  Future<({bool notificationsAllowed, bool exactAlarmsAllowed})>
+  checkPermissions() async {
+    if (!_supported) {
+      return (notificationsAllowed: false, exactAlarmsAllowed: false);
+    }
+    try {
+      final android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      if (android != null) {
+        return (
+          notificationsAllowed: await android.areNotificationsEnabled() ?? false,
+          exactAlarmsAllowed:
+              await android.canScheduleExactNotifications() ?? true,
+        );
+      }
+      // Andere Plattformen kennen diese Trennung nicht.
+      return (notificationsAllowed: true, exactAlarmsAllowed: true);
+    } catch (error) {
+      debugPrint('checkPermissions fehlgeschlagen: $error');
+      return (notificationsAllowed: false, exactAlarmsAllowed: false);
+    }
+  }
+
+  /// Oeffnet die Android-Systemseite "Alarme & Erinnerungen".
+  Future<void> requestExactAlarms() async {
+    if (!_supported) return;
+    try {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestExactAlarmsPermission();
+    } catch (error) {
+      debugPrint('requestExactAlarms fehlgeschlagen: $error');
+    }
+  }
+
   /// Fragt (auf Android/iOS) die Benachrichtigungsberechtigung an.
   Future<bool> requestPermission() async {
     if (!_supported) return false;

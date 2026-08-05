@@ -137,44 +137,41 @@ class _PetHeader extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final photo = pet.photoPath;
     final hasPhoto = photo != null && File(photo).existsSync();
+    final hasBreed = pet.breed != null && pet.breed!.isNotEmpty;
+    final hasNote = pet.note != null && pet.note!.isNotEmpty;
+
+    // Ohne Foto und ohne Zusatzangaben gibt es nichts zu zeigen: dann lieber
+    // gar keinen Kopfbereich, statt Platz fuer Art-Icon und Artname zu opfern.
+    if (!hasPhoto && !hasBreed && !hasNote && pet.birthday == null) {
+      return const SizedBox.shrink();
+    }
+
+    final details = [
+      if (hasBreed) pet.breed!,
+      if (pet.birthday != null) _ageText(pet.birthday!),
+      if (hasNote) pet.note!,
+    ].join(' · ');
 
     return Container(
       color: scheme.surfaceContainerLow,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 32,
+            radius: 18,
             backgroundColor: scheme.secondaryContainer,
             backgroundImage: hasPhoto ? FileImage(File(photo)) : null,
             child: hasPhoto
                 ? null
-                : Icon(icon, size: 30, color: scheme.onSecondaryContainer),
+                : Icon(icon, size: 18, color: scheme.onSecondaryContainer),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  [petSpeciesInfo(pet.species).label, if (pet.breed != null) pet.breed!]
-                      .join(' · '),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                if (pet.birthday != null)
-                  Text(
-                    _ageText(pet.birthday!),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                if (pet.note != null && pet.note!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      pet.note!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-              ],
+            child: Text(
+              details,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
         ],

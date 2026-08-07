@@ -8,6 +8,7 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../app_info.dart';
+import '../diagnostics/debug_log.dart';
 
 /// Eine geplante lokale Erinnerung.
 class ScheduledReminder {
@@ -120,8 +121,19 @@ class NotificationService {
       );
 
       _supported = true;
+      DebugLog.instance.add(
+        'notifications',
+        'Bereit, Zeitzone ${tz.local.name}',
+      );
     } catch (error, stack) {
-      debugPrint('NotificationService init fehlgeschlagen: $error\n$stack');
+      // Scheitert das hier, bleibt die App still: keine einzige Erinnerung.
+      // Deshalb prominent ins Protokoll.
+      DebugLog.instance.error(
+        'notifications',
+        'Initialisierung fehlgeschlagen - es kommen KEINE Erinnerungen an',
+        error: error,
+        stack: stack,
+      );
       _supported = false;
     }
     _ready = true;
@@ -242,8 +254,13 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: reminder.payload,
       );
-    } catch (error) {
-      debugPrint('schedule fehlgeschlagen: $error');
+    } catch (error, stack) {
+      DebugLog.instance.error(
+        'notifications',
+        'Planen fehlgeschlagen: ${reminder.title}',
+        error: error,
+        stack: stack,
+      );
     }
   }
 
@@ -275,6 +292,38 @@ class NotificationService {
       await _plugin.cancel(id: id);
     } catch (_) {}
   }
+
+  /// Alle beim System vorgemerkten Erinnerungen (Diagnose).
+  Future<List<PendingNotificationRequest>> pending() async {
+    if (!_supported) return const [];
+    try {
+      return await _plugin.pendingNotificationRequests();
+    } catch (error) {
+      debugPrint('pending fehlgeschlagen: $error');
+      return const [];
+    }
+  }
+
+  /// Loescht nur Erinnerungen, deren Payload mit [prefix] beginnt.
+  ///
+  /// Ersetzt das fruehere pauschale [cancelAll] in den Planern: sonst
+  /// entfernt der eine Planer die Erinnerungen aller anderen.
+  Future<void> cancelWithPayloadPrefix(String prefix) async {
+    if (!_supported) return;
+    try {
+      for (final request in await _plugin.pendingNotificationRequests()) {
+        if (request.payload?.startsWith(prefix) ?? false) {
+          await _plugin.cancel(id: request.id);
+        }
+      }
+    } catch (error) {
+      debugPrint('cancelWithPayloadPrefix fehlgeschlagen: $error');
+    }
+  }
+
+  /// Name der erkannten Zeitzone (Diagnose). Stimmt sie nicht, laufen alle
+  /// geplanten Zeiten falsch.
+  String get timeZoneName => _supported ? tz.local.name : 'unbekannt';
 
   /// Entfernt alle geplanten Erinnerungen. Vor jedem Neuplanen aufgerufen,
   /// damit sich keine veralteten Termine ansammeln.

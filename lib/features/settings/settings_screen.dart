@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/app_info.dart';
+import '../../core/diagnostics/debug_log.dart';
 import '../../core/notifications/notification_providers.dart';
 import '../../core/providers.dart';
 import '../../core/security/app_lock.dart';
@@ -18,6 +19,8 @@ import '../privacy/ui/audit_log_screen.dart';
 import '../privacy/ui/privacy_info_screen.dart';
 import '../push/push_providers.dart';
 import '../sync/sync_providers.dart';
+import 'debug_log_screen.dart';
+import 'notification_debug_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -33,6 +36,18 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Einstellungen')),
       body: ListView(
         children: [
+          const _SectionHeader('Diagnose (Testphase)'),
+          const _DebugLogTile(),
+          ListTile(
+            leading: const Icon(Icons.troubleshoot_rounded),
+            title: const Text('Erinnerungen prüfen'),
+            subtitle: const Text(
+              'Testmeldung senden und geplante Erinnerungen ansehen.',
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => NotificationDebugScreen.show(context),
+          ),
+          const Divider(),
           const _SectionHeader('Konto'),
           ListTile(
             leading: CircleAvatar(child: Text(identity.initials)),
@@ -539,6 +554,43 @@ class _SyncTile extends ConsumerWidget {
             : () => ref.read(syncControllerProvider.notifier).syncNow(),
         icon: const Icon(Icons.refresh_rounded),
       ),
+    );
+  }
+}
+
+/// Einstieg ins Fehlerprotokoll, mit Anzahl der bisherigen Fehler.
+class _DebugLogTile extends StatelessWidget {
+  const _DebugLogTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return StreamBuilder<void>(
+      stream: DebugLog.instance.changes,
+      builder: (context, _) {
+        final errors = DebugLog.instance.errorCount;
+        final total = DebugLog.instance.entries.length;
+        return ListTile(
+          leading: Icon(
+            errors > 0 ? Icons.bug_report_rounded : Icons.bug_report_outlined,
+            color: errors > 0 ? scheme.error : null,
+          ),
+          title: const Text('Protokoll'),
+          subtitle: Text(
+            errors > 0
+                ? '$errors Fehler unter $total Einträgen'
+                : '$total Einträge, keine Fehler',
+          ),
+          trailing: errors > 0
+              ? Chip(
+                  label: Text('$errors'),
+                  backgroundColor: scheme.errorContainer,
+                  labelStyle: TextStyle(color: scheme.onErrorContainer),
+                )
+              : const Icon(Icons.chevron_right_rounded),
+          onTap: () => DebugLogScreen.show(context),
+        );
+      },
     );
   }
 }

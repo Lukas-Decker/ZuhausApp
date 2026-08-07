@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/diagnostics/debug_log.dart';
 import '../../data/db/app_database.dart';
 import 'local_sync_store.dart';
 
@@ -77,8 +78,13 @@ class SyncEngine {
     try {
       await push();
       await pull();
-    } catch (error) {
-      debugPrint('[sync] Abgleich fehlgeschlagen: $error');
+    } catch (error, stack) {
+      DebugLog.instance.error(
+        'sync',
+        'Abgleich fehlgeschlagen',
+        error: error,
+        stack: stack,
+      );
       rethrow;
     } finally {
       _running = false;

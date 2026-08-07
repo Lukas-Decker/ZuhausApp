@@ -25,9 +25,6 @@ class MedsScreen extends ConsumerWidget {
       appSettingsProvider.select((s) => s.healthDataConsent),
     );
 
-    // Erinnerungen im Hintergrund aktuell halten, solange dieser Screen lebt.
-    ref.watch(medicationReminderSyncProvider);
-
     if (consent != true) {
       return const ModuleScaffold(
         title: 'Pillen',

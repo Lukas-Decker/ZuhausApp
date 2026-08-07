@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'core/config/app_config.dart';
+import 'core/diagnostics/debug_log.dart';
 import 'core/deeplink/windows_deeplink.dart';
 import 'core/notifications/notification_providers.dart';
 import 'core/notifications/notification_service.dart';
@@ -17,6 +18,10 @@ import 'features/auth/data/auth_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Fehler und Abstuerze im App-eigenen Protokoll sichtbar machen.
+  DebugLog.captureGlobalErrors();
+  DebugLog.instance.add('app', 'Start');
 
   // Deutsche Datums- und Zahlenformate für intl bereitstellen.
   await initializeDateFormatting('de');

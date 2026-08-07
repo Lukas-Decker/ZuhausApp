@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-
+import '../../../core/diagnostics/debug_log.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../domain/dose_schedule.dart';
@@ -28,7 +27,9 @@ class MedicationReminderScheduler {
   Future<void> reschedule({required bool enabled}) async {
     if (!notifications.isSupported) return;
 
-    await notifications.cancelAll();
+    // Nur die eigenen Erinnerungen verwerfen. Ein pauschales cancelAll() hat
+    // frueher auch die Ablauf- und Tier-Erinnerungen mitgeloescht.
+    await notifications.cancelWithPayloadPrefix('med:');
     if (!enabled) return;
 
     final plans = await repository.allActivePlans();
@@ -54,8 +55,11 @@ class MedicationReminderScheduler {
         channel: NotificationService.medicationChannel,
       );
     }
-    debugPrint('Medikamenten-Erinnerungen geplant: '
-        '${reminders.take(_maxReminders).length}');
+    DebugLog.instance.add(
+      'meds',
+      'Erinnerungen geplant: ${reminders.take(_maxReminders).length} '
+      '(aus ${plans.length} aktiven Plänen)',
+    );
   }
 
   ScheduledReminder _reminderFor(DoseOccurrence occ) {

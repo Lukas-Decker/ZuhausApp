@@ -7,6 +7,7 @@ import '../core/widgets/scope_banner.dart';
 import '../features/family/family_providers.dart';
 import '../features/household/household_providers.dart';
 import '../features/inventory/inventory_providers.dart';
+import '../features/meds/meds_providers.dart';
 import '../features/meds/notification_action_handler.dart';
 import '../features/pets/pets_providers.dart';
 import '../features/privacy/privacy_providers.dart';
@@ -38,6 +39,10 @@ class AppShell extends ConsumerWidget {
     ref.watch(notificationActionHandlerProvider);
     // Haelt die taegliche Ablauf-Sammelbenachrichtigung aktuell.
     ref.watch(expiryNotificationSyncProvider);
+    // Plant die Medikamenten-Erinnerungen. Lief frueher nur, solange der
+    // Pillen-Tab offen war: nach einem Neustart ohne Besuch dort wurde nichts
+    // geplant.
+    ref.watch(medicationReminderSyncProvider);
     // Empfaengt Familien-Ereignisse und prueft auf meldenswerte Situationen.
     ref.watch(familyEventListenerProvider);
     ref.watch(familyEventCheckerProvider);

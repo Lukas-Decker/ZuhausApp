@@ -58,6 +58,13 @@ final medicationReminderSyncProvider = Provider<void>((ref) {
   // Auf Planänderungen reagieren (Inhalt egal, nur der Trigger zählt).
   ref.watch(medicationPlansProvider);
 
+  // Der Wecker-Modus steckt in den Zustelldetails: beim Umschalten muss neu
+  // geplant werden, sonst behalten vorgemerkte Erinnerungen die alte Art.
+  final wake = ref.watch(
+    appSettingsProvider.select((s) => s.wakeScreenEnabled),
+  );
+  ref.watch(notificationServiceProvider).wakeScreen = wake;
+
   final scheduler = ref.watch(medicationReminderSchedulerProvider);
   scheduler.reschedule(enabled: enabled);
 });

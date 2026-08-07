@@ -56,6 +56,9 @@ class NotificationService {
   static const _inventoryChannelId = 'inventory_reminders';
   static const _familyChannelId = 'family_events';
 
+  /// Anhang fuer die Wecker-Varianten der Kanaele (siehe [_detailsFor]).
+  static const _wakeChannelSuffix = '_wake';
+
   final FlutterLocalNotificationsPlugin _plugin;
   bool _ready = false;
   bool _supported = false;
@@ -325,6 +328,31 @@ class NotificationService {
   /// geplanten Zeiten falsch.
   String get timeZoneName => _supported ? tz.local.name : 'unbekannt';
 
+  /// Erinnerungen wie ein Wecker zustellen: Bildschirm aufwecken, ueber dem
+  /// Sperrbildschirm anzeigen. Wird aus den Einstellungen gesetzt.
+  bool wakeScreen = false;
+
+  /// Fragt die Android-Sonderberechtigung fuer Vollbild-Meldungen an
+  /// (ab Android 14 noetig, davor automatisch erteilt).
+  Future<bool> requestFullScreenIntentPermission() async {
+    if (!_supported) return false;
+    try {
+      final android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      if (android == null) return true;
+      return await android.requestFullScreenIntentPermission() ?? false;
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Vollbild-Berechtigung nicht anfragbar',
+        error: error,
+      );
+      return false;
+    }
+  }
+
   /// Entfernt alle geplanten Erinnerungen. Vor jedem Neuplanen aufgerufen,
   /// damit sich keine veralteten Termine ansammeln.
   Future<void> cancelAll() async {
@@ -344,14 +372,29 @@ class NotificationService {
 
     final isMed = channel == _medicationChannelId;
 
+    // Android friert die Einstellungen eines Kanals beim Anlegen ein. Fuer den
+    // Wecker-Modus braucht es deshalb einen eigenen Kanal, sonst bliebe die
+    // urspruengliche (niedrigere) Wichtigkeit bestehen.
+    final wake = wakeScreen;
+    final channelId = wake ? '$channel$_wakeChannelSuffix' : channel;
+    final channelName = wake ? '$name (Wecker)' : name;
+
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        channel,
-        name,
+        channelId,
+        channelName,
         channelDescription: description,
-        importance: Importance.high,
-        priority: Priority.high,
-        category: AndroidNotificationCategory.reminder,
+        importance: wake ? Importance.max : Importance.high,
+        priority: wake ? Priority.max : Priority.high,
+        category: wake
+            ? AndroidNotificationCategory.alarm
+            : AndroidNotificationCategory.reminder,
+        // Weckt den Bildschirm und zeigt die Meldung ueber dem Sperrbildschirm.
+        fullScreenIntent: wake,
+        visibility: wake ? NotificationVisibility.public : null,
+        audioAttributesUsage: wake
+            ? AudioAttributesUsage.alarm
+            : AudioAttributesUsage.notification,
         actions: isMed
             ? const [
                 AndroidNotificationAction(medTakenActionId, 'Genommen'),

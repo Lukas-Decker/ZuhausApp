@@ -20,6 +20,7 @@ class AppSettings {
     required this.appLockEnabled,
     required this.retentionDays,
     required this.privacyAccepted,
+    required this.wakeScreenEnabled,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -65,6 +66,10 @@ class AppSettings {
   /// Ob der Datenschutz-Hinweis beim ersten Start bestaetigt wurde.
   final bool privacyAccepted;
 
+  /// Erinnerungen wie ein Wecker: Bildschirm aufwecken und ueber dem
+  /// Sperrbildschirm anzeigen. Bewusst standardmaessig aus, weil aufdringlich.
+  final bool wakeScreenEnabled;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
@@ -78,6 +83,7 @@ class AppSettings {
     bool? appLockEnabled,
     int? retentionDays,
     bool? privacyAccepted,
+    bool? wakeScreenEnabled,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
@@ -96,6 +102,7 @@ class AppSettings {
     appLockEnabled: appLockEnabled ?? this.appLockEnabled,
     retentionDays: retentionDays ?? this.retentionDays,
     privacyAccepted: privacyAccepted ?? this.privacyAccepted,
+    wakeScreenEnabled: wakeScreenEnabled ?? this.wakeScreenEnabled,
   );
 
   static const Object _unset = Object();
@@ -114,6 +121,7 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyAppLock = 'security.applock.enabled';
   static const _keyRetentionDays = 'privacy.retention.days';
   static const _keyPrivacyAccepted = 'privacy.accepted';
+  static const _keyWakeScreen = 'reminder.wakescreen';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -133,6 +141,7 @@ class AppSettingsController extends Notifier<AppSettings> {
       appLockEnabled: prefs.getBool(_keyAppLock) ?? false,
       retentionDays: prefs.getInt(_keyRetentionDays) ?? 90,
       privacyAccepted: prefs.getBool(_keyPrivacyAccepted) ?? false,
+      wakeScreenEnabled: prefs.getBool(_keyWakeScreen) ?? false,
     );
   }
 
@@ -200,6 +209,11 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setPrivacyAccepted(bool accepted) async {
     await _prefs.setBool(_keyPrivacyAccepted, accepted);
     state = state.copyWith(privacyAccepted: accepted);
+  }
+
+  Future<void> setWakeScreenEnabled(bool enabled) async {
+    await _prefs.setBool(_keyWakeScreen, enabled);
+    state = state.copyWith(wakeScreenEnabled: enabled);
   }
 }
 

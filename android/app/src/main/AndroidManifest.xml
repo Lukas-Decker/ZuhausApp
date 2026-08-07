@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Optionaler Wecker-Modus: Bildschirm aufwecken und Erinnerung ueber dem
+         Sperrbildschirm zeigen. Ab Android 14 muss der Nutzer das zusaetzlich
+         in den Systemeinstellungen erlauben. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <!-- Kamera fuer den Barcode-Scanner (mobile_scanner). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />

@@ -54,6 +54,8 @@ class AppShell extends ConsumerWidget {
     ref.watch(petTaskTitleRepairProvider);
     // Holt die Android-Benachrichtigungsberechtigung, falls sie noch fehlt.
     ref.watch(notificationPermissionRequestProvider);
+    // Haelt den Wecker-Modus der Erinnerungen aktuell.
+    ref.watch(wakeScreenSyncProvider);
 
     // Beim Tab-Wechsel einen Abgleich anstossen.
     void onNavigate() =>

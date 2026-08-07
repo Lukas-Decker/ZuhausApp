@@ -136,6 +136,27 @@ class SettingsScreen extends ConsumerWidget {
           const _SectionHeader('Erinnerungen'),
           const _NotificationPermissionTile(),
           SwitchListTile(
+            secondary: const Icon(Icons.alarm_on_rounded),
+            value: settings.wakeScreenEnabled,
+            onChanged: (value) async {
+              if (value) {
+                // Ab Android 14 braucht der Wecker-Modus eine Sonderfreigabe.
+                await ref
+                    .read(notificationServiceProvider)
+                    .requestFullScreenIntentPermission();
+              }
+              await ref
+                  .read(appSettingsProvider.notifier)
+                  .setWakeScreenEnabled(value);
+            },
+            title: const Text('Wie ein Wecker'),
+            subtitle: const Text(
+              'Weckt den Bildschirm und zeigt die Erinnerung über dem '
+              'Sperrbildschirm. Gilt für neu geplante Erinnerungen.',
+            ),
+            isThreeLine: true,
+          ),
+          SwitchListTile(
             secondary: const Icon(Icons.medication_rounded),
             value: settings.medicationRemindersEnabled,
             onChanged: ref

@@ -53,6 +53,10 @@ class HouseholdScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Fehler: $error')),
         data: (list) => ListView(
+          // Platz fuer die Systemleiste am unteren Rand.
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewPaddingOf(context).bottom,
+          ),
           children: [
             const _SectionHeader('Mitglieder'),
             for (final member in list)

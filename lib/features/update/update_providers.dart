@@ -235,6 +235,13 @@ final updateInstallerProvider = Provider<UpdateInstaller>((ref) {
 final updateControllerProvider =
     NotifierProvider<UpdateController, UpdateStatus>(UpdateController.new);
 
+/// Prozessorart des Geraets (z. B. arm64-v8a), oder `null` wo es keine Rolle
+/// spielt. Nur zur Anzeige: welche APK man von Hand nehmen muss.
+final deviceAbiProvider = FutureProvider<String?>((ref) async {
+  final abis = await ref.watch(updateInstallerProvider).supportedAbis();
+  return abis.isEmpty ? null : abis.first;
+});
+
 /// Prüft beim Start und danach alle sechs Stunden, solange die Automatik in
 /// den Einstellungen an ist.
 final updateAutoCheckProvider = Provider<void>((ref) {

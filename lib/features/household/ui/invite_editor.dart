@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/household/household_role.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../household_actions.dart';
 
 /// Konfiguriert eine neue Einladung und zeigt den erzeugten Code.
@@ -52,7 +53,7 @@ class _InviteEditorState extends ConsumerState<InviteEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),

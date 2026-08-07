@@ -37,6 +37,10 @@ class AuditLogScreen extends ConsumerWidget {
           }
           final format = DateFormat('dd.MM.yyyy HH:mm', 'de');
           return ListView.separated(
+            // Platz fuer die Systemleiste am unteren Rand.
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewPaddingOf(context).bottom,
+            ),
             itemCount: list.length,
             separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {

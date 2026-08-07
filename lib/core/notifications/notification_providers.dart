@@ -21,13 +21,20 @@ final notificationPermissionsProvider =
       })
     >((ref) => ref.watch(notificationServiceProvider).checkPermissions());
 
-/// Reicht den Wecker-Schalter aus den Einstellungen an den Dienst durch, damit
-/// neue Erinnerungen entsprechend zugestellt werden. In der AppShell beobachtet.
+/// Reicht Wecker-Modus, Timeout, Ton und Vibration aus den Einstellungen an
+/// den Dienst durch, damit neue Erinnerungen entsprechend zugestellt werden.
+/// In der AppShell beobachtet.
+///
+/// Wirkt auf neu geplante Erinnerungen: Android friert die Eigenschaften eines
+/// Kanals beim Anlegen ein, deshalb traegt jede Kombination eine eigene
+/// Kanal-Kennung.
 final wakeScreenSyncProvider = Provider<void>((ref) {
-  final enabled = ref.watch(
-    appSettingsProvider.select((s) => s.wakeScreenEnabled),
-  );
-  ref.watch(notificationServiceProvider).wakeScreen = enabled;
+  final settings = ref.watch(appSettingsProvider);
+  final service = ref.watch(notificationServiceProvider);
+  service.wakeScreen = settings.wakeScreenEnabled;
+  service.wakeTimeoutMinutes = settings.wakeTimeoutMinutes;
+  service.soundEnabled = settings.reminderSoundEnabled;
+  service.vibrationEnabled = settings.reminderVibrationEnabled;
 });
 
 /// Fragt beim Start einmalig die Benachrichtigungsberechtigung an, wenn sie

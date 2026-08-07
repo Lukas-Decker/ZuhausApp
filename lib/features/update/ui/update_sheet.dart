@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/app_info.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../update_providers.dart';
 
 /// Zeigt den Update-Hinweis.
@@ -26,9 +27,15 @@ Future<void> showUpdateSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => const Padding(
-      padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: UpdateSheetBody(mandatory: false),
+    builder: (sheetContext) => Padding(
+      // Unten die Systemleiste (Gestenbalken oder Zurueck-Knoepfe) mitrechnen.
+      padding: EdgeInsets.fromLTRB(
+        24,
+        0,
+        24,
+        24 + sheetBottomInset(sheetContext),
+      ),
+      child: const UpdateSheetBody(mandatory: false),
     ),
   );
 }

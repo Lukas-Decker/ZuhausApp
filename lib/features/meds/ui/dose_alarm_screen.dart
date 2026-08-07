@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/notifications/notification_providers.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/providers.dart';
+import '../../../core/settings/app_settings.dart';
 import '../../../core/scope/app_scope.dart';
 import '../../../data/db/app_database.dart';
 import '../domain/medication_schedule.dart';
@@ -15,7 +18,7 @@ import '../meds_providers.dart';
 /// Wird geoeffnet, wenn eine Erinnerung angetippt wird - auch aus einer
 /// Vollbild-Meldung ueber dem Sperrbildschirm. Bewusst gross und mit wenigen,
 /// eindeutigen Aktionen, damit man sie halb wach bedienen kann.
-class DoseAlarmScreen extends ConsumerWidget {
+class DoseAlarmScreen extends ConsumerStatefulWidget {
   const DoseAlarmScreen({
     super.key,
     required this.planId,
@@ -26,7 +29,35 @@ class DoseAlarmScreen extends ConsumerWidget {
   final DateTime scheduledFor;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DoseAlarmScreen> createState() => _DoseAlarmScreenState();
+}
+
+class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
+  Timer? _timeout;
+
+  @override
+  void initState() {
+    super.initState();
+    // Reagiert niemand, schliesst sich der Schirm von selbst: sonst leuchtet
+    // das Telefon die ganze Nacht. Die Einnahme bleibt faellig.
+    final minutes = ref.read(appSettingsProvider).wakeTimeoutMinutes;
+    if (minutes > 0) {
+      _timeout = Timer(Duration(minutes: minutes), () {
+        if (mounted) _close(context);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timeout?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final planId = widget.planId;
+    final scheduledFor = widget.scheduledFor;
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(

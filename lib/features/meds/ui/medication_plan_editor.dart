@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
 import '../domain/medication_schedule.dart';
 import '../meds_providers.dart';
@@ -95,7 +96,7 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
   @override
   Widget build(BuildContext context) {
     final scope = ref.watch(activeScopeProvider);
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),

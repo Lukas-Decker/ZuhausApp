@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
 import '../domain/pet_types.dart';
 import '../pets_providers.dart';
@@ -67,7 +68,7 @@ class _PetHealthEditorState extends ConsumerState<PetHealthEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),

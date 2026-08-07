@@ -37,6 +37,9 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Einstellungen')),
       body: ListView(
+        // Ohne diesen Abstand sitzt der letzte Eintrag unter der Systemleiste
+        // (Gestenbalken bzw. Zurueck-Knoepfe) und bleibt halb verdeckt.
+        padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
         children: [
           const _SectionHeader('Diagnose (Testphase)'),
           const _DebugLogTile(),
@@ -107,7 +110,7 @@ class SettingsScreen extends ConsumerWidget {
                     leading: Icon(Icons.info_outline),
                     title: Text('Noch kein Haushalt'),
                     subtitle: Text(
-                      '�ober den Kontext-Umschalter kannst du einen erstellen '
+                      'Über den Kontext-Umschalter kannst du einen erstellen '
                       'oder beitreten.',
                     ),
                   )
@@ -138,6 +141,29 @@ class SettingsScreen extends ConsumerWidget {
           const _SectionHeader('Erinnerungen'),
           const _NotificationPermissionTile(),
           const _WakeScreenTile(),
+          const _WakeTimeoutTile(),
+          SwitchListTile(
+            secondary: const Icon(Icons.volume_up_rounded),
+            value: settings.reminderSoundEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setReminderSoundEnabled,
+            title: const Text('Ton'),
+            subtitle: const Text('Erinnerungen mit Klang ankündigen.'),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.vibration_rounded),
+            value: settings.reminderVibrationEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setReminderVibrationEnabled,
+            title: const Text('Vibration'),
+            subtitle: Text(
+              settings.wakeScreenEnabled
+                  ? 'Im Wecker-Modus mit kräftigem, langem Muster.'
+                  : 'Erinnerungen spürbar machen.',
+            ),
+          ),
           SwitchListTile(
             secondary: const Icon(Icons.medication_rounded),
             value: settings.medicationRemindersEnabled,
@@ -306,11 +332,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
           const _SectionHeader('Über'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text(appName),
-            subtitle: Text('Version $appVersion'),
-          ),
+          const _AboutTile(),
         ],
       ),
     );
@@ -568,6 +590,74 @@ class _SyncTile extends ConsumerWidget {
             ? null
             : () => ref.read(syncControllerProvider.notifier).syncNow(),
         icon: const Icon(Icons.refresh_rounded),
+      ),
+    );
+  }
+}
+
+/// Wie lange eine Wecker-Erinnerung durchhält, bevor sie von selbst aufhört.
+class _WakeTimeoutTile extends ConsumerWidget {
+  const _WakeTimeoutTile();
+
+  // Kurze Beschriftungen: der Auswahlknopf sitzt am rechten Rand und darf
+  // auf schmalen Telefonen nicht überlaufen.
+  static const _choices = <int, String>{
+    1: '1 Min.',
+    2: '2 Min.',
+    5: '5 Min.',
+    10: '10 Min.',
+    0: 'Nie',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    final active = settings.wakeScreenEnabled;
+
+    return ListTile(
+      enabled: active,
+      leading: const Icon(Icons.timer_outlined),
+      title: const Text('Wecker hört auf nach'),
+      subtitle: Text(
+        active
+            ? 'Meldung verschwindet und der Vollbild-Schirm schließt sich.'
+            : 'Nur im Wecker-Modus.',
+      ),
+      trailing: DropdownButton<int>(
+        value: settings.wakeTimeoutMinutes,
+        onChanged: active
+            ? (value) {
+                if (value == null) return;
+                ref
+                    .read(appSettingsProvider.notifier)
+                    .setWakeTimeoutMinutes(value);
+              }
+            : null,
+        items: [
+          for (final entry in _choices.entries)
+            DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+        ],
+      ),
+      isThreeLine: false,
+    );
+  }
+}
+
+/// Name, Version und Prozessorart des Geräts.
+///
+/// Die Prozessorart steht hier, weil beim Weitergeben oder beim Installieren
+/// von Hand die passende der drei APKs gewählt werden muss.
+class _AboutTile extends ConsumerWidget {
+  const _AboutTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final abi = ref.watch(deviceAbiProvider).value;
+    return ListTile(
+      leading: const Icon(Icons.info_outline),
+      title: const Text(appName),
+      subtitle: Text(
+        abi == null ? 'Version $appVersion' : 'Version $appVersion  -  $abi',
       ),
     );
   }

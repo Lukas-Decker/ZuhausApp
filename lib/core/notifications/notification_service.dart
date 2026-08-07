@@ -359,6 +359,27 @@ class NotificationService {
   /// Sperrbildschirm anzeigen. Wird aus den Einstellungen gesetzt.
   bool wakeScreen = false;
 
+  /// Minuten, nach denen eine Wecker-Meldung von selbst verschwindet.
+  /// 0 heisst: bleibt liegen, bis jemand reagiert.
+  int wakeTimeoutMinutes = 2;
+
+  /// Ob Erinnerungen einen Ton abspielen bzw. vibrieren.
+  bool soundEnabled = true;
+  bool vibrationEnabled = true;
+
+  /// Kraeftiges Muster fuer den Wecker-Modus: lange Stoesse mit Pausen,
+  /// deutlich hartnaeckiger als das kurze Standard-Zucken.
+  static final Int64List _alarmVibration = Int64List.fromList(const [
+    0,
+    800,
+    400,
+    800,
+    400,
+    800,
+    400,
+    1200,
+  ]);
+
   /// Fragt die Android-Sonderberechtigung fuer Vollbild-Meldungen an
   /// (ab Android 14 noetig, davor automatisch erteilt).
   Future<bool> requestFullScreenIntentPermission() async {
@@ -422,12 +443,24 @@ class NotificationService {
 
     final isMed = channel == _medicationChannelId;
 
-    // Android friert die Einstellungen eines Kanals beim Anlegen ein. Fuer den
-    // Wecker-Modus braucht es deshalb einen eigenen Kanal, sonst bliebe die
-    // urspruengliche (niedrigere) Wichtigkeit bestehen.
+    // Android friert die Einstellungen eines Kanals beim Anlegen ein. Jede
+    // Kombination bekommt deshalb einen eigenen Kanal, sonst bliebe die
+    // urspruengliche Wichtigkeit bzw. Ton/Vibration bestehen.
     final wake = wakeScreen;
-    final channelId = wake ? '$channel$_wakeChannelSuffix' : channel;
-    final channelName = wake ? '$name (Wecker)' : name;
+    final variants = [
+      if (wake) 'Wecker',
+      if (!soundEnabled) 'ohne Ton',
+      if (!vibrationEnabled) 'ohne Vibration',
+    ];
+    final channelId = [
+      channel,
+      if (wake) _wakeChannelSuffix,
+      if (!soundEnabled) '_ns',
+      if (!vibrationEnabled) '_nv',
+    ].join();
+    final channelName = variants.isEmpty
+        ? name
+        : '$name (${variants.join(', ')})';
 
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -442,6 +475,14 @@ class NotificationService {
         // Weckt den Bildschirm und zeigt die Meldung ueber dem Sperrbildschirm.
         fullScreenIntent: wake,
         visibility: wake ? NotificationVisibility.public : null,
+        // Damit der Wecker nicht endlos leuchtet: Android nimmt die Meldung
+        // nach dieser Zeit selbst wieder weg.
+        timeoutAfter: wake && wakeTimeoutMinutes > 0
+            ? wakeTimeoutMinutes * 60 * 1000
+            : null,
+        playSound: soundEnabled,
+        enableVibration: vibrationEnabled,
+        vibrationPattern: vibrationEnabled && wake ? _alarmVibration : null,
         audioAttributesUsage: wake
             ? AudioAttributesUsage.alarm
             : AudioAttributesUsage.notification,

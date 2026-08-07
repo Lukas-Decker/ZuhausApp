@@ -21,6 +21,9 @@ class AppSettings {
     required this.retentionDays,
     required this.privacyAccepted,
     required this.wakeScreenEnabled,
+    required this.wakeTimeoutMinutes,
+    required this.reminderSoundEnabled,
+    required this.reminderVibrationEnabled,
     required this.updateCheckEnabled,
   });
 
@@ -71,6 +74,17 @@ class AppSettings {
   /// Sperrbildschirm anzeigen. Bewusst standardmaessig aus, weil aufdringlich.
   final bool wakeScreenEnabled;
 
+  /// Nach wie vielen Minuten eine Wecker-Erinnerung von selbst aufhört:
+  /// die Meldung verschwindet, der Vollbild-Schirm schließt sich.
+  /// 0 bedeutet: bleibt, bis jemand reagiert.
+  final int wakeTimeoutMinutes;
+
+  /// Ob Erinnerungen einen Ton abspielen.
+  final bool reminderSoundEnabled;
+
+  /// Ob Erinnerungen vibrieren.
+  final bool reminderVibrationEnabled;
+
   /// Beim Start und alle sechs Stunden nachsehen, ob auf dem Server eine
   /// neuere Version liegt.
   final bool updateCheckEnabled;
@@ -89,6 +103,9 @@ class AppSettings {
     int? retentionDays,
     bool? privacyAccepted,
     bool? wakeScreenEnabled,
+    int? wakeTimeoutMinutes,
+    bool? reminderSoundEnabled,
+    bool? reminderVibrationEnabled,
     bool? updateCheckEnabled,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
@@ -109,6 +126,10 @@ class AppSettings {
     retentionDays: retentionDays ?? this.retentionDays,
     privacyAccepted: privacyAccepted ?? this.privacyAccepted,
     wakeScreenEnabled: wakeScreenEnabled ?? this.wakeScreenEnabled,
+    wakeTimeoutMinutes: wakeTimeoutMinutes ?? this.wakeTimeoutMinutes,
+    reminderSoundEnabled: reminderSoundEnabled ?? this.reminderSoundEnabled,
+    reminderVibrationEnabled:
+        reminderVibrationEnabled ?? this.reminderVibrationEnabled,
     updateCheckEnabled: updateCheckEnabled ?? this.updateCheckEnabled,
   );
 
@@ -129,6 +150,9 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyRetentionDays = 'privacy.retention.days';
   static const _keyPrivacyAccepted = 'privacy.accepted';
   static const _keyWakeScreen = 'reminder.wakescreen';
+  static const _keyWakeTimeout = 'reminder.wakescreen.timeout';
+  static const _keySound = 'reminder.sound';
+  static const _keyVibration = 'reminder.vibration';
   static const _keyUpdateCheck = 'update.check.enabled';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
@@ -150,6 +174,9 @@ class AppSettingsController extends Notifier<AppSettings> {
       retentionDays: prefs.getInt(_keyRetentionDays) ?? 90,
       privacyAccepted: prefs.getBool(_keyPrivacyAccepted) ?? false,
       wakeScreenEnabled: prefs.getBool(_keyWakeScreen) ?? false,
+      wakeTimeoutMinutes: prefs.getInt(_keyWakeTimeout) ?? 2,
+      reminderSoundEnabled: prefs.getBool(_keySound) ?? true,
+      reminderVibrationEnabled: prefs.getBool(_keyVibration) ?? true,
       updateCheckEnabled: prefs.getBool(_keyUpdateCheck) ?? true,
     );
   }
@@ -223,6 +250,21 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setWakeScreenEnabled(bool enabled) async {
     await _prefs.setBool(_keyWakeScreen, enabled);
     state = state.copyWith(wakeScreenEnabled: enabled);
+  }
+
+  Future<void> setWakeTimeoutMinutes(int minutes) async {
+    await _prefs.setInt(_keyWakeTimeout, minutes);
+    state = state.copyWith(wakeTimeoutMinutes: minutes);
+  }
+
+  Future<void> setReminderSoundEnabled(bool enabled) async {
+    await _prefs.setBool(_keySound, enabled);
+    state = state.copyWith(reminderSoundEnabled: enabled);
+  }
+
+  Future<void> setReminderVibrationEnabled(bool enabled) async {
+    await _prefs.setBool(_keyVibration, enabled);
+    state = state.copyWith(reminderVibrationEnabled: enabled);
   }
 
   Future<void> setUpdateCheckEnabled(bool enabled) async {

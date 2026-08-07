@@ -13,6 +13,7 @@ import '../features/pets/pets_providers.dart';
 import '../features/privacy/privacy_providers.dart';
 import '../features/push/push_providers.dart';
 import '../features/sync/sync_providers.dart';
+import '../features/update/ui/post_update_prompt.dart';
 import '../features/update/ui/update_prompt.dart';
 import '../features/update/update_providers.dart';
 import 'navigation.dart';
@@ -75,6 +76,8 @@ class AppShell extends ConsumerWidget {
           const SafeArea(bottom: false, child: ScopeBanner()),
           // Zeigt den Update-Hinweis, sobald eine Pruefung faellig war.
           const UpdatePrompt(),
+          // Prueft nach einem Update die Freigabe fuer den Wecker-Modus.
+          const PostUpdatePrompt(),
           // Der Kontextbanner hat die Statusleiste oben bereits abgedeckt.
           // Ohne dieses removeTop wuerde die Modul-Kopfzeile die Statusleisten-
           // Hoehe ein zweites Mal reservieren (leerer Streifen ueber dem Titel).

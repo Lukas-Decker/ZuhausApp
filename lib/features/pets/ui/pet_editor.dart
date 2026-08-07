@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
 import '../../inventory/domain/measurement_unit.dart';
 import '../../inventory/inventory_providers.dart';
@@ -76,7 +77,7 @@ class _PetEditorState extends ConsumerState<PetEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
     final inventory = ref.watch(inventoryItemsProvider).value ?? const [];
 
     return Padding(

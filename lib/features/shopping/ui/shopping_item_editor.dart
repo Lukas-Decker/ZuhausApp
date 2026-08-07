@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
 import '../../inventory/domain/measurement_unit.dart';
 import '../domain/shopping_category.dart';
@@ -100,7 +101,7 @@ class _ShoppingItemEditorState extends ConsumerState<ShoppingItemEditor> {
   @override
   Widget build(BuildContext context) {
     final scope = ref.watch(activeScopeProvider);
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
 import '../data/open_food_facts_service.dart';
 import '../domain/measurement_unit.dart';
@@ -101,7 +102,7 @@ class _InventoryItemEditorState extends ConsumerState<InventoryItemEditor> {
   Widget build(BuildContext context) {
     final scope = ref.watch(activeScopeProvider);
     final locations = ref.watch(storageLocationsProvider).value ?? const [];
-    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomInset = sheetBottomInset(context);
 
     // Hat der Artikel Chargen, verwalten diese Menge und MHD automatisch.
     final batches = _isEdit

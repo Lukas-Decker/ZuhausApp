@@ -43,9 +43,9 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
 
     // Reagiert niemand, schliesst sich der Schirm von selbst: sonst leuchtet
     // das Telefon die ganze Nacht. Die Einnahme bleibt faellig.
-    final minutes = settings.wakeTimeoutMinutes;
-    if (minutes > 0) {
-      _timeout = Timer(Duration(minutes: minutes), () {
+    final seconds = settings.wakeTimeoutSeconds;
+    if (seconds > 0) {
+      _timeout = Timer(Duration(seconds: seconds), () {
         _stopVibration();
         if (mounted) _close(context);
       });
@@ -63,7 +63,7 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
       _vibrating = true;
       ref
           .read(notificationServiceProvider)
-          .startAlarmVibration(maxMinutes: minutes > 0 ? minutes : 2);
+          .startAlarmVibration(maxSeconds: seconds > 0 ? seconds : 120);
     }
   }
 
@@ -71,7 +71,9 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
   void dispose() {
     _timeout?.cancel();
     _stopVibration();
-    ref.read(notificationServiceProvider).setShowWhenLocked(false);
+    // Nimmt das Sperrbildschirm-Recht zurueck UND geht bei gesperrtem Telefon
+    // in den Hintergrund. Ohne den zweiten Teil bliebe die App bedienbar.
+    ref.read(notificationServiceProvider).endAlarmPresentation();
     super.dispose();
   }
 

@@ -43,7 +43,7 @@ final wakeScreenSyncProvider = Provider<void>((ref) {
   final service = ref.watch(notificationServiceProvider);
   service.wakeScreen = settings.wakeScreenEnabled;
   service.dndBypassAllowed = dndAllowed;
-  service.wakeTimeoutMinutes = settings.wakeTimeoutMinutes;
+  service.wakeTimeoutSeconds = settings.wakeTimeoutSeconds;
   service.soundEnabled = settings.reminderSoundEnabled;
   service.vibrationEnabled = settings.reminderVibrationEnabled;
 });

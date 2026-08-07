@@ -1,5 +1,6 @@
 package de.lukas.multiapp
 
+import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -76,11 +77,25 @@ class MainActivity : FlutterFragmentActivity() {
     /// ruft kein onStop auf. Bleibt der Wecker-Schirm also aus irgendeinem
     /// Grund offen, wuerde das Recht nicht zurueckgenommen. Deshalb laeuft es
     /// zusaetzlich nach [SHOW_WHEN_LOCKED_MAX_MILLIS] von selbst ab.
+    /// Beendet die Wecker-Anzeige und geht hinter den Sperrbildschirm zurueck.
+    ///
+    /// Das Zuruecknehmen des Rechts allein genuegt nicht: es entscheidet nur,
+    /// ob eine Activity ueber der Sperre erscheinen DARF. Steht sie schon da,
+    /// bleibt sie stehen und waere weiter bedienbar. Deshalb wird die App bei
+    /// gesperrtem Telefon aktiv in den Hintergrund geschickt; ist das Telefon
+    /// entsperrt, bleibt alles wie es ist.
+    private fun endAlarmPresentation() {
+        applyShowWhenLocked(false)
+        val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        if (keyguard.isKeyguardLocked) moveTaskToBack(true)
+    }
+
     private fun applyShowWhenLocked(allow: Boolean) {
         showWhenLockedStop?.let { mainHandler.removeCallbacks(it) }
         showWhenLockedStop = null
         if (allow) {
-            showWhenLockedStop = Runnable { applyShowWhenLocked(false) }
+            // Notbremse: greift auch, wenn der Wecker-Schirm nie schliesst.
+            showWhenLockedStop = Runnable { endAlarmPresentation() }
             mainHandler.postDelayed(
                 showWhenLockedStop!!,
                 SHOW_WHEN_LOCKED_MAX_MILLIS
@@ -148,6 +163,10 @@ class MainActivity : FlutterFragmentActivity() {
                     // die Erinnerung nicht ueber onCreate herein.
                     "setShowWhenLocked" -> {
                         applyShowWhenLocked(call.argument<Boolean>("allow") == true)
+                        result.success(null)
+                    }
+                    "endAlarmPresentation" -> {
+                        endAlarmPresentation()
                         result.success(null)
                     }
                     else -> result.notImplemented()

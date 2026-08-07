@@ -600,12 +600,13 @@ class _WakeTimeoutTile extends ConsumerWidget {
   const _WakeTimeoutTile();
 
   // Kurze Beschriftungen: der Auswahlknopf sitzt am rechten Rand und darf
-  // auf schmalen Telefonen nicht überlaufen.
+  // auf schmalen Telefonen nicht überlaufen. Werte in Sekunden.
   static const _choices = <int, String>{
-    1: '1 Min.',
-    2: '2 Min.',
-    5: '5 Min.',
-    10: '10 Min.',
+    30: '30 Sek.',
+    60: '1 Min.',
+    120: '2 Min.',
+    300: '5 Min.',
+    600: '10 Min.',
     0: 'Nie',
   };
 
@@ -624,13 +625,17 @@ class _WakeTimeoutTile extends ConsumerWidget {
             : 'Nur im Wecker-Modus.',
       ),
       trailing: DropdownButton<int>(
-        value: settings.wakeTimeoutMinutes,
+        // Ein alter, in Minuten gespeicherter Wert kann von der Liste
+        // abweichen; dann faellt die Anzeige auf 2 Minuten zurueck.
+        value: _choices.containsKey(settings.wakeTimeoutSeconds)
+            ? settings.wakeTimeoutSeconds
+            : 120,
         onChanged: active
             ? (value) {
                 if (value == null) return;
                 ref
                     .read(appSettingsProvider.notifier)
-                    .setWakeTimeoutMinutes(value);
+                    .setWakeTimeoutSeconds(value);
               }
             : null,
         items: [

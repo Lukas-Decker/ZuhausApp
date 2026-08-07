@@ -370,9 +370,9 @@ class NotificationService {
   /// Sperrbildschirm anzeigen. Wird aus den Einstellungen gesetzt.
   bool wakeScreen = false;
 
-  /// Minuten, nach denen eine Wecker-Meldung von selbst verschwindet.
+  /// Sekunden, nach denen eine Wecker-Meldung von selbst verschwindet.
   /// 0 heisst: bleibt liegen, bis jemand reagiert.
-  int wakeTimeoutMinutes = 2;
+  int wakeTimeoutSeconds = 120;
 
   /// Ob Erinnerungen einen Ton abspielen bzw. vibrieren.
   bool soundEnabled = true;
@@ -458,13 +458,13 @@ class NotificationService {
   /// Lässt das Gerät im Wecker-Muster vibrieren, unabhängig davon, ob die
   /// Vibration für Benachrichtigungen abgeschaltet ist.
   ///
-  /// [maxMinutes] ist eine harte Obergrenze auf der nativen Seite: bleibt
+  /// [maxSeconds] ist eine harte Obergrenze auf der nativen Seite: bleibt
   /// [stopAlarmVibration] aus, hört es trotzdem auf.
-  Future<void> startAlarmVibration({int maxMinutes = 2}) async {
+  Future<void> startAlarmVibration({int maxSeconds = 120}) async {
     if (!Platform.isAndroid) return;
     try {
       await _wakeChannel.invokeMethod<void>('startAlarmVibration', {
-        'maxMillis': maxMinutes.clamp(1, 15) * 60 * 1000,
+        'maxMillis': maxSeconds.clamp(5, 15 * 60) * 1000,
       });
     } catch (error) {
       DebugLog.instance.warn('notifications', 'Vibration', error: error);
@@ -486,6 +486,24 @@ class NotificationService {
       DebugLog.instance.warn(
         'notifications',
         'Sperrbildschirm-Anzeige nicht umschaltbar',
+        error: error,
+      );
+    }
+  }
+
+  /// Beendet die Wecker-Anzeige: nimmt das Sperrbildschirm-Recht zurück und
+  /// schickt die App bei gesperrtem Telefon in den Hintergrund.
+  ///
+  /// Ohne das Zweite bliebe die App bedienbar, sobald sie einmal über der
+  /// Sperre stand: das Recht steuert nur, ob sie erscheinen darf.
+  Future<void> endAlarmPresentation() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('endAlarmPresentation');
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Wecker-Anzeige nicht beendbar',
         error: error,
       );
     }
@@ -576,8 +594,8 @@ class NotificationService {
         visibility: wake ? NotificationVisibility.public : null,
         // Damit der Wecker nicht endlos leuchtet: Android nimmt die Meldung
         // nach dieser Zeit selbst wieder weg.
-        timeoutAfter: wake && wakeTimeoutMinutes > 0
-            ? wakeTimeoutMinutes * 60 * 1000
+        timeoutAfter: wake && wakeTimeoutSeconds > 0
+            ? wakeTimeoutSeconds * 1000
             : null,
         playSound: soundEnabled,
         enableVibration: vibrationEnabled,

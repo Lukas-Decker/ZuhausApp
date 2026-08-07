@@ -65,7 +65,7 @@ final medicationReminderSyncProvider = Provider<void>((ref) {
     appSettingsProvider.select(
       (s) => (
         s.wakeScreenEnabled,
-        s.wakeTimeoutMinutes,
+        s.wakeTimeoutSeconds,
         s.reminderSoundEnabled,
         s.reminderVibrationEnabled,
       ),

@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.19.0+36
+version: 0.19.1+37
 
 environment:
   sdk: ^3.12.2

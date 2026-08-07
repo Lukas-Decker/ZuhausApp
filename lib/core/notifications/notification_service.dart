@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -58,6 +59,9 @@ class NotificationService {
 
   /// Anhang fuer die Wecker-Varianten der Kanaele (siehe [_detailsFor]).
   static const _wakeChannelSuffix = '_wake';
+
+  /// Kanal zur nativen Seite (Statusabfrage fuer Vollbild-Meldungen).
+  static const _wakeChannel = MethodChannel('de.lukas.multiapp/wake');
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _ready = false;
@@ -173,10 +177,20 @@ class NotificationService {
   /// [notificationsAllowed] ist die POST_NOTIFICATIONS-Berechtigung (Android
   /// 13+), [exactAlarmsAllowed] das Recht "Alarme & Erinnerungen" (Android
   /// 12+). Ohne letzteres kommen zeitgenaue Erinnerungen nicht an.
-  Future<({bool notificationsAllowed, bool exactAlarmsAllowed})>
+  Future<
+    ({
+      bool notificationsAllowed,
+      bool exactAlarmsAllowed,
+      bool fullScreenAllowed,
+    })
+  >
   checkPermissions() async {
     if (!_supported) {
-      return (notificationsAllowed: false, exactAlarmsAllowed: false);
+      return (
+        notificationsAllowed: false,
+        exactAlarmsAllowed: false,
+        fullScreenAllowed: false,
+      );
     }
     try {
       final android = _plugin
@@ -188,13 +202,26 @@ class NotificationService {
           notificationsAllowed: await android.areNotificationsEnabled() ?? false,
           exactAlarmsAllowed:
               await android.canScheduleExactNotifications() ?? true,
+          fullScreenAllowed: await canUseFullScreenIntent(),
         );
       }
       // Andere Plattformen kennen diese Trennung nicht.
-      return (notificationsAllowed: true, exactAlarmsAllowed: true);
+      return (
+        notificationsAllowed: true,
+        exactAlarmsAllowed: true,
+        fullScreenAllowed: true,
+      );
     } catch (error) {
-      debugPrint('checkPermissions fehlgeschlagen: $error');
-      return (notificationsAllowed: false, exactAlarmsAllowed: false);
+      DebugLog.instance.warn(
+        'notifications',
+        'Rechte konnten nicht geprueft werden',
+        error: error,
+      );
+      return (
+        notificationsAllowed: false,
+        exactAlarmsAllowed: false,
+        fullScreenAllowed: false,
+      );
     }
   }
 
@@ -342,11 +369,34 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin
           >();
       if (android == null) return true;
-      return await android.requestFullScreenIntentPermission() ?? false;
+      await android.requestFullScreenIntentPermission();
+      // Der Rueckgabewert der Anfrage sagt nur, dass die Systemseite geoeffnet
+      // wurde. Den echten Stand liefert erst die Abfrage danach.
+      return canUseFullScreenIntent();
     } catch (error) {
       DebugLog.instance.warn(
         'notifications',
         'Vollbild-Berechtigung nicht anfragbar',
+        error: error,
+      );
+      return false;
+    }
+  }
+
+  /// Ob Vollbild-Meldungen (Bildschirm aufwecken) erlaubt sind.
+  ///
+  /// Fragt nativ nach; ab Android 14 muss der Nutzer das eigens freigeben.
+  Future<bool> canUseFullScreenIntent() async {
+    if (!_platformSupported || !Platform.isAndroid) return false;
+    try {
+      final result = await _wakeChannel.invokeMethod<bool>(
+        'canUseFullScreenIntent',
+      );
+      return result ?? false;
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Vollbild-Status nicht abfragbar',
         error: error,
       );
       return false;

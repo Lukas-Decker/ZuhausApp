@@ -135,27 +135,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const _SectionHeader('Erinnerungen'),
           const _NotificationPermissionTile(),
-          SwitchListTile(
-            secondary: const Icon(Icons.alarm_on_rounded),
-            value: settings.wakeScreenEnabled,
-            onChanged: (value) async {
-              if (value) {
-                // Ab Android 14 braucht der Wecker-Modus eine Sonderfreigabe.
-                await ref
-                    .read(notificationServiceProvider)
-                    .requestFullScreenIntentPermission();
-              }
-              await ref
-                  .read(appSettingsProvider.notifier)
-                  .setWakeScreenEnabled(value);
-            },
-            title: const Text('Wie ein Wecker'),
-            subtitle: const Text(
-              'Weckt den Bildschirm und zeigt die Erinnerung über dem '
-              'Sperrbildschirm. Gilt für neu geplante Erinnerungen.',
-            ),
-            isThreeLine: true,
-          ),
+          const _WakeScreenTile(),
           SwitchListTile(
             secondary: const Icon(Icons.medication_rounded),
             value: settings.medicationRemindersEnabled,
@@ -612,6 +592,84 @@ class _DebugLogTile extends StatelessWidget {
           onTap: () => DebugLogScreen.show(context),
         );
       },
+    );
+  }
+}
+
+/// Schalter fuer den Wecker-Modus, samt echtem Freigabe-Status.
+///
+/// Ab Android 14 nuetzt der Schalter allein nichts: ohne die Sonderfreigabe
+/// "Vollbild-Benachrichtigungen" bleibt der Bildschirm dunkel. Deshalb wird der
+/// Stand hier angezeigt und laesst sich direkt nachholen.
+class _WakeScreenTile extends ConsumerWidget {
+  const _WakeScreenTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      appSettingsProvider.select((s) => s.wakeScreenEnabled),
+    );
+    final permissions = ref.watch(notificationPermissionsProvider);
+    final allowed = permissions.value?.fullScreenAllowed ?? true;
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        SwitchListTile(
+          secondary: const Icon(Icons.alarm_on_rounded),
+          value: enabled,
+          onChanged: (value) async {
+            if (value) {
+              await ref
+                  .read(notificationServiceProvider)
+                  .requestFullScreenIntentPermission();
+            }
+            await ref
+                .read(appSettingsProvider.notifier)
+                .setWakeScreenEnabled(value);
+            ref.invalidate(notificationPermissionsProvider);
+          },
+          title: const Text('Wie ein Wecker'),
+          subtitle: const Text(
+            'Weckt den Bildschirm und zeigt die Erinnerung über dem '
+            'Sperrbildschirm.',
+          ),
+          isThreeLine: true,
+        ),
+        // Nur zeigen, wenn der Schalter an ist, die Freigabe aber fehlt.
+        if (enabled && !allowed)
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: scheme.errorContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: scheme.onErrorContainer),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Android erlaubt das Aufwecken noch nicht. Ohne diese '
+                    'Freigabe kommt die Meldung, der Bildschirm bleibt aber aus.',
+                    style: TextStyle(color: scheme.onErrorContainer),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () async {
+                    await ref
+                        .read(notificationServiceProvider)
+                        .requestFullScreenIntentPermission();
+                    ref.invalidate(notificationPermissionsProvider);
+                  },
+                  child: const Text('Erlauben'),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

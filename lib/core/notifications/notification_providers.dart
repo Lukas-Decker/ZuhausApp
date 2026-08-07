@@ -13,9 +13,13 @@ final notificationServiceProvider = Provider<NotificationService>(
 /// `ref.invalidate(notificationPermissionsProvider)` nach einer Anfrage neu
 /// auswerten lassen.
 final notificationPermissionsProvider =
-    FutureProvider<({bool notificationsAllowed, bool exactAlarmsAllowed})>(
-      (ref) => ref.watch(notificationServiceProvider).checkPermissions(),
-    );
+    FutureProvider<
+      ({
+        bool notificationsAllowed,
+        bool exactAlarmsAllowed,
+        bool fullScreenAllowed,
+      })
+    >((ref) => ref.watch(notificationServiceProvider).checkPermissions());
 
 /// Reicht den Wecker-Schalter aus den Einstellungen an den Dienst durch, damit
 /// neue Erinnerungen entsprechend zugestellt werden. In der AppShell beobachtet.

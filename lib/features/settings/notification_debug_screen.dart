@@ -80,6 +80,7 @@ class _NotificationDebugScreenState
               children: [
                 _row('Recht: Benachrichtigungen', data.notificationsAllowed),
                 _row('Recht: Alarme & Erinnerungen', data.exactAlarmsAllowed),
+                _row('Recht: Bildschirm aufwecken', data.fullScreenAllowed),
               ],
             ),
           ),
@@ -104,7 +105,7 @@ class _NotificationDebugScreenState
               ),
               FilledButton.tonalIcon(
                 onPressed: () async {
-                  final when = DateTime.now().add(const Duration(minutes: 1));
+                  final when = DateTime.now().add(const Duration(seconds: 10));
                   await service.schedule(
                     ScheduledReminder(
                       id: 999002,
@@ -119,25 +120,29 @@ class _NotificationDebugScreenState
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Geplant. App jetzt schließen und 1 Minute warten.',
+                        'Geplant. Bildschirm jetzt sperren und 10 Sekunden warten.',
                       ),
                     ),
                   );
                   await _reload();
                 },
                 icon: const Icon(Icons.schedule_rounded),
-                label: const Text('In 1 Minute'),
+                label: const Text('In 10 Sekunden'),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            'Kommt "Jetzt anzeigen" an, aber "In 1 Minute" nicht, blockiert '
-            'Android das zeitgenaue Wecken. Das liegt fast immer an der '
+            'Kommt "Jetzt anzeigen" an, aber die geplante nicht, blockiert '
+            'Android das zeitgenaue Wecken. Das liegt dann meist an der '
             'Akku-Optimierung des Herstellers (bei Samsung: Einstellungen → '
             'Akku → Nutzungslimits für Apps → "Apps im Ruhemodus"). Trage '
             '$_appLabel dort als Ausnahme ein bzw. erlaube uneingeschränkte '
-            'Akkunutzung.',
+            'Akkunutzung.\n\n'
+            'Soll auch der Bildschirm angehen, muss oben "Recht: Bildschirm '
+            'aufwecken" auf ja stehen UND der Schalter "Wie ein Wecker" in den '
+            'Einstellungen an sein. Zum Prüfen den Bildschirm sperren, bevor '
+            'die Zeit abläuft.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const Divider(height: 32),

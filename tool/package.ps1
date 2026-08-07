@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
   Baut die App und legt die Artefakte unter dist/ ab:
-    dist/Windows-<version>.zip   (gezippter Release-Ordner)
-    dist/Android-<version>.apk   (Release-APK)
+    dist/Windows-<version>.zip          (gezippter Release-Ordner)
+    dist/Android-<version>-<abi>.apk    (je Prozessorart eine Release-APK)
 
 .DESCRIPTION
   Die Version wird aus pubspec.yaml gelesen (ohne Build-Nummer nach dem +).
@@ -63,7 +63,16 @@ function Invoke-Flutter {
   $previous = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
-    & flutter @FlutterArgs 2>&1 | ForEach-Object { Write-Host $_ }
+    # stderr kommt in PowerShell als ErrorRecord herein. Ohne diese
+    # Umwandlung steht in der Ausgabe nur die nutzlose Zeile
+    # "System.Management.Automation.RemoteException" statt der Meldung.
+    & flutter @FlutterArgs 2>&1 | ForEach-Object {
+      if ($_ -is [System.Management.Automation.ErrorRecord]) {
+        Write-Host $_.Exception.Message
+      } else {
+        Write-Host $_
+      }
+    }
   } finally {
     $ErrorActionPreference = $previous
   }
@@ -102,19 +111,30 @@ function New-WindowsPackage {
 function New-AndroidPackage {
   param([string]$Version, [string[]]$DefineArgs)
 
+  # Eine APK fuer alle Prozessorarten waere ueber 80 MB. Mit --split-per-abi
+  # entsteht je Prozessorart eine, jede rund ein Drittel so gross; der
+  # Update-Kanal reicht dem Geraet dann die passende.
   if (-not $SkipBuild) {
-    Invoke-Flutter (@('build', 'apk', '--release') + $DefineArgs)
+    Invoke-Flutter (@('build', 'apk', '--release', '--split-per-abi') + $DefineArgs)
   }
 
-  $apk = Join-Path $root 'build/app/outputs/flutter-apk/app-release.apk'
-  if (-not (Test-Path $apk)) {
-    throw "APK nicht gefunden ($apk). Erst bauen (ohne -SkipBuild)."
+  $apkDir = Join-Path $root 'build/app/outputs/flutter-apk'
+  $abis = @('arm64-v8a', 'armeabi-v7a', 'x86_64')
+  $found = 0
+
+  foreach ($abi in $abis) {
+    $apk = Join-Path $apkDir "app-$abi-release.apk"
+    if (-not (Test-Path $apk)) { continue }
+    $dest = Join-Path $distDir "Android-$Version-$abi.apk"
+    if (Test-Path $dest) { Remove-Item -LiteralPath $dest -Force }
+    Write-Host "Kopiere APK ($abi) -> $dest" -ForegroundColor Green
+    Copy-Item $apk $dest -Force
+    $found++
   }
 
-  $dest = Join-Path $distDir "Android-$Version.apk"
-  if (Test-Path $dest) { Remove-Item $dest -Force }
-  Write-Host "Kopiere APK -> $dest" -ForegroundColor Green
-  Copy-Item $apk $dest -Force
+  if ($found -eq 0) {
+    throw "Keine APK in $apkDir gefunden. Erst bauen (ohne -SkipBuild)."
+  }
 }
 
 $version = Get-AppVersion

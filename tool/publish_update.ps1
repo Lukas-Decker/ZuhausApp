@@ -5,9 +5,13 @@
 
 .DESCRIPTION
   Laedt hoch:
-    Android-<version>.apk
+    Android-<version>-<abi>.apk   (je Prozessorart eine)
     Windows-<version>.zip
     manifest.json   (Version, Pflichtversion, Aenderungen, Pruefsummen)
+
+  Android wird pro Prozessorart gebaut: eine APK fuer alles waere ueber
+  80 MB und damit groesser als das Upload-Limit des Free-Plans (50 MB).
+  Das Manifest fuehrt alle auf, das Geraet nimmt die passende.
 
   Die App fragt manifest.json ab, vergleicht mit ihrer eigenen Version und
   bietet das Update an. Die Version kommt aus pubspec.yaml.
@@ -148,7 +152,7 @@ if ($Build) {
   if ($LASTEXITCODE -ne 0) { throw "package.ps1 fehlgeschlagen." }
 }
 
-$apkPath = Join-Path $distDir "Android-$version.apk"
+$abis = @('arm64-v8a', 'armeabi-v7a', 'x86_64')
 $zipPath = Join-Path $distDir "Windows-$version.zip"
 
 $manifest = [ordered]@{
@@ -174,11 +178,20 @@ if (-not $Notes) {
 if ($Notes) { $manifest['notes'] = $Notes }
 
 $uploads = @()
-if (Test-Path $apkPath) {
-  $manifest['android'] = New-AssetInfo -Path $apkPath -PublicBase $publicBase
-  $uploads += , @($apkPath, "Android-$version.apk", 'application/vnd.android.package-archive')
+
+# Android: je Prozessorart eine APK, im Manifest unter ihrem ABI-Namen.
+$android = [ordered]@{}
+foreach ($abi in $abis) {
+  $name = "Android-$version-$abi.apk"
+  $path = Join-Path $distDir $name
+  if (-not (Test-Path $path)) { continue }
+  $android[$abi] = New-AssetInfo -Path $path -PublicBase $publicBase
+  $uploads += , @($path, $name, 'application/vnd.android.package-archive')
+}
+if ($android.Count -gt 0) {
+  $manifest['android'] = $android
 } else {
-  Write-Host "Kein Android-Paket in dist/ - Android bekommt kein Update angeboten." -ForegroundColor Yellow
+  Write-Host "Keine Android-Pakete in dist/ - Android bekommt kein Update angeboten." -ForegroundColor Yellow
 }
 if (Test-Path $zipPath) {
   $manifest['windows'] = New-AssetInfo -Path $zipPath -PublicBase $publicBase
@@ -191,6 +204,12 @@ if ($uploads.Count -eq 0) {
 }
 
 foreach ($upload in $uploads) {
+  # Lieber vorher klar sagen als hinterher ein 413 vom Server.
+  $mb = (Get-Item -LiteralPath $upload[0]).Length / 1MB
+  if ($mb -gt 50) {
+    throw ("{0} ist {1} MB gross. Supabase Storage nimmt im Free-Plan " +
+      "hoechstens 50 MB je Datei.") -f $upload[1], [math]::Round($mb, 1)
+  }
   Send-StorageObject -Path $upload[0] -Name $upload[1] -ContentType $upload[2] `
     -BaseUrl $baseUrl -Key $ServiceKey
 }

@@ -44,9 +44,27 @@ nie wieder eintippen.
 Das Skript
 
 1. baut (mit `-Build`) über `tool/package.ps1` nach `dist/`,
-2. berechnet Größe und SHA-256 beider Pakete,
-3. lädt `Android-<version>.apk` und `Windows-<version>.zip` hoch,
+2. berechnet Größe und SHA-256 aller Pakete,
+3. lädt `Android-<version>-<abi>.apk` (drei Stück) und
+   `Windows-<version>.zip` hoch,
 4. schreibt zuletzt `manifest.json`.
+
+**Warum drei APKs:** eine APK für alle Prozessorarten ist über 80 MB, und
+Supabase Storage nimmt im Free-Plan höchstens 50 MB je Datei. `package.ps1`
+baut deshalb mit `--split-per-abi` je eine APK für `arm64-v8a`,
+`armeabi-v7a` und `x86_64` (jeweils rund 30 MB). Das Manifest führt alle auf,
+und das Gerät sucht sich beim Update die passende: die App fragt über den
+Kanal `de.lukas.multiapp/installer` ihre `Build.SUPPORTED_ABIS` ab und nimmt
+den ersten Eintrag, für den es ein Paket gibt. Vor dem Hochladen prüft das
+Skript die Dateigrößen und bricht mit klarer Meldung ab, falls doch etwas
+über 50 MB liegt.
+
+**Einmal geteilt, immer geteilt:** Flutter gibt jeder Split-APK einen eigenen
+`versionCode` (Build 39 wird zu 2039 für arm64-v8a, 1039 für armeabi-v7a,
+4039 für x86_64). Eine spätere universelle APK hätte den viel kleineren Code
+40 und ließe sich nicht mehr darüber installieren, Android verweigert
+Rückschritte beim `versionCode`. Das ginge nur mit Deinstallation, und damit
+wären die lokalen Daten weg. Also bei den geteilten APKs bleiben.
 
 Das Manifest kommt bewusst zum Schluss: so wird nie eine Version angekündigt,
 deren Datei noch fehlt.
@@ -75,12 +93,21 @@ hochzählen.
   "publishedAt": "2026-08-07T10:00:00Z",
   "notes": "- Live-Updates\n- Kleinkram",
   "android": {
-    "url": "https://<projekt>.supabase.co/storage/v1/object/public/releases/Android-0.21.0.apk",
-    "file": "Android-0.21.0.apk",
-    "size": 31457280,
-    "sha256": "a1b2..."
+    "arm64-v8a": {
+      "url": "https://<projekt>.supabase.co/storage/v1/object/public/releases/Android-0.21.0-arm64-v8a.apk",
+      "file": "Android-0.21.0-arm64-v8a.apk",
+      "size": 31457280,
+      "sha256": "a1b2..."
+    },
+    "armeabi-v7a": { "...": "gleiche Felder" },
+    "x86_64": { "...": "gleiche Felder" }
   },
-  "windows": { "...": "wie oben, nur Windows-0.21.0.zip" }
+  "windows": {
+    "url": ".../Windows-0.21.0.zip",
+    "file": "Windows-0.21.0.zip",
+    "size": 16252928,
+    "sha256": "c3d4..."
+  }
 }
 ```
 
@@ -91,6 +118,13 @@ hochzählen.
 - `sha256` – wird nach dem Download geprüft; passt sie nicht, wird die Datei
   verworfen.
 - Fehlt ein Plattform-Block, bekommt diese Plattform kein Update angeboten.
+  Gleiches gilt für eine Prozessorart, die unter `android` nicht auftaucht.
+- Ein einzelner Android-Block mit `url` (also ohne ABI-Ebene) wird weiterhin
+  verstanden, falls du doch mal eine universelle APK ausliefern willst.
+
+Alte Versionen bleiben im Bucket liegen (praktisch, um notfalls
+zurückzugehen). Pro Veröffentlichung kommen rund 100 MB dazu, der Free-Plan
+hat 1 GB: ab und zu die ältesten Dateien im Dashboard unter Storage löschen.
 
 ## 4. Was der Nutzer sieht
 

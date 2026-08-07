@@ -124,6 +124,7 @@ class ReleaseManifest {
     this.notes,
     this.publishedAt,
     this.assets = const {},
+    this.androidAbis = const {},
   });
 
   /// Neueste veröffentlichte Version.
@@ -138,21 +139,57 @@ class ReleaseManifest {
 
   final DateTime? publishedAt;
 
-  /// Pakete je Plattform: 'android' und 'windows'.
+  /// Pakete je Plattform: 'android' (universelle APK) und 'windows'.
   final Map<String, ReleaseAsset> assets;
 
-  ReleaseAsset? assetFor(String platform) => assets[platform];
+  /// Android-Pakete je Prozessorart, z. B. 'arm64-v8a'.
+  ///
+  /// Eine APK für alle Prozessorarten waere fast dreimal so gross, deshalb
+  /// wird pro ABI eine gebaut und das Geraet sucht sich die passende.
+  final Map<String, ReleaseAsset> androidAbis;
+
+  /// Sucht das Paket für diese Plattform.
+  ///
+  /// [abis] ist die Vorzugsliste des Geraets (beste zuerst, aus
+  /// Build.SUPPORTED_ABIS). Passt keine, bleibt die universelle APK als
+  /// Rueckfall, sofern das Manifest eine hat.
+  ReleaseAsset? assetFor(String platform, {List<String> abis = const []}) {
+    if (platform == 'android') {
+      for (final abi in abis) {
+        final match = androidAbis[abi];
+        if (match != null) return match;
+      }
+      return assets['android'];
+    }
+    return assets[platform];
+  }
 
   factory ReleaseManifest.fromJson(Map<String, dynamic> json) {
     final latest = AppVersion.tryParse('${json['latestVersion'] ?? ''}');
     if (latest == null) {
       throw const FormatException('Manifest ohne gültiges Feld latestVersion.');
     }
+
     final assets = <String, ReleaseAsset>{};
-    for (final platform in const ['android', 'windows']) {
-      final asset = ReleaseAsset.fromJson(json[platform]);
-      if (asset != null) assets[platform] = asset;
+    final windows = ReleaseAsset.fromJson(json['windows']);
+    if (windows != null) assets['windows'] = windows;
+
+    // Der Android-Block ist entweder ein einzelnes Paket (dann steht dort
+    // eine url) oder eine Liste je Prozessorart.
+    final androidAbis = <String, ReleaseAsset>{};
+    final android = json['android'];
+    if (android is Map) {
+      if (android['url'] != null) {
+        final single = ReleaseAsset.fromJson(android);
+        if (single != null) assets['android'] = single;
+      } else {
+        for (final entry in android.entries) {
+          final asset = ReleaseAsset.fromJson(entry.value);
+          if (asset != null) androidAbis['${entry.key}'] = asset;
+        }
+      }
     }
+
     final notes = '${json['notes'] ?? ''}'.trim();
     return ReleaseManifest(
       latest: latest,
@@ -160,6 +197,7 @@ class ReleaseManifest {
       notes: notes.isEmpty ? null : notes,
       publishedAt: DateTime.tryParse('${json['publishedAt'] ?? ''}')?.toLocal(),
       assets: assets,
+      androidAbis: androidAbis,
     );
   }
 }
@@ -176,15 +214,15 @@ enum UpdateAvailability {
 
 /// Vergleicht die laufende Version mit dem Manifest.
 ///
-/// Ohne Paket für die laufende Plattform gibt es nichts zu installieren, also
-/// auch keine Meldung. Ein Pflicht-Update entsteht nur, wenn es tatsächlich
-/// eine neuere Version zum Installieren gibt.
+/// Ohne passendes Paket ([asset] ist null) gibt es nichts zu installieren,
+/// also auch keine Meldung. Ein Pflicht-Update entsteht nur, wenn es
+/// tatsächlich eine neuere Version zum Installieren gibt.
 UpdateAvailability evaluateUpdate({
   required AppVersion current,
   required ReleaseManifest manifest,
-  required String platform,
+  required ReleaseAsset? asset,
 }) {
-  if (manifest.assetFor(platform) == null) return UpdateAvailability.none;
+  if (asset == null) return UpdateAvailability.none;
   if (!(current < manifest.latest)) return UpdateAvailability.none;
   final minimum = manifest.minimum;
   if (minimum != null && current < minimum) return UpdateAvailability.required;

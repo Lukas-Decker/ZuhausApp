@@ -27,6 +27,7 @@ class UpdateStatus {
   const UpdateStatus({
     this.phase = UpdatePhase.idle,
     this.manifest,
+    this.asset,
     this.availability = UpdateAvailability.none,
     this.received = 0,
     this.total = 0,
@@ -37,6 +38,11 @@ class UpdateStatus {
 
   final UpdatePhase phase;
   final ReleaseManifest? manifest;
+
+  /// Das Paket, das zu diesem Geraet passt (auf Android die APK der
+  /// richtigen Prozessorart).
+  final ReleaseAsset? asset;
+
   final UpdateAvailability availability;
   final int received;
   final int total;
@@ -56,6 +62,7 @@ class UpdateStatus {
   UpdateStatus copyWith({
     UpdatePhase? phase,
     ReleaseManifest? manifest,
+    ReleaseAsset? asset,
     UpdateAvailability? availability,
     int? received,
     int? total,
@@ -65,6 +72,7 @@ class UpdateStatus {
   }) => UpdateStatus(
     phase: phase ?? this.phase,
     manifest: manifest ?? this.manifest,
+    asset: asset ?? this.asset,
     availability: availability ?? this.availability,
     received: received ?? this.received,
     total: total ?? this.total,
@@ -107,19 +115,26 @@ class UpdateController extends Notifier<UpdateStatus> {
     state = state.copyWith(phase: UpdatePhase.checking, error: null);
     try {
       final manifest = await _service.fetchManifest();
+      // Auf Android bestimmt die Prozessorart, welche der APKs passt.
+      final asset = manifest.assetFor(
+        UpdateService.currentPlatform ?? '',
+        abis: await _installer.supportedAbis(),
+      );
       final availability = evaluateUpdate(
         current: currentVersion,
         manifest: manifest,
-        platform: UpdateService.currentPlatform ?? '',
+        asset: asset,
       );
       state = UpdateStatus(
         manifest: manifest,
+        asset: asset,
         availability: availability,
         lastCheckedAt: DateTime.now(),
       );
       DebugLog.instance.add(
         'update',
-        'Geprüft: ${manifest.latest} (${availability.name})',
+        'Geprüft: ${manifest.latest} (${availability.name}, '
+            'Paket ${asset?.fileName ?? 'keins'})',
       );
     } catch (error) {
       state = state.copyWith(
@@ -138,13 +153,11 @@ class UpdateController extends Notifier<UpdateStatus> {
 
   /// Lädt das Paket und startet die Installation.
   Future<void> downloadAndInstall() async {
-    final manifest = state.manifest;
-    final platform = UpdateService.currentPlatform;
-    final asset = platform == null ? null : manifest?.assetFor(platform);
+    final asset = state.asset;
     if (asset == null) {
       state = state.copyWith(
         phase: UpdatePhase.failed,
-        error: 'Kein Paket für diese Plattform im Manifest.',
+        error: 'Kein passendes Paket für dieses Gerät im Manifest.',
       );
       return;
     }

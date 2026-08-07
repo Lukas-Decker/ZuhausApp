@@ -27,6 +27,26 @@ class UpdateInstaller {
   /// Nur Android und Windows bekommen Pakete vom eigenen Server.
   bool get isSupported => Platform.isAndroid || Platform.isWindows;
 
+  /// Prozessorarten des Geraets, beste zuerst (z. B. arm64-v8a, armeabi-v7a).
+  ///
+  /// Auf allem ausser Android leer: dort gibt es nur ein Paket.
+  Future<List<String>> supportedAbis() async {
+    if (!Platform.isAndroid) return const [];
+    try {
+      final abis = await _channel.invokeListMethod<String>('supportedAbis');
+      return abis ?? const [];
+    } on PlatformException catch (error) {
+      DebugLog.instance.add(
+        'update',
+        'supportedAbis: $error',
+        level: LogLevel.error,
+      );
+      // Aeltere Builds ohne diese Kanal-Methode: die mit Abstand
+      // haeufigste Prozessorart annehmen.
+      return const ['arm64-v8a'];
+    }
+  }
+
   /// Auf Android muss "Unbekannte Apps installieren" fuer diese App erlaubt
   /// sein. Vor Android 8 gilt das als globale Systemeinstellung.
   Future<bool> canInstall() async {

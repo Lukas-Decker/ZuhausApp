@@ -68,7 +68,8 @@ Fertige Artefakte landen im Ordner `dist/` im Projekt-Root. Das Skript liest
 die Version aus `pubspec.yaml` und legt ab:
 
 - `dist/Windows-<version>.zip` (gezippter Release-Ordner)
-- `dist/Android-<version>.apk` (Release-APK)
+- `dist/Android-<version>-<abi>.apk` (je Prozessorart eine Release-APK:
+  arm64-v8a, armeabi-v7a, x86_64)
 
 Liegt eine `env.json` vor, wird sie in den Build uebernommen, sonst baut es im
 Gastmodus (ohne Supabase).

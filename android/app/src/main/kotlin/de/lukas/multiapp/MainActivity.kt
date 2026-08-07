@@ -72,6 +72,9 @@ class MainActivity : FlutterFragmentActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, installerChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
+                    // Prozessorarten des Geraets, beste zuerst. Damit sucht
+                    // sich die App die passende der drei APKs aus.
+                    "supportedAbis" -> result.success(Build.SUPPORTED_ABIS.toList())
                     "canInstallPackages" -> result.success(canInstallPackages())
                     "openInstallPermissionSettings" -> {
                         openInstallPermissionSettings()

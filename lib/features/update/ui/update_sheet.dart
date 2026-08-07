@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/app_info.dart';
-import '../data/update_service.dart';
 import '../update_providers.dart';
 
 /// Zeigt den Update-Hinweis.
@@ -68,8 +67,7 @@ class UpdateSheetBody extends ConsumerWidget {
 
     if (manifest == null) return const SizedBox.shrink();
 
-    final platform = UpdateService.currentPlatform;
-    final asset = platform == null ? null : manifest.assetFor(platform);
+    final asset = status.asset;
     final published = manifest.publishedAt;
 
     return SingleChildScrollView(

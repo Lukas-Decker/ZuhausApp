@@ -225,7 +225,7 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun stopAlarmVibration() {
-        vibrationStop?.let { vibrationHandler.removeCallbacks(it) }
+        vibrationStop?.let { mainHandler.removeCallbacks(it) }
         vibrationStop = null
         try {
             vibrator().cancel()

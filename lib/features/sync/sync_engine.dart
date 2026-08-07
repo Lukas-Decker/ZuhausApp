@@ -79,12 +79,18 @@ class SyncEngine {
       await push();
       await pull();
     } catch (error, stack) {
-      DebugLog.instance.error(
-        'sync',
-        'Abgleich fehlgeschlagen',
-        error: error,
-        stack: stack,
-      );
+      // Ohne Netz ist ein Fehlschlag normal (offline-first): nur als Warnung
+      // protokollieren, damit echte Fehler im Protokoll auffallen.
+      if (_isOffline(error)) {
+        DebugLog.instance.warn('sync', 'Kein Netz, Abgleich verschoben');
+      } else {
+        DebugLog.instance.error(
+          'sync',
+          'Abgleich fehlgeschlagen',
+          error: error,
+          stack: stack,
+        );
+      }
       rethrow;
     } finally {
       _running = false;
@@ -176,6 +182,16 @@ class SyncEngine {
     }
     if (value is Map) return Map<String, dynamic>.from(value);
     return null;
+  }
+
+  /// Erkennt typische Netzausfaelle (kein WLAN, DNS scheitert, Zeitueberschreitung).
+  static bool _isOffline(Object error) {
+    final text = error.toString().toLowerCase();
+    return text.contains('socketexception') ||
+        text.contains('failed host lookup') ||
+        text.contains('clientexception') ||
+        text.contains('timeoutexception') ||
+        text.contains('connection');
   }
 
   static String _secondsToIso(int seconds) =>

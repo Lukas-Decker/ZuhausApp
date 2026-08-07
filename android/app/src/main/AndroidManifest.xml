@@ -48,6 +48,29 @@
                       android:host="join"/>
             </intent-filter>
         </activity>
+        <!-- Empfaenger von flutter_local_notifications. Ohne diese Eintraege
+             wird ein Alarm zwar gesetzt, aber beim Ausloesen fuehrt ihn
+             niemand aus: geplante Erinnerungen kommen dann nie an. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <!-- Stellt geplante Erinnerungen nach einem Neustart wieder her. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+        <!-- Verarbeitet die Knoepfe "Genommen" und "Snooze" direkt aus der
+             Benachrichtigung, auch wenn die App nicht im Vordergrund ist. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

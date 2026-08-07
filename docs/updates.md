@@ -15,13 +15,22 @@ Alles liegt im eigenen Supabase-Projekt (EU) im öffentlichen Storage-Bucket
 
 1. Migration `supabase/migrations/0006_releases.sql` im SQL-Editor ausführen.
    Sie legt den Bucket `releases` an und macht ihn öffentlich lesbar.
-2. Service-Role-Key holen: Dashboard -> Project Settings -> API ->
-   `service_role`. Der Schlüssel darf **nie** in die App, in `env.json` oder
-   ins Repo: er umgeht alle Zugriffsregeln.
+2. Geheimen Schlüssel holen: Dashboard -> **Settings -> API Keys**. Dort gibt
+   es zwei Sorten, beide funktionieren:
+   - Tab **Legacy API keys** -> `service_role` (JWT, beginnt mit `eyJ`)
+   - **Secret keys** -> `sb_secret_...` (neue Art, muss ggf. erst angelegt
+     werden)
+
+   Der Schlüssel darf **nie** in die App, in `env.json` oder ins Repo: er
+   umgeht alle Zugriffsregeln.
 
 ```bash
-$env:SUPABASE_SERVICE_KEY = 'eyJ...'
+$env:SUPABASE_SECRET_KEY = 'eyJ...'
 ```
+
+Das Skript schickt den Schlüssel in `apikey` **und** `Authorization`. Der alte
+`service_role`-JWT braucht `Authorization`, die neuen `sb_secret_`-Schlüssel
+den `apikey`-Header und dulden `Authorization` nur mit exakt demselben Wert.
 
 Am besten dauerhaft als Benutzer-Umgebungsvariable setzen, dann muss man ihn
 nie wieder eintippen.
@@ -49,7 +58,7 @@ Nützliche Schalter:
 | `-Build` | vorher `package.ps1` laufen lassen |
 | `-Notes "..."` | Änderungstext; ohne Angabe wird `dist/notes-<version>.txt` gelesen |
 | `-MinVersion 0.20.0` | Pflicht-Update für alles darunter; ohne Angabe bleibt der bisherige Wert |
-| `-ServiceKey ...` | Schlüssel direkt statt aus der Umgebungsvariable |
+| `-ServiceKey ...` | Schlüssel direkt statt aus `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_KEY` |
 
 Die Version kommt immer aus `pubspec.yaml`. Vor dem Veröffentlichen also
 `version:` in `pubspec.yaml` **und** `appVersion` in `lib/core/app_info.dart`

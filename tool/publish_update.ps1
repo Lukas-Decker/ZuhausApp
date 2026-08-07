@@ -12,9 +12,15 @@
   Die App fragt manifest.json ab, vergleicht mit ihrer eigenen Version und
   bietet das Update an. Die Version kommt aus pubspec.yaml.
 
-  Der Service-Role-Key wird zum Hochladen gebraucht und darf NIE in die App
-  oder ins Repo. Er kommt aus der Umgebungsvariable SUPABASE_SERVICE_KEY oder
-  aus dem Parameter -ServiceKey.
+  Zum Hochladen wird ein geheimer Schluessel gebraucht, der die
+  Zugriffsregeln umgeht. Im Dashboard unter Settings -> API Keys:
+
+    - neu:    "Secret keys" -> sb_secret_...   (ggf. erst anlegen)
+    - alt:    Tab "Legacy API keys" -> service_role (JWT, eyJ...)
+
+  Beides funktioniert. Der Schluessel darf NIE in die App, in env.json oder
+  ins Repo. Er kommt aus der Umgebungsvariable SUPABASE_SECRET_KEY bzw.
+  SUPABASE_SERVICE_KEY oder aus dem Parameter -ServiceKey.
 
 .PARAMETER Notes
   Aenderungen dieser Version, eine Zeile pro Punkt. Ohne Angabe wird
@@ -28,7 +34,7 @@
   Vorher tool/package.ps1 laufen lassen.
 
 .EXAMPLE
-  $env:SUPABASE_SERVICE_KEY = 'eyJ...'
+  $env:SUPABASE_SECRET_KEY = 'sb_secret_...'
   ./tool/publish_update.ps1 -Notes "Live-Updates eingebaut"
   ./tool/publish_update.ps1 -Build -MinVersion 0.20.0
 #>
@@ -36,7 +42,7 @@
 param(
   [string]$Notes = '',
   [string]$MinVersion = '',
-  [string]$ServiceKey = $env:SUPABASE_SERVICE_KEY,
+  [string]$ServiceKey = '',
   [string]$SupabaseUrl = '',
   [switch]$Build
 )
@@ -92,7 +98,11 @@ function Send-StorageObject {
   $url = "$BaseUrl/storage/v1/object/$bucket/$Name"
   $sizeMb = [math]::Round((Get-Item -LiteralPath $Path).Length / 1MB, 1)
   Write-Host "Lade hoch: $Name ($sizeMb MB)" -ForegroundColor Green
+  # apikey UND Authorization mit demselben Wert: der alte service_role-JWT
+  # braucht Authorization, die neuen sb_secret_-Schluessel den apikey-Header
+  # (und dulden Authorization nur, wenn er exakt gleich lautet).
   $headers = @{
+    'apikey'        = $Key
     Authorization   = "Bearer $Key"
     'x-upsert'      = 'true'
     'cache-control' = $CacheControl
@@ -116,8 +126,15 @@ function Get-PublishedManifest {
   }
 }
 
+if (-not $ServiceKey) { $ServiceKey = $env:SUPABASE_SECRET_KEY }
+if (-not $ServiceKey) { $ServiceKey = $env:SUPABASE_SERVICE_KEY }
 if (-not $ServiceKey) {
-  throw "Kein Service-Role-Key. Setze `$env:SUPABASE_SERVICE_KEY oder nutze -ServiceKey. (Dashboard: Project Settings -> API -> service_role)"
+  throw @"
+Kein geheimer Schluessel gesetzt. Im Dashboard unter Settings -> API Keys:
+  - Tab "Legacy API keys" -> service_role (eyJ...), oder
+  - "Secret keys" -> sb_secret_... (ggf. erst anlegen)
+Dann: `$env:SUPABASE_SECRET_KEY = '...'   (oder -ServiceKey '...')
+"@
 }
 
 $version = Get-AppVersion

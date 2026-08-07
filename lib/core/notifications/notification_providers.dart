@@ -19,6 +19,7 @@ final notificationPermissionsProvider =
         bool notificationsAllowed,
         bool exactAlarmsAllowed,
         bool fullScreenAllowed,
+        bool dndBypassAllowed,
       })
     >((ref) => ref.watch(notificationServiceProvider).checkPermissions());
 

@@ -81,6 +81,7 @@ class _NotificationDebugScreenState
                 _row('Recht: Benachrichtigungen', data.notificationsAllowed),
                 _row('Recht: Alarme & Erinnerungen', data.exactAlarmsAllowed),
                 _row('Recht: Bildschirm aufwecken', data.fullScreenAllowed),
+                _row('Recht: Bitte nicht stören', data.dndBypassAllowed),
               ],
             ),
           ),

@@ -9,6 +9,9 @@
          Sperrbildschirm zeigen. Ab Android 14 muss der Nutzer das zusaetzlich
          in den Systemeinstellungen erlauben. -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Wecker-Modus: eigenes Vibrieren mit Alarm-Attributen, auch wenn die
+         Vibration fuer Benachrichtigungen abgeschaltet ist. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Kamera fuer den Barcode-Scanner (mobile_scanner). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />

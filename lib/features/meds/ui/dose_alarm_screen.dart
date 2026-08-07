@@ -34,24 +34,45 @@ class DoseAlarmScreen extends ConsumerStatefulWidget {
 
 class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
   Timer? _timeout;
+  bool _vibrating = false;
 
   @override
   void initState() {
     super.initState();
+    final settings = ref.read(appSettingsProvider);
+
     // Reagiert niemand, schliesst sich der Schirm von selbst: sonst leuchtet
     // das Telefon die ganze Nacht. Die Einnahme bleibt faellig.
-    final minutes = ref.read(appSettingsProvider).wakeTimeoutMinutes;
+    final minutes = settings.wakeTimeoutMinutes;
     if (minutes > 0) {
       _timeout = Timer(Duration(minutes: minutes), () {
+        _stopVibration();
         if (mounted) _close(context);
       });
+    }
+
+    // Eigenes Vibrieren mit Alarm-Attributen: greift auch dann, wenn die
+    // Vibration fuer Benachrichtigungen am Geraet abgeschaltet ist.
+    if (settings.wakeScreenEnabled && settings.reminderVibrationEnabled) {
+      _vibrating = true;
+      ref
+          .read(notificationServiceProvider)
+          .startAlarmVibration(maxMinutes: minutes > 0 ? minutes : 2);
     }
   }
 
   @override
   void dispose() {
     _timeout?.cancel();
+    _stopVibration();
     super.dispose();
+  }
+
+  /// Beendet die Vibration; mehrfaches Aufrufen schadet nicht.
+  void _stopVibration() {
+    if (!_vibrating) return;
+    _vibrating = false;
+    ref.read(notificationServiceProvider).stopAlarmVibration();
   }
 
   @override

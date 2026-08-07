@@ -796,7 +796,7 @@ class _WakeScreenTile extends ConsumerWidget {
     );
     final permissions = ref.watch(notificationPermissionsProvider);
     final allowed = permissions.value?.fullScreenAllowed ?? true;
-    final scheme = Theme.of(context).colorScheme;
+    final dndAllowed = permissions.value?.dndBypassAllowed ?? true;
 
     return Column(
       children: [
@@ -823,38 +823,62 @@ class _WakeScreenTile extends ConsumerWidget {
         ),
         // Nur zeigen, wenn der Schalter an ist, die Freigabe aber fehlt.
         if (enabled && !allowed)
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: scheme.errorContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.warning_amber_rounded, color: scheme.onErrorContainer),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Android erlaubt das Aufwecken noch nicht. Ohne diese '
-                    'Freigabe kommt die Meldung, der Bildschirm bleibt aber aus.',
-                    style: TextStyle(color: scheme.onErrorContainer),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: () async {
-                    await ref
-                        .read(notificationServiceProvider)
-                        .requestFullScreenIntentPermission();
-                    ref.invalidate(notificationPermissionsProvider);
-                  },
-                  child: const Text('Erlauben'),
-                ),
-              ],
-            ),
+          _PermissionHint(
+            text:
+                'Android erlaubt das Aufwecken noch nicht. Ohne diese '
+                'Freigabe kommt die Meldung, der Bildschirm bleibt aber aus.',
+            onGrant: () async {
+              await ref
+                  .read(notificationServiceProvider)
+                  .requestFullScreenIntentPermission();
+              ref.invalidate(notificationPermissionsProvider);
+            },
+          ),
+        if (enabled && !dndAllowed)
+          _PermissionHint(
+            text:
+                'Steht das Telefon auf "Bitte nicht stören", bleibt der '
+                'Wecker still. Mit dieser Freigabe gilt er als Ausnahme.',
+            onGrant: () async {
+              await ref.read(notificationServiceProvider).openDndAccessSettings();
+            },
           ),
       ],
+    );
+  }
+}
+
+/// Roter Kasten mit Hinweis und Knopf, wenn eine Systemfreigabe fehlt.
+class _PermissionHint extends StatelessWidget {
+  const _PermissionHint({required this.text, required this.onGrant});
+
+  final String text;
+  final Future<void> Function() onGrant;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded, color: scheme.onErrorContainer),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(onPressed: onGrant, child: const Text('Erlauben')),
+        ],
+      ),
     );
   }
 }

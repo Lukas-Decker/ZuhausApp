@@ -58,7 +58,12 @@ class NotificationService {
   static const _familyChannelId = 'family_events';
 
   /// Anhang fuer die Wecker-Varianten der Kanaele (siehe [_detailsFor]).
-  static const _wakeChannelSuffix = '_wake';
+  ///
+  /// Frueher '_wake'. Der Kanal hat seit v0.22 zusaetzlich die Ausnahme von
+  /// "Bitte nicht stoeren", und Android uebernimmt Aenderungen an einem
+  /// bestehenden Kanal nicht: nur eine neue Kennung greift. Die alten
+  /// '_wake'-Kanaele bleiben ungenutzt in den Systemeinstellungen stehen.
+  static const _wakeChannelSuffix = '_alarm';
 
   /// Kanal zur nativen Seite (Statusabfrage fuer Vollbild-Meldungen).
   static const _wakeChannel = MethodChannel('de.lukas.multiapp/wake');
@@ -177,11 +182,13 @@ class NotificationService {
   /// [notificationsAllowed] ist die POST_NOTIFICATIONS-Berechtigung (Android
   /// 13+), [exactAlarmsAllowed] das Recht "Alarme & Erinnerungen" (Android
   /// 12+). Ohne letzteres kommen zeitgenaue Erinnerungen nicht an.
+  /// [dndBypassAllowed] erlaubt die Ausnahme von "Bitte nicht stören".
   Future<
     ({
       bool notificationsAllowed,
       bool exactAlarmsAllowed,
       bool fullScreenAllowed,
+      bool dndBypassAllowed,
     })
   >
   checkPermissions() async {
@@ -190,6 +197,7 @@ class NotificationService {
         notificationsAllowed: false,
         exactAlarmsAllowed: false,
         fullScreenAllowed: false,
+        dndBypassAllowed: false,
       );
     }
     try {
@@ -203,6 +211,7 @@ class NotificationService {
           exactAlarmsAllowed:
               await android.canScheduleExactNotifications() ?? true,
           fullScreenAllowed: await canUseFullScreenIntent(),
+          dndBypassAllowed: await canBypassDnd(),
         );
       }
       // Andere Plattformen kennen diese Trennung nicht.
@@ -210,6 +219,7 @@ class NotificationService {
         notificationsAllowed: true,
         exactAlarmsAllowed: true,
         fullScreenAllowed: true,
+        dndBypassAllowed: true,
       );
     } catch (error) {
       DebugLog.instance.warn(
@@ -221,6 +231,7 @@ class NotificationService {
         notificationsAllowed: false,
         exactAlarmsAllowed: false,
         fullScreenAllowed: false,
+        dndBypassAllowed: false,
       );
     }
   }
@@ -404,6 +415,61 @@ class NotificationService {
     }
   }
 
+  /// Ob die App eine Ausnahme von "Bitte nicht stören" setzen darf.
+  ///
+  /// Ohne diese Freigabe ignoriert Android das Kennzeichen am Kanal: die
+  /// Wecker-Erinnerung bliebe im Nicht-stören-Modus still.
+  Future<bool> canBypassDnd() async {
+    if (!_platformSupported || !Platform.isAndroid) return false;
+    try {
+      return await _wakeChannel.invokeMethod<bool>('canBypassDnd') ?? false;
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Nicht-stoeren-Status nicht abfragbar',
+        error: error,
+      );
+      return false;
+    }
+  }
+
+  /// Öffnet die Systemseite, auf der die Nicht-stören-Ausnahme erteilt wird.
+  Future<void> openDndAccessSettings() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('openDndAccessSettings');
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Nicht-stoeren-Einstellung nicht zu oeffnen',
+        error: error,
+      );
+    }
+  }
+
+  /// Lässt das Gerät im Wecker-Muster vibrieren, unabhängig davon, ob die
+  /// Vibration für Benachrichtigungen abgeschaltet ist.
+  ///
+  /// [maxMinutes] ist eine harte Obergrenze auf der nativen Seite: bleibt
+  /// [stopAlarmVibration] aus, hört es trotzdem auf.
+  Future<void> startAlarmVibration({int maxMinutes = 2}) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('startAlarmVibration', {
+        'maxMillis': maxMinutes.clamp(1, 15) * 60 * 1000,
+      });
+    } catch (error) {
+      DebugLog.instance.warn('notifications', 'Vibration', error: error);
+    }
+  }
+
+  Future<void> stopAlarmVibration() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('stopAlarmVibration');
+    } catch (_) {}
+  }
+
   /// Ob Vollbild-Meldungen (Bildschirm aufwecken) erlaubt sind.
   ///
   /// Fragt nativ nach; ab Android 14 muss der Nutzer das eigens freigeben.
@@ -474,6 +540,9 @@ class NotificationService {
             : AndroidNotificationCategory.reminder,
         // Weckt den Bildschirm und zeigt die Meldung ueber dem Sperrbildschirm.
         fullScreenIntent: wake,
+        // Wecker gehen auch durch "Bitte nicht stoeren". Android beachtet das
+        // nur mit der entsprechenden Freigabe, sonst bleibt es wirkungslos.
+        channelBypassDnd: wake,
         visibility: wake ? NotificationVisibility.public : null,
         // Damit der Wecker nicht endlos leuchtet: Android nimmt die Meldung
         // nach dieser Zeit selbst wieder weg.

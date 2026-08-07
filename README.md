@@ -84,6 +84,19 @@ Nur eine Plattform bzw. nur neu zippen ohne Bauen:
 ./tool/package.ps1 -Target android -SkipBuild
 ```
 
+## Update-Kanal (Live-Updates)
+
+Die App holt sich neue Versionen selbst vom eigenen Server (oeffentlicher
+Supabase-Storage-Bucket `releases`): Hinweis beim Start, Download mit
+Fortschritt, Installation per System-Installer (Android) bzw. Austausch nach
+dem Beenden (Windows). Veroeffentlicht wird mit:
+
+```powershell
+./tool/publish_update.ps1 -Build -Notes "Was neu ist"
+```
+
+Einrichtung, Manifest-Format und Fehlersuche: [docs/updates.md](docs/updates.md).
+
 ## App-Icon
 
 Das Icon (weisses Haus auf blauem, abgerundetem Grund) ist selbst gezeichnet und

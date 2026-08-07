@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nur der Zwischenspeicher der App wird freigegeben; dort landet die
+     heruntergeladene APK (path_provider: getTemporaryDirectory). -->
+<paths>
+    <cache-path name="update_cache" path="." />
+</paths>

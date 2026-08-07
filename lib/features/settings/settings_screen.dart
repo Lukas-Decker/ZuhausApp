@@ -19,6 +19,8 @@ import '../privacy/ui/audit_log_screen.dart';
 import '../privacy/ui/privacy_info_screen.dart';
 import '../push/push_providers.dart';
 import '../sync/sync_providers.dart';
+import '../update/ui/update_sheet.dart';
+import '../update/update_providers.dart';
 import 'debug_log_screen.dart';
 import 'notification_debug_screen.dart';
 
@@ -291,6 +293,18 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => _deleteAccount(context, ref),
             ),
           const Divider(),
+          const _SectionHeader('Updates'),
+          const _UpdateTile(),
+          SwitchListTile(
+            secondary: const Icon(Icons.update_rounded),
+            value: settings.updateCheckEnabled,
+            onChanged: ref
+                .read(appSettingsProvider.notifier)
+                .setUpdateCheckEnabled,
+            title: const Text('Automatisch nach Updates suchen'),
+            subtitle: const Text('Beim Start und danach alle sechs Stunden.'),
+          ),
+          const Divider(),
           const _SectionHeader('Über'),
           const ListTile(
             leading: Icon(Icons.info_outline),
@@ -555,6 +569,87 @@ class _SyncTile extends ConsumerWidget {
             : () => ref.read(syncControllerProvider.notifier).syncNow(),
         icon: const Icon(Icons.refresh_rounded),
       ),
+    );
+  }
+}
+
+/// Zustand des Update-Kanals, mit Knopf zum Nachsehen.
+class _UpdateTile extends ConsumerWidget {
+  const _UpdateTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(updateControllerProvider);
+    final controller = ref.read(updateControllerProvider.notifier);
+    final scheme = Theme.of(context).colorScheme;
+
+    if (!controller.isSupported) {
+      return const ListTile(
+        leading: Icon(Icons.cloud_off_rounded),
+        title: Text('Updates'),
+        subtitle: Text('Für diese Plattform ist kein Kanal eingerichtet.'),
+      );
+    }
+
+    final checking = status.phase == UpdatePhase.checking;
+    final latest = status.manifest?.latest;
+
+    final (icon, text) = switch (status.phase) {
+      UpdatePhase.checking => (Icons.sync_rounded, 'Wird geprüft ...'),
+      UpdatePhase.downloading => (
+        Icons.download_rounded,
+        'Wird geladen ...',
+      ),
+      UpdatePhase.installing => (
+        Icons.install_mobile_rounded,
+        'Wird installiert ...',
+      ),
+      UpdatePhase.failed => (
+        Icons.error_outline_rounded,
+        status.error ?? 'Prüfung fehlgeschlagen',
+      ),
+      UpdatePhase.idle when status.hasUpdate => (
+        Icons.system_update_rounded,
+        'Version $latest steht bereit',
+      ),
+      UpdatePhase.idle => (
+        Icons.check_circle_outline_rounded,
+        status.lastCheckedAt == null
+            ? 'Noch nicht geprüft'
+            : 'Aktuell (zuletzt geprüft um '
+                  '${DateFormat('HH:mm', 'de').format(status.lastCheckedAt!)})',
+      ),
+    };
+
+    return ListTile(
+      isThreeLine: status.phase == UpdatePhase.failed,
+      leading: checking
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(
+              icon,
+              color: status.phase == UpdatePhase.failed
+                  ? scheme.error
+                  : status.hasUpdate
+                  ? scheme.primary
+                  : null,
+            ),
+      title: const Text('Version prüfen'),
+      subtitle: Text(text, maxLines: 4, overflow: TextOverflow.ellipsis),
+      trailing: IconButton(
+        tooltip: 'Jetzt nachsehen',
+        onPressed: checking ? null : controller.check,
+        icon: const Icon(Icons.refresh_rounded),
+      ),
+      onTap: status.hasUpdate
+          ? () => showUpdateSheet(
+              context,
+              mandatory: status.availability.isRequired,
+            )
+          : null,
     );
   }
 }

@@ -21,6 +21,7 @@ class AppSettings {
     required this.retentionDays,
     required this.privacyAccepted,
     required this.wakeScreenEnabled,
+    required this.updateCheckEnabled,
   });
 
   /// `null` bedeutet: noch nicht gefragt.
@@ -70,6 +71,10 @@ class AppSettings {
   /// Sperrbildschirm anzeigen. Bewusst standardmaessig aus, weil aufdringlich.
   final bool wakeScreenEnabled;
 
+  /// Beim Start und alle sechs Stunden nachsehen, ob auf dem Server eine
+  /// neuere Version liegt.
+  final bool updateCheckEnabled;
+
   AppSettings copyWith({
     Object? openFoodFactsConsent = _unset,
     bool? expiryWarningsEnabled,
@@ -84,6 +89,7 @@ class AppSettings {
     int? retentionDays,
     bool? privacyAccepted,
     bool? wakeScreenEnabled,
+    bool? updateCheckEnabled,
   }) => AppSettings(
     openFoodFactsConsent: openFoodFactsConsent == _unset
         ? this.openFoodFactsConsent
@@ -103,6 +109,7 @@ class AppSettings {
     retentionDays: retentionDays ?? this.retentionDays,
     privacyAccepted: privacyAccepted ?? this.privacyAccepted,
     wakeScreenEnabled: wakeScreenEnabled ?? this.wakeScreenEnabled,
+    updateCheckEnabled: updateCheckEnabled ?? this.updateCheckEnabled,
   );
 
   static const Object _unset = Object();
@@ -122,6 +129,7 @@ class AppSettingsController extends Notifier<AppSettings> {
   static const _keyRetentionDays = 'privacy.retention.days';
   static const _keyPrivacyAccepted = 'privacy.accepted';
   static const _keyWakeScreen = 'reminder.wakescreen';
+  static const _keyUpdateCheck = 'update.check.enabled';
 
   SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
@@ -142,6 +150,7 @@ class AppSettingsController extends Notifier<AppSettings> {
       retentionDays: prefs.getInt(_keyRetentionDays) ?? 90,
       privacyAccepted: prefs.getBool(_keyPrivacyAccepted) ?? false,
       wakeScreenEnabled: prefs.getBool(_keyWakeScreen) ?? false,
+      updateCheckEnabled: prefs.getBool(_keyUpdateCheck) ?? true,
     );
   }
 
@@ -214,6 +223,11 @@ class AppSettingsController extends Notifier<AppSettings> {
   Future<void> setWakeScreenEnabled(bool enabled) async {
     await _prefs.setBool(_keyWakeScreen, enabled);
     state = state.copyWith(wakeScreenEnabled: enabled);
+  }
+
+  Future<void> setUpdateCheckEnabled(bool enabled) async {
+    await _prefs.setBool(_keyUpdateCheck, enabled);
+    state = state.copyWith(updateCheckEnabled: enabled);
   }
 }
 

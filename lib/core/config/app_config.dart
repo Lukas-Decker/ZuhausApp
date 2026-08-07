@@ -39,6 +39,36 @@ abstract final class AppConfig {
   static const String authRedirectScheme = 'de.lukas.multiapp';
   static const String authRedirectUrl = '$authRedirectScheme://login-callback';
 
+  /// Name des oeffentlichen Storage-Buckets mit den Release-Dateien.
+  static const String updateBucket = 'releases';
+
+  static const String _rawUpdateBaseUrl =
+      String.fromEnvironment('UPDATE_BASE_URL');
+
+  /// Basis-URL des Update-Kanals, ohne Schraegstrich am Ende.
+  ///
+  /// Standardmaessig der oeffentliche Bucket im eigenen Supabase-Projekt.
+  /// Mit `--dart-define=UPDATE_BASE_URL=https://...` laesst sich stattdessen
+  /// ein beliebiger Webserver ansprechen, ohne die App umzubauen.
+  static String get updateBaseUrl {
+    final raw = _rawUpdateBaseUrl.trim();
+    if (raw.isNotEmpty) {
+      return raw.endsWith('/') ? raw.substring(0, raw.length - 1) : raw;
+    }
+    final base = supabaseUrl;
+    if (base.isEmpty) return '';
+    return '$base/storage/v1/object/public/$updateBucket';
+  }
+
+  /// Adresse des Versions-Manifests.
+  static String get updateManifestUrl {
+    final base = updateBaseUrl;
+    return base.isEmpty ? '' : '$base/manifest.json';
+  }
+
+  /// True, sobald ein Update-Kanal erreichbar konfiguriert ist.
+  static bool get hasUpdateChannel => updateManifestUrl.startsWith('http');
+
   /// True, sobald gueltige Supabase-Zugangsdaten vorliegen.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty &&

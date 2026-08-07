@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.20.0+38
+version: 0.21.0+39
 
 environment:
   sdk: ^3.12.2
@@ -30,6 +30,8 @@ dependencies:
   shared_preferences: ^2.5.5
   collection: ^1.19.1
   http: ^1.6.0
+  # Pruefsumme der heruntergeladenen Update-Pakete (SHA-256).
+  crypto: ^3.0.7
   mobile_scanner: ^7.4.0
   flutter_local_notifications: ^22.1.0
   timezone: ^0.11.1

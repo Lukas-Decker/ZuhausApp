@@ -1,0 +1,194 @@
+<#
+.SYNOPSIS
+  Veroeffentlicht die Pakete aus dist/ im eigenen Update-Kanal
+  (oeffentlicher Supabase-Storage-Bucket "releases").
+
+.DESCRIPTION
+  Laedt hoch:
+    Android-<version>.apk
+    Windows-<version>.zip
+    manifest.json   (Version, Pflichtversion, Aenderungen, Pruefsummen)
+
+  Die App fragt manifest.json ab, vergleicht mit ihrer eigenen Version und
+  bietet das Update an. Die Version kommt aus pubspec.yaml.
+
+  Der Service-Role-Key wird zum Hochladen gebraucht und darf NIE in die App
+  oder ins Repo. Er kommt aus der Umgebungsvariable SUPABASE_SERVICE_KEY oder
+  aus dem Parameter -ServiceKey.
+
+.PARAMETER Notes
+  Aenderungen dieser Version, eine Zeile pro Punkt. Ohne Angabe wird
+  dist/notes-<version>.txt gelesen, falls vorhanden.
+
+.PARAMETER MinVersion
+  Kleinste noch erlaubte Version. Wer darunter liegt, bekommt ein
+  Pflicht-Update. Ohne Angabe bleibt der Wert des bisherigen Manifests.
+
+.PARAMETER Build
+  Vorher tool/package.ps1 laufen lassen.
+
+.EXAMPLE
+  $env:SUPABASE_SERVICE_KEY = 'eyJ...'
+  ./tool/publish_update.ps1 -Notes "Live-Updates eingebaut"
+  ./tool/publish_update.ps1 -Build -MinVersion 0.20.0
+#>
+[CmdletBinding()]
+param(
+  [string]$Notes = '',
+  [string]$MinVersion = '',
+  [string]$ServiceKey = $env:SUPABASE_SERVICE_KEY,
+  [string]$SupabaseUrl = '',
+  [switch]$Build
+)
+
+$ErrorActionPreference = 'Stop'
+
+$root = Split-Path -Parent $PSScriptRoot
+$distDir = Join-Path $root 'dist'
+$bucket = 'releases'
+
+function Get-AppVersion {
+  $pubspec = Join-Path $root 'pubspec.yaml'
+  $line = Select-String -Path $pubspec -Pattern '^version:\s*(.+)$' | Select-Object -First 1
+  if (-not $line) { throw "Keine version in pubspec.yaml gefunden." }
+  return $line.Matches[0].Groups[1].Value.Trim().Split('+')[0]
+}
+
+function Get-SupabaseUrl {
+  if ($SupabaseUrl) { $raw = $SupabaseUrl }
+  else {
+    $envFile = Join-Path $root 'env.json'
+    if (-not (Test-Path $envFile)) {
+      throw "Keine env.json gefunden. Supabase-URL mit -SupabaseUrl angeben."
+    }
+    $raw = (Get-Content $envFile -Raw -Encoding UTF8 | ConvertFrom-Json).SUPABASE_URL
+  }
+  if (-not $raw) { throw "SUPABASE_URL ist leer." }
+  $uri = [Uri]$raw
+  return "$($uri.Scheme)://$($uri.Host)"
+}
+
+function New-AssetInfo {
+  param([string]$Path, [string]$PublicBase)
+  $file = Get-Item -LiteralPath $Path
+  $hash = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+  return [ordered]@{
+    url    = "$PublicBase/$($file.Name)"
+    file   = $file.Name
+    size   = [int64]$file.Length
+    sha256 = $hash
+  }
+}
+
+function Send-StorageObject {
+  param(
+    [string]$Path,
+    [string]$Name,
+    [string]$ContentType,
+    [string]$BaseUrl,
+    [string]$Key,
+    [string]$CacheControl = 'max-age=3600'
+  )
+  $url = "$BaseUrl/storage/v1/object/$bucket/$Name"
+  $sizeMb = [math]::Round((Get-Item -LiteralPath $Path).Length / 1MB, 1)
+  Write-Host "Lade hoch: $Name ($sizeMb MB)" -ForegroundColor Green
+  $headers = @{
+    Authorization   = "Bearer $Key"
+    'x-upsert'      = 'true'
+    'cache-control' = $CacheControl
+  }
+  try {
+    Invoke-WebRequest -Uri $url -Method Post -Headers $headers `
+      -ContentType $ContentType -InFile $Path -UseBasicParsing | Out-Null
+  } catch {
+    $detail = $_.Exception.Message
+    if ($_.ErrorDetails) { $detail = $_.ErrorDetails.Message }
+    throw "Upload von $Name fehlgeschlagen: $detail"
+  }
+}
+
+function Get-PublishedManifest {
+  param([string]$PublicBase)
+  try {
+    return Invoke-RestMethod -Uri "$PublicBase/manifest.json?t=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" -UseBasicParsing
+  } catch {
+    return $null
+  }
+}
+
+if (-not $ServiceKey) {
+  throw "Kein Service-Role-Key. Setze `$env:SUPABASE_SERVICE_KEY oder nutze -ServiceKey. (Dashboard: Project Settings -> API -> service_role)"
+}
+
+$version = Get-AppVersion
+$baseUrl = Get-SupabaseUrl
+$publicBase = "$baseUrl/storage/v1/object/public/$bucket"
+
+Write-Host "Zuhaus $version -> $publicBase" -ForegroundColor Magenta
+
+if ($Build) {
+  & (Join-Path $PSScriptRoot 'package.ps1')
+  if ($LASTEXITCODE -ne 0) { throw "package.ps1 fehlgeschlagen." }
+}
+
+$apkPath = Join-Path $distDir "Android-$version.apk"
+$zipPath = Join-Path $distDir "Windows-$version.zip"
+
+$manifest = [ordered]@{
+  latestVersion = $version
+  publishedAt   = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+}
+
+# Pflichtversion: Parameter schlaegt den bisherigen Wert, sonst bleibt er.
+$published = Get-PublishedManifest -PublicBase $publicBase
+if ($MinVersion) {
+  $manifest['minVersion'] = $MinVersion
+} elseif ($published -and $published.minVersion) {
+  $manifest['minVersion'] = $published.minVersion
+}
+
+# Aenderungen: Parameter, sonst dist/notes-<version>.txt.
+if (-not $Notes) {
+  $notesFile = Join-Path $distDir "notes-$version.txt"
+  if (Test-Path $notesFile) {
+    $Notes = (Get-Content $notesFile -Raw -Encoding UTF8).Trim()
+  }
+}
+if ($Notes) { $manifest['notes'] = $Notes }
+
+$uploads = @()
+if (Test-Path $apkPath) {
+  $manifest['android'] = New-AssetInfo -Path $apkPath -PublicBase $publicBase
+  $uploads += , @($apkPath, "Android-$version.apk", 'application/vnd.android.package-archive')
+} else {
+  Write-Host "Kein Android-Paket in dist/ - Android bekommt kein Update angeboten." -ForegroundColor Yellow
+}
+if (Test-Path $zipPath) {
+  $manifest['windows'] = New-AssetInfo -Path $zipPath -PublicBase $publicBase
+  $uploads += , @($zipPath, "Windows-$version.zip", 'application/zip')
+} else {
+  Write-Host "Kein Windows-Paket in dist/ - Windows bekommt kein Update angeboten." -ForegroundColor Yellow
+}
+if ($uploads.Count -eq 0) {
+  throw "Nichts zu veroeffentlichen. Erst bauen: ./tool/package.ps1"
+}
+
+foreach ($upload in $uploads) {
+  Send-StorageObject -Path $upload[0] -Name $upload[1] -ContentType $upload[2] `
+    -BaseUrl $baseUrl -Key $ServiceKey
+}
+
+# Manifest zuletzt, damit nie eine Version angekuendigt wird, deren Datei noch
+# fehlt. UTF-8 ohne BOM, sonst stolpert der JSON-Leser ueber die Umlaute.
+$manifestPath = Join-Path $distDir 'manifest.json'
+$json = $manifest | ConvertTo-Json -Depth 5
+[System.IO.File]::WriteAllText($manifestPath, $json, (New-Object System.Text.UTF8Encoding($false)))
+
+Send-StorageObject -Path $manifestPath -Name 'manifest.json' -ContentType 'application/json' `
+  -BaseUrl $baseUrl -Key $ServiceKey -CacheControl 'max-age=60'
+
+Write-Host ""
+Write-Host "Veroeffentlicht:" -ForegroundColor Magenta
+Write-Host $json
+Write-Host ""
+Write-Host "Manifest: $publicBase/manifest.json" -ForegroundColor DarkGray

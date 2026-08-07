@@ -27,8 +27,15 @@ class MainActivity : FlutterFragmentActivity() {
     private val channelName = "de.lukas.multiapp/wake"
     private val installerChannelName = "de.lukas.multiapp/installer"
 
-    private val vibrationHandler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var vibrationStop: Runnable? = null
+    private var showWhenLockedStop: Runnable? = null
+
+    companion object {
+        /// Spaetestens danach gilt wieder der Normalfall, egal was passiert.
+        /// Der laengste einstellbare Wecker-Timeout sind 10 Minuten.
+        private const val SHOW_WHEN_LOCKED_MAX_MILLIS = 15L * 60 * 1000
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +71,22 @@ class MainActivity : FlutterFragmentActivity() {
     ///
     /// Bewusst ohne requestDismissKeyguard: ein Wecker soll ueber der Sperre
     /// erscheinen, sie aber nicht aufheben. Das Telefon bleibt gesperrt.
+    ///
+    /// Solange das Recht gesetzt ist, haelt Android die Activity sichtbar und
+    /// ruft kein onStop auf. Bleibt der Wecker-Schirm also aus irgendeinem
+    /// Grund offen, wuerde das Recht nicht zurueckgenommen. Deshalb laeuft es
+    /// zusaetzlich nach [SHOW_WHEN_LOCKED_MAX_MILLIS] von selbst ab.
     private fun applyShowWhenLocked(allow: Boolean) {
+        showWhenLockedStop?.let { mainHandler.removeCallbacks(it) }
+        showWhenLockedStop = null
+        if (allow) {
+            showWhenLockedStop = Runnable { applyShowWhenLocked(false) }
+            mainHandler.postDelayed(
+                showWhenLockedStop!!,
+                SHOW_WHEN_LOCKED_MAX_MILLIS
+            )
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(allow)
             setTurnScreenOn(allow)
@@ -199,7 +221,7 @@ class MainActivity : FlutterFragmentActivity() {
         // Notbremse: ohne sie wuerde ein verpasster Stopp-Aufruf das Geraet
         // endlos vibrieren lassen.
         vibrationStop = Runnable { stopAlarmVibration() }
-        vibrationHandler.postDelayed(vibrationStop!!, maxMillis)
+        mainHandler.postDelayed(vibrationStop!!, maxMillis)
     }
 
     private fun stopAlarmVibration() {

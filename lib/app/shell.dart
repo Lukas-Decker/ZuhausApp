@@ -57,6 +57,8 @@ class AppShell extends ConsumerWidget {
     ref.watch(petTaskTitleRepairProvider);
     // Holt die Android-Benachrichtigungsberechtigung, falls sie noch fehlt.
     ref.watch(notificationPermissionRequestProvider);
+    // Prueft die Systemrechte neu, wenn die App aus den Einstellungen kommt.
+    ref.watch(permissionRefreshProvider);
     // Haelt den Wecker-Modus der Erinnerungen aktuell.
     ref.watch(wakeScreenSyncProvider);
     // Sieht beim Start und alle sechs Stunden nach neuen Versionen.

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../settings/app_settings.dart';
@@ -35,6 +36,19 @@ final wakeScreenSyncProvider = Provider<void>((ref) {
   service.wakeTimeoutMinutes = settings.wakeTimeoutMinutes;
   service.soundEnabled = settings.reminderSoundEnabled;
   service.vibrationEnabled = settings.reminderVibrationEnabled;
+});
+
+/// Wertet die Systemrechte neu aus, sobald die App wieder nach vorne kommt.
+///
+/// Die "Erlauben"-Knöpfe öffnen nur die Systemeinstellung. Ob der Nutzer dort
+/// zugestimmt hat, lässt sich erst bei der Rückkehr feststellen; ohne diese
+/// Prüfung stünde in den Einstellungen weiter der alte Warnhinweis.
+/// In der AppShell beobachtet.
+final permissionRefreshProvider = Provider<void>((ref) {
+  final listener = AppLifecycleListener(
+    onResume: () => ref.invalidate(notificationPermissionsProvider),
+  );
+  ref.onDispose(listener.dispose);
 });
 
 /// Fragt beim Start einmalig die Benachrichtigungsberechtigung an, wenn sie

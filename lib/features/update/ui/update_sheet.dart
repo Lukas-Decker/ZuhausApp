@@ -59,13 +59,39 @@ class _MandatoryUpdateDialog extends StatelessWidget {
 }
 
 /// Inhalt des Hinweises: Version, Änderungen, Fortschritt und Knöpfe.
-class UpdateSheetBody extends ConsumerWidget {
+class UpdateSheetBody extends ConsumerStatefulWidget {
   const UpdateSheetBody({super.key, required this.mandatory});
 
   final bool mandatory;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<UpdateSheetBody> createState() => _UpdateSheetBodyState();
+}
+
+class _UpdateSheetBodyState extends ConsumerState<UpdateSheetBody> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Kommt die App aus der Systemeinstellung zurück, gleich nachsehen ob die
+    // Installation jetzt erlaubt ist, statt den Nutzer noch einmal tippen zu
+    // lassen.
+    _lifecycle = AppLifecycleListener(
+      onResume: () =>
+          ref.read(updateControllerProvider.notifier).recheckInstallPermission(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mandatory = widget.mandatory;
     final status = ref.watch(updateControllerProvider);
     final controller = ref.read(updateControllerProvider.notifier);
     final manifest = status.manifest;

@@ -211,6 +211,20 @@ class UpdateController extends Notifier<UpdateStatus> {
   Future<void> openInstallPermissionSettings() =>
       _installer.openInstallPermissionSettings();
 
+  /// Sieht nach, ob die Installations-Erlaubnis inzwischen erteilt wurde.
+  ///
+  /// Der Knopf "Installation erlauben" öffnet nur die Systemeinstellung; ob
+  /// der Nutzer dort zugestimmt hat, weiß die App erst, wenn sie wieder nach
+  /// vorne kommt. Ist die Erlaubnis jetzt da, geht es ohne weiteren Tipp
+  /// weiter: die Datei liegt schon im Zwischenspeicher, der Installer
+  /// startet also sofort.
+  Future<void> recheckInstallPermission() async {
+    if (!state.needsInstallPermission || state.phase.isBusy) return;
+    if (!await _installer.canInstall()) return;
+    state = state.copyWith(needsInstallPermission: false);
+    await downloadAndInstall();
+  }
+
   /// Merkt sich, dass diese Version übersprungen wurde: der Hinweis beim Start
   /// kommt dann erst bei der nächsten Version wieder.
   Future<void> skipCurrentVersion() async {

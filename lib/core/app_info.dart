@@ -6,4 +6,4 @@
 const String appName = 'Zuhaus';
 
 /// Anzeige-Version der App. Beim Versionsbump in pubspec.yaml mitziehen.
-const String appVersion = '0.19.1';
+const String appVersion = '0.20.0';

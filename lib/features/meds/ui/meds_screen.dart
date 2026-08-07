@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/notifications/notification_providers.dart';
+import '../../../core/notifications/notification_service.dart';
 import '../../../core/providers.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/widgets/add_fab.dart';
@@ -42,6 +43,8 @@ class MedsScreen extends ConsumerWidget {
             onPressed: () => SupplementInfoScreen.show(context),
             icon: const Icon(Icons.menu_book_outlined),
           ),
+          // Testphase: die echte Erinnerungskette pruefen.
+          const _ReminderTestButton(),
         ],
         bottom: const TabBar(
           tabs: [
@@ -57,6 +60,71 @@ class MedsScreen extends ConsumerWidget {
           children: [_DayTab(), _PlansTab()],
         ),
       ),
+    );
+  }
+}
+
+/// Plant fuer einen echten Plan eine Erinnerung in 10 Sekunden.
+///
+/// Testet die komplette Kette: planen, Vollbild-Meldung, Antippen, Anzeige der
+/// faelligen Einnahme und die Aktionen darin. Nur fuer die Testphase gedacht.
+class _ReminderTestButton extends ConsumerWidget {
+  const _ReminderTestButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      tooltip: 'Test-Erinnerung in 10 Sekunden',
+      icon: const Icon(Icons.alarm_add_outlined),
+      onPressed: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        final plans = await ref.read(medicationRepositoryProvider).allActivePlans();
+        if (plans.isEmpty) {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text('Kein aktiver Plan vorhanden - erst einen anlegen.'),
+            ),
+          );
+          return;
+        }
+
+        final plan = plans.first;
+        final form = medicationForm(plan.form);
+        final dosage = plan.dosage.trim();
+        // Auf volle Sekunden runden, damit der Slot-Schluessel stabil ist.
+        final when = DateTime.now().add(const Duration(seconds: 10));
+        final slot = DateTime(
+          when.year,
+          when.month,
+          when.day,
+          when.hour,
+          when.minute,
+          when.second,
+        );
+
+        await ref
+            .read(notificationServiceProvider)
+            .schedule(
+              ScheduledReminder(
+                id: notificationIdFromKey('test:${plan.id}'),
+                title: '${form.label} nehmen',
+                body: dosage.isEmpty
+                    ? 'Zeit für ${plan.name}'
+                    : 'Zeit für ${plan.name}: $dosage',
+                when: slot,
+                payload: 'med:${plan.id}|${slot.toIso8601String()}',
+              ),
+              channel: NotificationService.medicationChannel,
+            );
+
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Test für "${plan.name}" geplant. Bildschirm jetzt sperren.',
+            ),
+          ),
+        );
+      },
     );
   }
 }

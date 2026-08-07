@@ -1,11 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/router.dart';
 import '../../core/notifications/notification_providers.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/providers.dart';
 import '../../core/scope/app_scope.dart';
 import 'domain/medication_schedule.dart';
 import 'meds_providers.dart';
+import 'ui/dose_alarm_screen.dart';
 
 /// Reagiert auf Aktionen aus Medikamenten-Benachrichtigungen
 /// (Genommen / Snooze) und den Start aus einer Benachrichtigung.
@@ -75,7 +78,19 @@ Future<void> _handle(
       );
 
     default:
-      // Einfaches Antippen: keine Sonderbehandlung noetig.
-      break;
+      // Einfaches Antippen (auch aus einer Vollbild-Meldung ueber dem
+      // Sperrbildschirm): die faellige Einnahme gross anzeigen, statt die App
+      // dort zu oeffnen, wo sie zuletzt war.
+      final navigator = rootNavigatorKey.currentState;
+      if (navigator == null) return;
+      await navigator.push(
+        MaterialPageRoute(
+          builder: (_) => DoseAlarmScreen(
+            planId: planId,
+            scheduledFor: scheduledFor,
+          ),
+          fullscreenDialog: true,
+        ),
+      );
   }
 }

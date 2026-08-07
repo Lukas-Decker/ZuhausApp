@@ -32,8 +32,17 @@ final notificationPermissionsProvider =
 /// Kanal-Kennung.
 final wakeScreenSyncProvider = Provider<void>((ref) {
   final settings = ref.watch(appSettingsProvider);
+  // Die Nicht-stoeren-Freigabe gehoert mit in die Kanal-Kennung. Bewusst nur
+  // der eine Wahrheitswert beobachtet: sonst wuerde jede Neuauswertung der
+  // Rechte eine Neuplanung der Erinnerungen ausloesen.
+  final dndAllowed = ref.watch(
+    notificationPermissionsProvider.select(
+      (state) => state.value?.dndBypassAllowed ?? false,
+    ),
+  );
   final service = ref.watch(notificationServiceProvider);
   service.wakeScreen = settings.wakeScreenEnabled;
+  service.dndBypassAllowed = dndAllowed;
   service.wakeTimeoutMinutes = settings.wakeTimeoutMinutes;
   service.soundEnabled = settings.reminderSoundEnabled;
   service.vibrationEnabled = settings.reminderVibrationEnabled;

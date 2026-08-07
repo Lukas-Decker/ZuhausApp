@@ -12,6 +12,10 @@
     <!-- Wecker-Modus: eigenes Vibrieren mit Alarm-Attributen, auch wenn die
          Vibration fuer Benachrichtigungen abgeschaltet ist. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Ausnahme von "Bitte nicht stoeren" fuer den Wecker-Kanal. Erst diese
+         Deklaration bringt die App ueberhaupt in die Systemliste, in der die
+         Freigabe erteilt wird. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- Kamera fuer den Barcode-Scanner (mobile_scanner). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />

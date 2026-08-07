@@ -378,6 +378,14 @@ class NotificationService {
   bool soundEnabled = true;
   bool vibrationEnabled = true;
 
+  /// Ob Android die Ausnahme von "Bitte nicht stören" akzeptiert.
+  ///
+  /// Ohne die Freigabe wird das Kennzeichen am Kanal ignoriert. Weil ein
+  /// einmal angelegter Kanal nicht mehr nachträglich geändert werden kann,
+  /// steckt der Zustand in der Kanal-Kennung: nach dem Erteilen entsteht ein
+  /// neuer Kanal, der die Ausnahme wirklich hat.
+  bool dndBypassAllowed = false;
+
   /// Kraeftiges Muster fuer den Wecker-Modus: lange Stoesse mit Pausen,
   /// deutlich hartnaeckiger als das kurze Standard-Zucken.
   static final Int64List _alarmVibration = Int64List.fromList(const [
@@ -533,14 +541,16 @@ class NotificationService {
     // Kombination bekommt deshalb einen eigenen Kanal, sonst bliebe die
     // urspruengliche Wichtigkeit bzw. Ton/Vibration bestehen.
     final wake = wakeScreen;
+    final bypassDnd = wake && dndBypassAllowed;
     final variants = [
-      if (wake) 'Wecker',
+      if (bypassDnd) 'Wecker, auch bei Nicht stören' else if (wake) 'Wecker',
       if (!soundEnabled) 'ohne Ton',
       if (!vibrationEnabled) 'ohne Vibration',
     ];
     final channelId = [
       channel,
       if (wake) _wakeChannelSuffix,
+      if (bypassDnd) '_dnd',
       if (!soundEnabled) '_ns',
       if (!vibrationEnabled) '_nv',
     ].join();
@@ -560,9 +570,9 @@ class NotificationService {
             : AndroidNotificationCategory.reminder,
         // Weckt den Bildschirm und zeigt die Meldung ueber dem Sperrbildschirm.
         fullScreenIntent: wake,
-        // Wecker gehen auch durch "Bitte nicht stoeren". Android beachtet das
-        // nur mit der entsprechenden Freigabe, sonst bleibt es wirkungslos.
-        channelBypassDnd: wake,
+        // Wecker gehen auch durch "Bitte nicht stoeren", sofern die Freigabe
+        // dafuer vorliegt.
+        channelBypassDnd: bypassDnd,
         visibility: wake ? NotificationVisibility.public : null,
         // Damit der Wecker nicht endlos leuchtet: Android nimmt die Meldung
         // nach dieser Zeit selbst wieder weg.

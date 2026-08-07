@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../core/providers.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/pet_repository.dart';
@@ -216,7 +217,7 @@ class _TasksTab extends ConsumerWidget {
           data: (list) => list.isEmpty
               ? _emptyHint(context, 'Keine Tagesaufgaben. Füge welche hinzu.')
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, 88 + systemBottomInset(context)),
                   children: [
                     for (final status in list)
                       _TaskRow(pet: pet, status: status),
@@ -333,7 +334,7 @@ class _HealthTab extends ConsumerWidget {
                   'Keine Einträge. Erfasse Impfungen, Arznei oder Termine.',
                 )
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, 88 + systemBottomInset(context)),
                   children: [
                     for (final entry in list)
                       _HealthRow(pet: pet, entry: entry),
@@ -474,7 +475,7 @@ class _WeightTab extends ConsumerWidget {
           data: (list) => list.isEmpty
               ? _emptyHint(context, 'Noch keine Messungen. Trage ein Gewicht ein.')
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 88),
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, 88 + systemBottomInset(context)),
                   children: [
                     PetWeightChart(entries: list),
                     const SizedBox(height: 8),

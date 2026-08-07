@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/sheet_insets.dart';
+
 /// Zusammenfassung, wie die App mit Daten umgeht (DSGVO-Transparenz).
 class PrivacyInfoScreen extends StatelessWidget {
   const PrivacyInfoScreen({super.key});
@@ -15,7 +17,7 @@ class PrivacyInfoScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Datenschutz')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + systemBottomInset(context)),
         children: const [
           _Section(
             title: 'Offline-first',

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
 import '../../../data/db/app_database.dart';
@@ -185,7 +186,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 32 + systemBottomInset(context)),
         children: [
           TextField(
             controller: _title,

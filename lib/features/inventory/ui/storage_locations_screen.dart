@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/sheet_insets.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
 import '../../../data/db/app_database.dart';
@@ -34,7 +35,7 @@ class StorageLocationsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Fehler: $error')),
         data: (list) => ListView.separated(
-          padding: const EdgeInsets.only(bottom: 96),
+          padding: EdgeInsets.only(bottom: 96 + systemBottomInset(context)),
           itemCount: list.length,
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, index) {

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/notifications/notification_providers.dart';
 import '../../core/notifications/notification_service.dart';
+import '../../core/widgets/sheet_insets.dart';
 
 /// Diagnose fuer Erinnerungen: zeigt Rechte, Zeitzone und alle beim System
 /// vorgemerkten Alarme und kann Testmeldungen ausloesen.
@@ -65,7 +66,7 @@ class _NotificationDebugScreenState
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + systemBottomInset(context)),
         children: [
           Text('Status', style: Theme.of(context).textTheme.titleMedium),
           _row('Benachrichtigungen technisch aktiv', service.isSupported),

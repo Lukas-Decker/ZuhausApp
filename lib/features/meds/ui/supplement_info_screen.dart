@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/sheet_insets.dart';
 import '../domain/supplement_info.dart';
 
 /// Infothek zu haeufigen Nahrungsergaenzungsmitteln.
@@ -20,7 +21,7 @@ class SupplementInfoScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Supplement-Infothek')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + systemBottomInset(context)),
         children: [
           const _DisclaimerCard(),
           const SizedBox(height: 8),
@@ -79,7 +80,7 @@ class _SupplementDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(info.name)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + systemBottomInset(context)),
         children: [
           Row(
             children: [

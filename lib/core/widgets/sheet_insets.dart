@@ -15,3 +15,11 @@ double sheetBottomInset(BuildContext context) {
   final media = MediaQuery.of(context);
   return math.max(media.viewInsets.bottom, media.viewPadding.bottom);
 }
+
+/// Höhe der System-Leiste am unteren Rand (Gestenbalken oder Zurück-Knöpfe).
+///
+/// Für Bildschirme, deren Inhalt bis nach ganz unten scrollt: auf den
+/// gewünschten Abstand aufaddieren, sonst verschwindet der letzte Eintrag
+/// halb unter der Leiste.
+double systemBottomInset(BuildContext context) =>
+    MediaQuery.viewPaddingOf(context).bottom;

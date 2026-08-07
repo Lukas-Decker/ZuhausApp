@@ -51,6 +51,12 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
       });
     }
 
+    // Dieser eine Schirm darf ueber dem Sperrbildschirm stehen. Das Telefon
+    // bleibt dabei gesperrt, und beim Schliessen wird es zurueckgenommen.
+    if (settings.wakeScreenEnabled) {
+      ref.read(notificationServiceProvider).setShowWhenLocked(true);
+    }
+
     // Eigenes Vibrieren mit Alarm-Attributen: greift auch dann, wenn die
     // Vibration fuer Benachrichtigungen am Geraet abgeschaltet ist.
     if (settings.wakeScreenEnabled && settings.reminderVibrationEnabled) {
@@ -65,6 +71,7 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
   void dispose() {
     _timeout?.cancel();
     _stopVibration();
+    ref.read(notificationServiceProvider).setShowWhenLocked(false);
     super.dispose();
   }
 

@@ -1,6 +1,5 @@
 package de.lukas.multiapp
 
-import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -33,25 +32,47 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Damit eine Vollbild-Erinnerung den Bildschirm wirklich einschaltet und
-        // ueber dem Sperrbildschirm erscheint. Ohne diese Flags startet die
-        // Activity zwar, der Bildschirm bleibt aber dunkel.
-        allowShowWhenLockedAndTurnScreenOn()
+        // Nur wenn eine Erinnerung die App geweckt hat, darf sie ueber dem
+        // Sperrbildschirm erscheinen. Sonst waere die ganze App bei gesperrtem
+        // Telefon bedienbar.
+        applyShowWhenLocked(isReminderLaunch(intent))
     }
 
-    private fun allowShowWhenLockedAndTurnScreenOn() {
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Laeuft die App schon, kommt die Erinnerung hier herein.
+        if (isReminderLaunch(intent)) applyShowWhenLocked(true)
+    }
+
+    override fun onStop() {
+        // Ist die App nicht mehr sichtbar, gilt wieder der Normalfall: hinter
+        // dem Sperrbildschirm.
+        applyShowWhenLocked(false)
+        super.onStop()
+    }
+
+    /// Wurde die Activity von einer Medikamenten-Erinnerung gestartet?
+    ///
+    /// flutter_local_notifications haengt die Nutzlast als "payload" an das
+    /// Intent; unsere Erinnerungen beginnen mit "med:".
+    private fun isReminderLaunch(intent: Intent?): Boolean {
+        val payload = intent?.getStringExtra("payload") ?: return false
+        return payload.startsWith("med:")
+    }
+
+    /// Erlaubt oder verbietet die Anzeige ueber dem Sperrbildschirm.
+    ///
+    /// Bewusst ohne requestDismissKeyguard: ein Wecker soll ueber der Sperre
+    /// erscheinen, sie aber nicht aufheben. Das Telefon bleibt gesperrt.
+    private fun applyShowWhenLocked(allow: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-            val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            keyguard.requestDismissKeyguard(this, null)
+            setShowWhenLocked(allow)
+            setTurnScreenOn(allow)
         } else {
             @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-            )
+            val flags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            if (allow) window.addFlags(flags) else window.clearFlags(flags)
         }
     }
 
@@ -98,6 +119,13 @@ class MainActivity : FlutterFragmentActivity() {
                     }
                     "stopAlarmVibration" -> {
                         stopAlarmVibration()
+                        result.success(null)
+                    }
+                    // Wird vom Wecker-Schirm gesetzt und beim Schliessen
+                    // wieder zurueckgenommen: laeuft die App bereits, kommt
+                    // die Erinnerung nicht ueber onCreate herein.
+                    "setShowWhenLocked" -> {
+                        applyShowWhenLocked(call.argument<Boolean>("allow") == true)
                         result.success(null)
                     }
                     else -> result.notImplemented()

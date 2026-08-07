@@ -463,6 +463,26 @@ class NotificationService {
     }
   }
 
+  /// Erlaubt der App, über dem Sperrbildschirm zu erscheinen.
+  ///
+  /// Nur für den Wecker-Schirm einer fälligen Einnahme gedacht und danach
+  /// sofort wieder zurückzunehmen: sonst wäre die ganze App bei gesperrtem
+  /// Telefon bedienbar.
+  Future<void> setShowWhenLocked(bool allow) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('setShowWhenLocked', {
+        'allow': allow,
+      });
+    } catch (error) {
+      DebugLog.instance.warn(
+        'notifications',
+        'Sperrbildschirm-Anzeige nicht umschaltbar',
+        error: error,
+      );
+    }
+  }
+
   Future<void> stopAlarmVibration() async {
     if (!Platform.isAndroid) return;
     try {

@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +33,8 @@ class MainActivity : FlutterFragmentActivity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var vibrationStop: Runnable? = null
     private var showWhenLockedStop: Runnable? = null
+    private var alarmPlayer: MediaPlayer? = null
+    private var alarmSoundStop: Runnable? = null
 
     companion object {
         /// Spaetestens danach gilt wieder der Normalfall, egal was passiert.
@@ -158,6 +162,18 @@ class MainActivity : FlutterFragmentActivity() {
                         stopAlarmVibration()
                         result.success(null)
                     }
+                    // Spielt den Weckerton selbst ab. Ueber den
+                    // Benachrichtigungskanal bleibt er bei stummem Telefon
+                    // still, ueber den Alarm-Kanal nicht.
+                    "startAlarmSound" -> {
+                        val maxMillis = call.argument<Int>("maxMillis") ?: 120_000
+                        startAlarmSound(maxMillis.toLong())
+                        result.success(null)
+                    }
+                    "stopAlarmSound" -> {
+                        stopAlarmSound()
+                        result.success(null)
+                    }
                     // Wird vom Wecker-Schirm gesetzt und beim Schliessen
                     // wieder zurueckgenommen: laeuft die App bereits, kommt
                     // die Erinnerung nicht ueber onCreate herein.
@@ -243,6 +259,54 @@ class MainActivity : FlutterFragmentActivity() {
         mainHandler.postDelayed(vibrationStop!!, maxMillis)
     }
 
+    /// Weckerton in Dauerschleife ueber den Alarm-Kanal.
+    ///
+    /// Bewusst der Standard-Weckerton des Geraets: kein eigenes Tonmaterial
+    /// im Paket, und der Nutzer kennt den Klang.
+    private fun startAlarmSound(maxMillis: Long) {
+        stopAlarmSound()
+        val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            ?: return
+
+        try {
+            alarmPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                setDataSource(this@MainActivity, uri)
+                isLooping = true
+                prepare()
+                start()
+            }
+        } catch (error: Exception) {
+            // Kein Ton verfuegbar: die Erinnerung erscheint trotzdem.
+            alarmPlayer = null
+            return
+        }
+
+        // Dieselbe Notbremse wie bei der Vibration.
+        alarmSoundStop = Runnable { stopAlarmSound() }
+        mainHandler.postDelayed(alarmSoundStop!!, maxMillis)
+    }
+
+    private fun stopAlarmSound() {
+        alarmSoundStop?.let { mainHandler.removeCallbacks(it) }
+        alarmSoundStop = null
+        alarmPlayer?.let { player ->
+            try {
+                if (player.isPlaying) player.stop()
+            } catch (_: Exception) {
+                // Schon beendet.
+            }
+            player.release()
+        }
+        alarmPlayer = null
+    }
+
     private fun stopAlarmVibration() {
         vibrationStop?.let { mainHandler.removeCallbacks(it) }
         vibrationStop = null
@@ -255,12 +319,14 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onPause() {
         super.onPause()
-        // Verlaesst der Nutzer den Wecker-Schirm, hoert auch die Vibration auf.
+        // Verlaesst der Nutzer den Wecker-Schirm, hoeren Ton und Vibration auf.
         stopAlarmVibration()
+        stopAlarmSound()
     }
 
     override fun onDestroy() {
         stopAlarmVibration()
+        stopAlarmSound()
         super.onDestroy()
     }
 

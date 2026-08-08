@@ -516,6 +516,29 @@ class NotificationService {
     } catch (_) {}
   }
 
+  /// Spielt den Weckerton des Geräts über den Alarm-Kanal ab.
+  ///
+  /// Der Ton der Benachrichtigung selbst bleibt bei stummem Telefon still,
+  /// weil Android ihn dem Benachrichtigungskanal zuordnet. Hier spielt die
+  /// App ihn selbst, mit denselben Attributen wie ein Wecker.
+  Future<void> startAlarmSound({int maxSeconds = 120}) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('startAlarmSound', {
+        'maxMillis': maxSeconds.clamp(5, 15 * 60) * 1000,
+      });
+    } catch (error) {
+      DebugLog.instance.warn('notifications', 'Weckerton', error: error);
+    }
+  }
+
+  Future<void> stopAlarmSound() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _wakeChannel.invokeMethod<void>('stopAlarmSound');
+    } catch (_) {}
+  }
+
   /// Ob Vollbild-Meldungen (Bildschirm aufwecken) erlaubt sind.
   ///
   /// Fragt nativ nach; ab Android 14 muss der Nutzer das eigens freigeben.

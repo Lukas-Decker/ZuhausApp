@@ -34,54 +34,63 @@ class DoseAlarmScreen extends ConsumerStatefulWidget {
 
 class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
   Timer? _timeout;
-  bool _vibrating = false;
+  bool _alarming = false;
+  late final NotificationService _notifications;
 
   @override
   void initState() {
     super.initState();
     final settings = ref.read(appSettingsProvider);
+    // In dispose() ist ref nicht mehr benutzbar (Riverpod wirft dort), der
+    // Dienst wird deshalb hier festgehalten. Ohne das lief das Aufraeumen am
+    // Ende nie: die App blieb ueber dem Sperrbildschirm bedienbar.
+    _notifications = ref.read(notificationServiceProvider);
 
     // Reagiert niemand, schliesst sich der Schirm von selbst: sonst leuchtet
     // das Telefon die ganze Nacht. Die Einnahme bleibt faellig.
     final seconds = settings.wakeTimeoutSeconds;
     if (seconds > 0) {
       _timeout = Timer(Duration(seconds: seconds), () {
-        _stopVibration();
+        _stopAlarm();
         if (mounted) _close(context);
       });
     }
 
-    // Dieser eine Schirm darf ueber dem Sperrbildschirm stehen. Das Telefon
-    // bleibt dabei gesperrt, und beim Schliessen wird es zurueckgenommen.
     if (settings.wakeScreenEnabled) {
-      ref.read(notificationServiceProvider).setShowWhenLocked(true);
-    }
+      // Dieser eine Schirm darf ueber dem Sperrbildschirm stehen. Das Telefon
+      // bleibt dabei gesperrt, und beim Schliessen wird es zurueckgenommen.
+      _notifications.setShowWhenLocked(true);
 
-    // Eigenes Vibrieren mit Alarm-Attributen: greift auch dann, wenn die
-    // Vibration fuer Benachrichtigungen am Geraet abgeschaltet ist.
-    if (settings.wakeScreenEnabled && settings.reminderVibrationEnabled) {
-      _vibrating = true;
-      ref
-          .read(notificationServiceProvider)
-          .startAlarmVibration(maxSeconds: seconds > 0 ? seconds : 120);
+      // Ton und Vibration steuert die App hier selbst, mit Alarm-Attributen:
+      // nur so greifen sie auch bei stumm geschaltetem Telefon.
+      final maxSeconds = seconds > 0 ? seconds : 120;
+      if (settings.reminderVibrationEnabled) {
+        _alarming = true;
+        _notifications.startAlarmVibration(maxSeconds: maxSeconds);
+      }
+      if (settings.reminderSoundEnabled) {
+        _alarming = true;
+        _notifications.startAlarmSound(maxSeconds: maxSeconds);
+      }
     }
   }
 
   @override
   void dispose() {
     _timeout?.cancel();
-    _stopVibration();
+    _stopAlarm();
     // Nimmt das Sperrbildschirm-Recht zurueck UND geht bei gesperrtem Telefon
     // in den Hintergrund. Ohne den zweiten Teil bliebe die App bedienbar.
-    ref.read(notificationServiceProvider).endAlarmPresentation();
+    _notifications.endAlarmPresentation();
     super.dispose();
   }
 
-  /// Beendet die Vibration; mehrfaches Aufrufen schadet nicht.
-  void _stopVibration() {
-    if (!_vibrating) return;
-    _vibrating = false;
-    ref.read(notificationServiceProvider).stopAlarmVibration();
+  /// Beendet Ton und Vibration; mehrfaches Aufrufen schadet nicht.
+  void _stopAlarm() {
+    if (!_alarming) return;
+    _alarming = false;
+    _notifications.stopAlarmVibration();
+    _notifications.stopAlarmSound();
   }
 
   @override
@@ -215,11 +224,9 @@ class _ContentState extends ConsumerState<_Content> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: _busy ? null : widget.onDone,
-            child: const Text('Später entscheiden'),
-          ),
+          // Kein "Später entscheiden": ein Wecker soll eine Entscheidung
+          // verlangen, sonst haette man ihn nicht gestellt. Wer wirklich
+          // nichts tun will, laesst ihn ablaufen.
         ],
       ),
     );

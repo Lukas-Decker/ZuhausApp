@@ -63,6 +63,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Erzeugt AppLocalizations aus lib/l10n/*.arb (Einstellungen: l10n.yaml).
+  generate: true
 
 # App-Icon (weisses Haus auf blauem Grund). Neu erzeugen mit:
 #   dart run tool/generate_icon.dart

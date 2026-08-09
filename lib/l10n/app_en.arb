@@ -1,0 +1,40 @@
+{
+  "@@locale": "en",
+
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonClose": "Close",
+  "commonBack": "Back",
+  "commonLater": "Later",
+  "commonAllow": "Allow",
+  "commonRetry": "Try again",
+  "commonSettings": "Settings",
+  "commonError": "Error: {message}",
+
+  "medsTitle": "Meds",
+  "medsDoseTaken": "Taken",
+  "medsDoseSkipped": "Skipped",
+  "medsDosePostponed": "Postponed",
+  "medsSnoozeMinutes": "{minutes} min",
+  "medsSnoozeSeconds": "{seconds} sec",
+  "medsPlanMissing": "This plan no longer exists.",
+  "medsReminderTitle": "Take {dose}",
+  "medsReminderBody": "Time for {name}",
+
+  "medsFormTablet": "Tablet",
+  "medsFormCapsule": "Capsule",
+  "medsFormDrop": "Drops",
+  "medsFormSpray": "Spray",
+  "medsFormInjection": "Injection",
+  "medsFormOintment": "Ointment",
+  "medsFormOther": "Other",
+
+  "medsDoseTablet": "{count, plural, =1{{amount} tablet} other{{amount} tablets}}",
+  "medsDoseCapsule": "{count, plural, =1{{amount} capsule} other{{amount} capsules}}",
+  "medsDoseDrop": "{count, plural, =1{{amount} drop} other{{amount} drops}}",
+  "medsDoseSpray": "{count, plural, =1{{amount} spray} other{{amount} sprays}}",
+  "medsDoseInjection": "{count, plural, =1{{amount} injection} other{{amount} injections}}",
+  "medsDoseOintment": "{count, plural, =1{{amount} application} other{{amount} applications}}",
+  "medsDoseOther": "{count, plural, =1{{amount} unit} other{{amount} units}}"
+}

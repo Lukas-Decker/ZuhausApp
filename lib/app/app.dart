@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_info.dart';
+import '../l10n/app_localizations.dart';
 import '../core/providers.dart';
 import '../core/security/app_lock_gate.dart';
 import '../features/household/join_link_listener.dart';
@@ -33,6 +34,7 @@ class MultiApp extends ConsumerWidget {
         locale: const Locale('de'),
         supportedLocales: const [Locale('de'), Locale('en')],
         localizationsDelegates: const [
+          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,

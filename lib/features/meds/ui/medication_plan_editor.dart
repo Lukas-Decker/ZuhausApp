@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/i18n/app_texts.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
 import '../../../core/widgets/sheet_insets.dart';
@@ -147,7 +148,9 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
                                 children: [
                                   Icon(entry.value.icon, size: 18),
                                   const SizedBox(width: 8),
-                                  Text(entry.value.label),
+                                  Text(
+                                    medicationFormLabel(entry.key, context.l10n),
+                                  ),
                                 ],
                               ),
                             ),

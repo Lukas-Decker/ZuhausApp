@@ -1,0 +1,12 @@
+# Erzeugt aus den ARB-Dateien die Klasse AppLocalizations.
+#   flutter gen-l10n
+# Laeuft auch automatisch bei jedem Build, weil in pubspec.yaml
+# "flutter: generate: true" gesetzt ist.
+#
+# Quellsprache ist Deutsch: die App wird deutsch geschrieben und ins
+# Englische uebersetzt, nicht umgekehrt.
+arb-dir: lib/l10n
+template-arb-file: app_de.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

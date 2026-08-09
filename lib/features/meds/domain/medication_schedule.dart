@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/app_texts.dart';
+import '../../../l10n/app_localizations.dart';
+
 /// Darreichungsformen mit Symbol.
 ///
 /// [label] ist der Name der Form in der Oberfläche, [one] und [many] sind
@@ -56,18 +59,51 @@ medicationForms = {
 
 /// Menge und Form als ein Text: "2 Tabletten", "1 Kapsel", "10 Tropfen".
 ///
+/// Die Mehrzahlregeln stehen in den ARB-Dateien, damit sie je Sprache
+/// stimmen. Ohne [l10n] (Dienste ohne BuildContext) gelten die Texte der
+/// zuletzt geladenen Sprache.
+///
 /// Ohne Mengenangabe bleibt nur die Form ("Tablette"). Steht in der Dosis
 /// schon eine eigene Einheit ("5 ml", "1 TL"), wird sie unverändert
 /// übernommen: "5 ml Tropfen" wäre Unsinn.
-String medicationDoseLabel(String formKey, String dosage) {
-  final form = medicationForm(formKey);
+String medicationDoseLabel(
+  String formKey,
+  String dosage, [
+  AppLocalizations? l10n,
+]) {
+  final texts = l10n ?? AppTexts.current;
   final trimmed = dosage.trim();
-  if (trimmed.isEmpty) return form.one;
-
   final amount = double.tryParse(trimmed.replaceAll(',', '.'));
-  if (amount == null) return trimmed;
 
-  return '$trimmed ${amount == 1 ? form.one : form.many}';
+  // Eigene Einheit oder Freitext: unveraendert lassen.
+  if (trimmed.isNotEmpty && amount == null) return trimmed;
+
+  final count = amount ?? 1;
+  final label = switch (formKey) {
+    'tablet' => texts.medsDoseTablet(count, trimmed),
+    'capsule' => texts.medsDoseCapsule(count, trimmed),
+    'drop' => texts.medsDoseDrop(count, trimmed),
+    'spray' => texts.medsDoseSpray(count, trimmed),
+    'injection' => texts.medsDoseInjection(count, trimmed),
+    'ointment' => texts.medsDoseOintment(count, trimmed),
+    _ => texts.medsDoseOther(count, trimmed),
+  };
+  // Ohne Menge bleibt ein fuehrendes Leerzeichen stehen.
+  return label.trim();
+}
+
+/// Name der Darreichungsform in der Sprache der Oberfläche.
+String medicationFormLabel(String formKey, [AppLocalizations? l10n]) {
+  final texts = l10n ?? AppTexts.current;
+  return switch (formKey) {
+    'tablet' => texts.medsFormTablet,
+    'capsule' => texts.medsFormCapsule,
+    'drop' => texts.medsFormDrop,
+    'spray' => texts.medsFormSpray,
+    'injection' => texts.medsFormInjection,
+    'ointment' => texts.medsFormOintment,
+    _ => texts.medsFormOther,
+  };
 }
 
 enum ScheduleType {

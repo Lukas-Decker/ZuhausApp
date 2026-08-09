@@ -1,0 +1,150 @@
+{
+  "@@locale": "de",
+
+  "commonSave": "Speichern",
+  "@commonSave": {
+    "description": "Knopf: Eingaben uebernehmen"
+  },
+  "commonCancel": "Abbrechen",
+  "commonDelete": "Löschen",
+  "commonClose": "Schließen",
+  "commonBack": "Zurück",
+  "commonLater": "Später",
+  "commonAllow": "Erlauben",
+  "commonRetry": "Erneut versuchen",
+  "commonSettings": "Einstellungen",
+  "commonError": "Fehler: {message}",
+  "@commonError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+
+  "medsTitle": "Pillen",
+  "medsDoseTaken": "Genommen",
+  "medsDoseSkipped": "Ausgelassen",
+  "medsDosePostponed": "Verschoben",
+  "medsSnoozeMinutes": "{minutes} Min.",
+  "@medsSnoozeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "medsSnoozeSeconds": "{seconds} Sek.",
+  "@medsSnoozeSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "medsPlanMissing": "Dieser Plan existiert nicht mehr.",
+  "medsReminderTitle": "{dose} nehmen",
+  "@medsReminderTitle": {
+    "description": "Titel der Erinnerung, z.B. '2 Tabletten nehmen'",
+    "placeholders": {
+      "dose": {
+        "type": "String"
+      }
+    }
+  },
+  "medsReminderBody": "Zeit für {name}",
+  "@medsReminderBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "medsFormTablet": "Tablette",
+  "medsFormCapsule": "Kapsel",
+  "medsFormDrop": "Tropfen",
+  "medsFormSpray": "Spray",
+  "medsFormInjection": "Spritze",
+  "medsFormOintment": "Salbe",
+  "medsFormOther": "Sonstiges",
+
+  "medsDoseTablet": "{count, plural, =1{{amount} Tablette} other{{amount} Tabletten}}",
+  "@medsDoseTablet": {
+    "description": "Menge mit Form; amount ist die Eingabe des Nutzers (kann '0,5' sein)",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseCapsule": "{count, plural, =1{{amount} Kapsel} other{{amount} Kapseln}}",
+  "@medsDoseCapsule": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseDrop": "{count, plural, =1{{amount} Tropfen} other{{amount} Tropfen}}",
+  "@medsDoseDrop": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseSpray": "{count, plural, =1{{amount} Sprühstoß} other{{amount} Sprühstöße}}",
+  "@medsDoseSpray": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseInjection": "{count, plural, =1{{amount} Spritze} other{{amount} Spritzen}}",
+  "@medsDoseInjection": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseOintment": "{count, plural, =1{{amount} Anwendung} other{{amount} Anwendungen}}",
+  "@medsDoseOintment": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "medsDoseOther": "{count, plural, =1{{amount} Einheit} other{{amount} Einheiten}}",
+  "@medsDoseOther": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
+}

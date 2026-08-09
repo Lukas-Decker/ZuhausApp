@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app.dart';
 import 'core/config/app_config.dart';
 import 'core/diagnostics/debug_log.dart';
+import 'core/i18n/app_texts.dart';
 import 'core/deeplink/windows_deeplink.dart';
 import 'core/notifications/notification_providers.dart';
 import 'core/notifications/notification_service.dart';
@@ -25,6 +26,10 @@ Future<void> main() async {
 
   // Deutsche Datums- und Zahlenformate für intl bereitstellen.
   await initializeDateFormatting('de');
+
+  // Texte für Code ohne BuildContext (Benachrichtigungen, Dienste). Die App
+  // läuft vorerst fest auf Deutsch, solange die Übersetzung noch wächst.
+  await AppTexts.load(const Locale('de'));
 
   final prefs = await SharedPreferences.getInstance();
   final database = AppDatabase();

@@ -135,4 +135,23 @@ void main() {
       );
     });
   });
+
+  group('medicationDoseLabel', () {
+    test('setzt die Mehrzahl nach der Menge', () {
+      expect(medicationDoseLabel('tablet', '1'), '1 Tablette');
+      expect(medicationDoseLabel('tablet', '2'), '2 Tabletten');
+      expect(medicationDoseLabel('capsule', '3'), '3 Kapseln');
+      // Tropfen heissen in beiden Faellen gleich.
+      expect(medicationDoseLabel('drop', '10'), '10 Tropfen');
+    });
+
+    test('laesst eine eigene Einheit unangetastet', () {
+      expect(medicationDoseLabel('drop', '5 ml'), '5 ml');
+      expect(medicationDoseLabel('tablet', 'nach Bedarf'), 'nach Bedarf');
+    });
+
+    test('ohne Menge bleibt nur die Form', () {
+      expect(medicationDoseLabel('tablet', '  '), 'Tablette');
+    });
+  });
 }

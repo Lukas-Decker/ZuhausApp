@@ -198,7 +198,8 @@ class _ContentState extends ConsumerState<_Content> {
           if (dosage.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              dosage,
+              // Gleiche Schreibweise wie in der Benachrichtigung.
+              medicationDoseLabel(plan.form, dosage),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -278,17 +279,14 @@ class _ContentState extends ConsumerState<_Content> {
     widget.onActionStarted();
     setState(() => _busy = true);
     final plan = widget.plan;
-    final form = medicationForm(plan.form);
-    final dosage = plan.dosage.trim();
+    final dose = medicationDoseLabel(plan.form, plan.dosage);
     await ref
         .read(notificationServiceProvider)
         .schedule(
           ScheduledReminder(
             id: notificationIdFromKey('snooze:$_slotKey'),
-            title: '${form.label} nehmen',
-            body: dosage.isEmpty
-                ? 'Zeit für ${plan.name}'
-                : 'Zeit für ${plan.name}: $dosage',
+            title: '$dose nehmen',
+            body: 'Zeit für ${plan.name}',
             when: DateTime.now().add(
               widget.isTest
                   ? const Duration(seconds: 10)

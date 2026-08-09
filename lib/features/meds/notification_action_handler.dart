@@ -64,15 +64,12 @@ Future<void> _handle(
       await service.cancel(notificationIdFromKey(slotKey));
 
     case medSnoozeActionId:
-      final form = medicationForm(plan.form);
-      final dosage = plan.dosage.trim();
+      final dose = medicationDoseLabel(plan.form, plan.dosage);
       await service.schedule(
         ScheduledReminder(
           id: notificationIdFromKey('snooze:$slotKey'),
-          title: '${form.label} nehmen',
-          body: dosage.isEmpty
-              ? 'Zeit für ${plan.name}'
-              : 'Zeit für ${plan.name}: $dosage',
+          title: '$dose nehmen',
+          body: 'Zeit für ${plan.name}',
           when: DateTime.now().add(
             isTest ? const Duration(seconds: 10) : const Duration(minutes: 15),
           ),

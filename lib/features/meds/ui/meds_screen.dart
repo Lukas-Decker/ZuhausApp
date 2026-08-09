@@ -89,8 +89,6 @@ class _ReminderTestButton extends ConsumerWidget {
         }
 
         final plan = plans.first;
-        final form = medicationForm(plan.form);
-        final dosage = plan.dosage.trim();
         // Auf volle Sekunden runden, damit der Slot-Schluessel stabil ist.
         final when = DateTime.now().add(const Duration(seconds: 10));
         final slot = DateTime(
@@ -107,10 +105,8 @@ class _ReminderTestButton extends ConsumerWidget {
             .schedule(
               ScheduledReminder(
                 id: notificationIdFromKey('test:${plan.id}'),
-                title: '${form.label} nehmen',
-                body: dosage.isEmpty
-                    ? 'Zeit für ${plan.name}'
-                    : 'Zeit für ${plan.name}: $dosage',
+                title: '${medicationDoseLabel(plan.form, plan.dosage)} nehmen',
+                body: 'Zeit für ${plan.name}',
                 when: slot,
                 // Die Markierung am Ende zieht sich durch: Snooze wartet im
                 // Test 10 Sekunden statt 15 Minuten.

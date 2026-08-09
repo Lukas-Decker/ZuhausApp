@@ -63,16 +63,13 @@ class MedicationReminderScheduler {
   }
 
   ScheduledReminder _reminderFor(DoseOccurrence occ) {
-    final form = medicationForm(occ.plan.form);
-    final dosage = occ.plan.dosage.trim();
-    final body = dosage.isEmpty
-        ? 'Zeit für ${occ.plan.name}'
-        : 'Zeit für ${occ.plan.name}: $dosage';
+    // Menge und Form zusammen: "2 Tabletten nehmen" statt "Tablette nehmen".
+    final dose = medicationDoseLabel(occ.plan.form, occ.plan.dosage);
 
     return ScheduledReminder(
       id: notificationIdFromKey(occ.slotKey),
-      title: '${form.label} nehmen',
-      body: body,
+      title: '$dose nehmen',
+      body: 'Zeit für ${occ.plan.name}',
       when: occ.scheduledFor,
       // Plan und genauer Zeitpunkt, damit die Aktionen die richtige Einnahme
       // treffen: "med:<planId>|<scheduledForIso>".

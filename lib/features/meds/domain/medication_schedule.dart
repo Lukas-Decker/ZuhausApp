@@ -1,18 +1,74 @@
 import 'package:flutter/material.dart';
 
 /// Darreichungsformen mit Symbol.
-const Map<String, ({String label, IconData icon})> medicationForms = {
-  'tablet': (label: 'Tablette', icon: Icons.medication_rounded),
-  'capsule': (label: 'Kapsel', icon: Icons.medication_liquid_rounded),
-  'drop': (label: 'Tropfen', icon: Icons.water_drop_rounded),
-  'spray': (label: 'Spray', icon: Icons.air_rounded),
-  'injection': (label: 'Spritze', icon: Icons.vaccines_rounded),
-  'ointment': (label: 'Salbe', icon: Icons.healing_rounded),
-  'other': (label: 'Sonstiges', icon: Icons.medical_services_rounded),
+///
+/// [label] ist der Name der Form in der Oberfläche, [one] und [many] sind
+/// die Wörter für eine Mengenangabe ("1 Tablette", "2 Tabletten").
+const Map<String, ({String label, String one, String many, IconData icon})>
+medicationForms = {
+  'tablet': (
+    label: 'Tablette',
+    one: 'Tablette',
+    many: 'Tabletten',
+    icon: Icons.medication_rounded,
+  ),
+  'capsule': (
+    label: 'Kapsel',
+    one: 'Kapsel',
+    many: 'Kapseln',
+    icon: Icons.medication_liquid_rounded,
+  ),
+  'drop': (
+    label: 'Tropfen',
+    one: 'Tropfen',
+    many: 'Tropfen',
+    icon: Icons.water_drop_rounded,
+  ),
+  'spray': (
+    label: 'Spray',
+    one: 'Sprühstoß',
+    many: 'Sprühstöße',
+    icon: Icons.air_rounded,
+  ),
+  'injection': (
+    label: 'Spritze',
+    one: 'Spritze',
+    many: 'Spritzen',
+    icon: Icons.vaccines_rounded,
+  ),
+  'ointment': (
+    label: 'Salbe',
+    one: 'Anwendung',
+    many: 'Anwendungen',
+    icon: Icons.healing_rounded,
+  ),
+  'other': (
+    label: 'Sonstiges',
+    one: 'Einheit',
+    many: 'Einheiten',
+    icon: Icons.medical_services_rounded,
+  ),
 };
 
-({String label, IconData icon}) medicationForm(String key) =>
-    medicationForms[key] ?? medicationForms['other']!;
+({String label, String one, String many, IconData icon}) medicationForm(
+  String key,
+) => medicationForms[key] ?? medicationForms['other']!;
+
+/// Menge und Form als ein Text: "2 Tabletten", "1 Kapsel", "10 Tropfen".
+///
+/// Ohne Mengenangabe bleibt nur die Form ("Tablette"). Steht in der Dosis
+/// schon eine eigene Einheit ("5 ml", "1 TL"), wird sie unverändert
+/// übernommen: "5 ml Tropfen" wäre Unsinn.
+String medicationDoseLabel(String formKey, String dosage) {
+  final form = medicationForm(formKey);
+  final trimmed = dosage.trim();
+  if (trimmed.isEmpty) return form.one;
+
+  final amount = double.tryParse(trimmed.replaceAll(',', '.'));
+  if (amount == null) return trimmed;
+
+  return '$trimmed ${amount == 1 ? form.one : form.many}';
+}
 
 enum ScheduleType {
   daily('daily', 'Feste Uhrzeiten'),

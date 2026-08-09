@@ -39,6 +39,8 @@ Future<void> _handle(
   final planId = parts.first;
   final scheduledFor = parts.length > 1 ? DateTime.tryParse(parts[1]) : null;
   if (scheduledFor == null) return;
+  // Testlauf aus dem Pillen-Tab: dann schlummert die Erinnerung nur kurz.
+  final isTest = parts.length > 2 && parts[2] == 'test';
 
   final repo = ref.read(medicationRepositoryProvider);
   final plan = await repo.getPlan(planId);
@@ -71,7 +73,9 @@ Future<void> _handle(
           body: dosage.isEmpty
               ? 'Zeit für ${plan.name}'
               : 'Zeit für ${plan.name}: $dosage',
-          when: DateTime.now().add(const Duration(minutes: 15)),
+          when: DateTime.now().add(
+            isTest ? const Duration(seconds: 10) : const Duration(minutes: 15),
+          ),
           payload: payload,
         ),
         channel: NotificationService.medicationChannel,
@@ -88,6 +92,7 @@ Future<void> _handle(
           builder: (_) => DoseAlarmScreen(
             planId: planId,
             scheduledFor: scheduledFor,
+            isTest: isTest,
           ),
           fullscreenDialog: true,
         ),

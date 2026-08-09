@@ -112,7 +112,9 @@ class _ReminderTestButton extends ConsumerWidget {
                     ? 'Zeit für ${plan.name}'
                     : 'Zeit für ${plan.name}: $dosage',
                 when: slot,
-                payload: 'med:${plan.id}|${slot.toIso8601String()}',
+                // Die Markierung am Ende zieht sich durch: Snooze wartet im
+                // Test 10 Sekunden statt 15 Minuten.
+                payload: 'med:${plan.id}|${slot.toIso8601String()}|test',
               ),
               channel: NotificationService.medicationChannel,
             );

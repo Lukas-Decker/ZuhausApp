@@ -23,10 +23,15 @@ class DoseAlarmScreen extends ConsumerStatefulWidget {
     super.key,
     required this.planId,
     required this.scheduledFor,
+    this.isTest = false,
   });
 
   final String planId;
   final DateTime scheduledFor;
+
+  /// Testlauf aus dem Pillen-Tab: dann schlummert die Erinnerung nur kurz,
+  /// damit sich die Kette in einem Durchgang pruefen laesst.
+  final bool isTest;
 
   @override
   ConsumerState<DoseAlarmScreen> createState() => _DoseAlarmScreenState();
@@ -115,6 +120,10 @@ class _DoseAlarmScreenState extends ConsumerState<DoseAlarmScreen> {
             return _Content(
               plan: plan,
               scheduledFor: scheduledFor,
+              isTest: widget.isTest,
+              // Ton und Vibration enden mit dem Antippen, nicht erst wenn die
+              // Buchung durch ist und sich der Schirm schliesst.
+              onActionStarted: _stopAlarm,
               onDone: () => _close(context),
             );
           },
@@ -135,11 +144,18 @@ class _Content extends ConsumerStatefulWidget {
     required this.plan,
     required this.scheduledFor,
     required this.onDone,
+    required this.onActionStarted,
+    this.isTest = false,
   });
 
   final MedicationPlan plan;
   final DateTime scheduledFor;
   final VoidCallback onDone;
+
+  /// Wird sofort beim Antippen einer Aktion aufgerufen (stoppt Ton/Vibration).
+  final VoidCallback onActionStarted;
+
+  final bool isTest;
 
   @override
   ConsumerState<_Content> createState() => _ContentState();
@@ -207,7 +223,7 @@ class _ContentState extends ConsumerState<_Content> {
                     minimumSize: const Size(0, 56),
                   ),
                   icon: const Icon(Icons.snooze_rounded),
-                  label: const Text('15 Min.'),
+                  label: Text(widget.isTest ? '10 Sek.' : '15 Min.'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -240,6 +256,8 @@ class _ContentState extends ConsumerState<_Content> {
       '${widget.plan.id}@${widget.scheduledFor.toIso8601String()}';
 
   Future<void> _record(String status) async {
+    // Sofort still, nicht erst wenn die Buchung durch ist.
+    widget.onActionStarted();
     setState(() => _busy = true);
     await ref
         .read(medicationRepositoryProvider)
@@ -257,6 +275,7 @@ class _ContentState extends ConsumerState<_Content> {
   }
 
   Future<void> _snooze() async {
+    widget.onActionStarted();
     setState(() => _busy = true);
     final plan = widget.plan;
     final form = medicationForm(plan.form);
@@ -270,8 +289,14 @@ class _ContentState extends ConsumerState<_Content> {
             body: dosage.isEmpty
                 ? 'Zeit für ${plan.name}'
                 : 'Zeit für ${plan.name}: $dosage',
-            when: DateTime.now().add(const Duration(minutes: 15)),
-            payload: 'med:${plan.id}|${widget.scheduledFor.toIso8601String()}',
+            when: DateTime.now().add(
+              widget.isTest
+                  ? const Duration(seconds: 10)
+                  : const Duration(minutes: 15),
+            ),
+            payload:
+                'med:${plan.id}|${widget.scheduledFor.toIso8601String()}'
+                '${widget.isTest ? '|test' : ''}',
           ),
           channel: NotificationService.medicationChannel,
         );

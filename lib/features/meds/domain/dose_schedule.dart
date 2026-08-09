@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/db/app_database.dart';
+import 'dose_slots.dart';
 import 'medication_schedule.dart';
 
 /// Ein konkreter, an einem Tag fälliger Einnahmezeitpunkt eines Plans.
 @immutable
 class DoseOccurrence {
-  const DoseOccurrence({required this.plan, required this.scheduledFor});
+  const DoseOccurrence({
+    required this.plan,
+    required this.scheduledFor,
+    this.amountOverride,
+  });
 
   final MedicationPlan plan;
   final DateTime scheduledFor;
+
+  /// Beim Tageszeiten-Schema die Menge dieses Eintrags.
+  final String? amountOverride;
+
+  /// Menge dieser Einnahme; ohne eigene Angabe die des Plans.
+  String get amount => amountOverride ?? plan.dosage;
 
   /// Stabile Kennung für Log-Abgleich und Notification-ID.
   String get slotKey =>
@@ -38,8 +49,34 @@ abstract final class DoseSchedule {
 
     return switch (ScheduleType.parse(plan.scheduleType)) {
       ScheduleType.daily => _dailyForDay(plan, dayStart),
+      ScheduleType.scheme => _schemeForDay(plan, dayStart),
       ScheduleType.interval => _intervalForDay(plan, dayStart, dayEnd),
     };
+  }
+
+  /// Tageszeiten-Schema: nur die Einträge mit einer Menge werden fällig.
+  static List<DoseOccurrence> _schemeForDay(
+    MedicationPlan plan,
+    DateTime dayStart,
+  ) {
+    if (!ScheduleWeekdays.includes(plan.weekdays, dayStart.weekday)) {
+      return const [];
+    }
+    return [
+      for (final entry in DoseScheme.parse(plan.times, plan.doses))
+        if (entry.isActive)
+          DoseOccurrence(
+            plan: plan,
+            scheduledFor: DateTime(
+              dayStart.year,
+              dayStart.month,
+              dayStart.day,
+              entry.time.hour,
+              entry.time.minute,
+            ),
+            amountOverride: entry.amount.trim(),
+          ),
+    ];
   }
 
   static List<DoseOccurrence> _dailyForDay(

@@ -8935,6 +8935,28 @@ class $MedicationPlansTable extends MedicationPlans
     requiredDuringInsert: false,
     defaultValue: const Constant('08:00'),
   );
+  static const VerificationMeta _dosesMeta = const VerificationMeta('doses');
+  @override
+  late final GeneratedColumn<String> doses = GeneratedColumn<String>(
+    'doses',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _intakeHintsMeta = const VerificationMeta(
+    'intakeHints',
+  );
+  @override
+  late final GeneratedColumn<String> intakeHints = GeneratedColumn<String>(
+    'intake_hints',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _weekdaysMeta = const VerificationMeta(
     'weekdays',
   );
@@ -9095,6 +9117,8 @@ class $MedicationPlansTable extends MedicationPlans
     form,
     scheduleType,
     times,
+    doses,
+    intakeHints,
     weekdays,
     intervalHours,
     startDate,
@@ -9208,6 +9232,21 @@ class $MedicationPlansTable extends MedicationPlans
       context.handle(
         _timesMeta,
         times.isAcceptableOrUnknown(data['times']!, _timesMeta),
+      );
+    }
+    if (data.containsKey('doses')) {
+      context.handle(
+        _dosesMeta,
+        doses.isAcceptableOrUnknown(data['doses']!, _dosesMeta),
+      );
+    }
+    if (data.containsKey('intake_hints')) {
+      context.handle(
+        _intakeHintsMeta,
+        intakeHints.isAcceptableOrUnknown(
+          data['intake_hints']!,
+          _intakeHintsMeta,
+        ),
       );
     }
     if (data.containsKey('weekdays')) {
@@ -9365,6 +9404,14 @@ class $MedicationPlansTable extends MedicationPlans
         DriftSqlType.string,
         data['${effectivePrefix}times'],
       )!,
+      doses: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doses'],
+      )!,
+      intakeHints: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}intake_hints'],
+      )!,
       weekdays: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}weekdays'],
@@ -9446,11 +9493,24 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
   /// Schlüssel aus [medicationForms], z.B. tablet, drop, spray.
   final String form;
 
-  /// 'daily' (feste Uhrzeiten an Wochentagen) oder 'interval' (alle N Stunden).
+  /// 'daily' (feste Uhrzeiten an Wochentagen), 'scheme' (Morgens/Mittags/
+  /// Abends/Nachts mit eigener Menge) oder 'interval' (alle N Stunden).
   final String scheduleType;
 
-  /// Bei 'daily': Uhrzeiten als CSV "HH:mm", z.B. "08:00,20:00".
+  /// Bei 'daily' und 'scheme': Uhrzeiten als CSV "HH:mm", z.B. "08:00,20:00".
+  ///
+  /// Bei 'scheme' stehen hier immer alle vier Tageszeiten in fester
+  /// Reihenfolge (morgens, mittags, abends, nachts).
   final String times;
+
+  /// Bei 'scheme': Menge je Uhrzeit als CSV, gleiche Reihenfolge wie [times],
+  /// z.B. "1,0,1,0" für das klassische 1-0-1. Eine 0 bedeutet: zu dieser
+  /// Tageszeit keine Einnahme. Leer heißt: überall die Menge aus [dosage].
+  final String doses;
+
+  /// Einnahmehinweise als CSV von Schlüsseln, z.B. "fasting,water".
+  /// Die Texte dazu stehen übersetzt in den ARB-Dateien.
+  final String intakeHints;
 
   /// Bei 'daily': aktive Wochentage als CSV 1-7 (Mo-So), leer = alle Tage.
   final String weekdays;
@@ -9496,6 +9556,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
     required this.form,
     required this.scheduleType,
     required this.times,
+    required this.doses,
+    required this.intakeHints,
     required this.weekdays,
     required this.intervalHours,
     this.startDate,
@@ -9532,6 +9594,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
     map['form'] = Variable<String>(form);
     map['schedule_type'] = Variable<String>(scheduleType);
     map['times'] = Variable<String>(times);
+    map['doses'] = Variable<String>(doses);
+    map['intake_hints'] = Variable<String>(intakeHints);
     map['weekdays'] = Variable<String>(weekdays);
     map['interval_hours'] = Variable<int>(intervalHours);
     if (!nullToAbsent || startDate != null) {
@@ -9581,6 +9645,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
       form: Value(form),
       scheduleType: Value(scheduleType),
       times: Value(times),
+      doses: Value(doses),
+      intakeHints: Value(intakeHints),
       weekdays: Value(weekdays),
       intervalHours: Value(intervalHours),
       startDate: startDate == null && nullToAbsent
@@ -9626,6 +9692,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
       form: serializer.fromJson<String>(json['form']),
       scheduleType: serializer.fromJson<String>(json['scheduleType']),
       times: serializer.fromJson<String>(json['times']),
+      doses: serializer.fromJson<String>(json['doses']),
+      intakeHints: serializer.fromJson<String>(json['intakeHints']),
       weekdays: serializer.fromJson<String>(json['weekdays']),
       intervalHours: serializer.fromJson<int>(json['intervalHours']),
       startDate: serializer.fromJson<DateTime?>(json['startDate']),
@@ -9660,6 +9728,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
       'form': serializer.toJson<String>(form),
       'scheduleType': serializer.toJson<String>(scheduleType),
       'times': serializer.toJson<String>(times),
+      'doses': serializer.toJson<String>(doses),
+      'intakeHints': serializer.toJson<String>(intakeHints),
       'weekdays': serializer.toJson<String>(weekdays),
       'intervalHours': serializer.toJson<int>(intervalHours),
       'startDate': serializer.toJson<DateTime?>(startDate),
@@ -9690,6 +9760,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
     String? form,
     String? scheduleType,
     String? times,
+    String? doses,
+    String? intakeHints,
     String? weekdays,
     int? intervalHours,
     Value<DateTime?> startDate = const Value.absent(),
@@ -9717,6 +9789,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
     form: form ?? this.form,
     scheduleType: scheduleType ?? this.scheduleType,
     times: times ?? this.times,
+    doses: doses ?? this.doses,
+    intakeHints: intakeHints ?? this.intakeHints,
     weekdays: weekdays ?? this.weekdays,
     intervalHours: intervalHours ?? this.intervalHours,
     startDate: startDate.present ? startDate.value : this.startDate,
@@ -9752,6 +9826,10 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
           ? data.scheduleType.value
           : this.scheduleType,
       times: data.times.present ? data.times.value : this.times,
+      doses: data.doses.present ? data.doses.value : this.doses,
+      intakeHints: data.intakeHints.present
+          ? data.intakeHints.value
+          : this.intakeHints,
       weekdays: data.weekdays.present ? data.weekdays.value : this.weekdays,
       intervalHours: data.intervalHours.present
           ? data.intervalHours.value
@@ -9798,6 +9876,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
           ..write('form: $form, ')
           ..write('scheduleType: $scheduleType, ')
           ..write('times: $times, ')
+          ..write('doses: $doses, ')
+          ..write('intakeHints: $intakeHints, ')
           ..write('weekdays: $weekdays, ')
           ..write('intervalHours: $intervalHours, ')
           ..write('startDate: $startDate, ')
@@ -9830,6 +9910,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
     form,
     scheduleType,
     times,
+    doses,
+    intakeHints,
     weekdays,
     intervalHours,
     startDate,
@@ -9861,6 +9943,8 @@ class MedicationPlan extends DataClass implements Insertable<MedicationPlan> {
           other.form == this.form &&
           other.scheduleType == this.scheduleType &&
           other.times == this.times &&
+          other.doses == this.doses &&
+          other.intakeHints == this.intakeHints &&
           other.weekdays == this.weekdays &&
           other.intervalHours == this.intervalHours &&
           other.startDate == this.startDate &&
@@ -9890,6 +9974,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
   final Value<String> form;
   final Value<String> scheduleType;
   final Value<String> times;
+  final Value<String> doses;
+  final Value<String> intakeHints;
   final Value<String> weekdays;
   final Value<int> intervalHours;
   final Value<DateTime?> startDate;
@@ -9918,6 +10004,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
     this.form = const Value.absent(),
     this.scheduleType = const Value.absent(),
     this.times = const Value.absent(),
+    this.doses = const Value.absent(),
+    this.intakeHints = const Value.absent(),
     this.weekdays = const Value.absent(),
     this.intervalHours = const Value.absent(),
     this.startDate = const Value.absent(),
@@ -9947,6 +10035,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
     this.form = const Value.absent(),
     this.scheduleType = const Value.absent(),
     this.times = const Value.absent(),
+    this.doses = const Value.absent(),
+    this.intakeHints = const Value.absent(),
     this.weekdays = const Value.absent(),
     this.intervalHours = const Value.absent(),
     this.startDate = const Value.absent(),
@@ -9978,6 +10068,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
     Expression<String>? form,
     Expression<String>? scheduleType,
     Expression<String>? times,
+    Expression<String>? doses,
+    Expression<String>? intakeHints,
     Expression<String>? weekdays,
     Expression<int>? intervalHours,
     Expression<DateTime>? startDate,
@@ -10007,6 +10099,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
       if (form != null) 'form': form,
       if (scheduleType != null) 'schedule_type': scheduleType,
       if (times != null) 'times': times,
+      if (doses != null) 'doses': doses,
+      if (intakeHints != null) 'intake_hints': intakeHints,
       if (weekdays != null) 'weekdays': weekdays,
       if (intervalHours != null) 'interval_hours': intervalHours,
       if (startDate != null) 'start_date': startDate,
@@ -10039,6 +10133,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
     Value<String>? form,
     Value<String>? scheduleType,
     Value<String>? times,
+    Value<String>? doses,
+    Value<String>? intakeHints,
     Value<String>? weekdays,
     Value<int>? intervalHours,
     Value<DateTime?>? startDate,
@@ -10068,6 +10164,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
       form: form ?? this.form,
       scheduleType: scheduleType ?? this.scheduleType,
       times: times ?? this.times,
+      doses: doses ?? this.doses,
+      intakeHints: intakeHints ?? this.intakeHints,
       weekdays: weekdays ?? this.weekdays,
       intervalHours: intervalHours ?? this.intervalHours,
       startDate: startDate ?? this.startDate,
@@ -10129,6 +10227,12 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
     if (times.present) {
       map['times'] = Variable<String>(times.value);
     }
+    if (doses.present) {
+      map['doses'] = Variable<String>(doses.value);
+    }
+    if (intakeHints.present) {
+      map['intake_hints'] = Variable<String>(intakeHints.value);
+    }
     if (weekdays.present) {
       map['weekdays'] = Variable<String>(weekdays.value);
     }
@@ -10188,6 +10292,8 @@ class MedicationPlansCompanion extends UpdateCompanion<MedicationPlan> {
           ..write('form: $form, ')
           ..write('scheduleType: $scheduleType, ')
           ..write('times: $times, ')
+          ..write('doses: $doses, ')
+          ..write('intakeHints: $intakeHints, ')
           ..write('weekdays: $weekdays, ')
           ..write('intervalHours: $intervalHours, ')
           ..write('startDate: $startDate, ')
@@ -21949,6 +22055,8 @@ typedef $$MedicationPlansTableCreateCompanionBuilder =
       Value<String> form,
       Value<String> scheduleType,
       Value<String> times,
+      Value<String> doses,
+      Value<String> intakeHints,
       Value<String> weekdays,
       Value<int> intervalHours,
       Value<DateTime?> startDate,
@@ -21979,6 +22087,8 @@ typedef $$MedicationPlansTableUpdateCompanionBuilder =
       Value<String> form,
       Value<String> scheduleType,
       Value<String> times,
+      Value<String> doses,
+      Value<String> intakeHints,
       Value<String> weekdays,
       Value<int> intervalHours,
       Value<DateTime?> startDate,
@@ -22098,6 +22208,16 @@ class $$MedicationPlansTableFilterComposer
 
   ColumnFilters<String> get times => $composableBuilder(
     column: $table.times,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get doses => $composableBuilder(
+    column: $table.doses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get intakeHints => $composableBuilder(
+    column: $table.intakeHints,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -22266,6 +22386,16 @@ class $$MedicationPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get doses => $composableBuilder(
+    column: $table.doses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get intakeHints => $composableBuilder(
+    column: $table.intakeHints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get weekdays => $composableBuilder(
     column: $table.weekdays,
     builder: (column) => ColumnOrderings(column),
@@ -22379,6 +22509,14 @@ class $$MedicationPlansTableAnnotationComposer
 
   GeneratedColumn<String> get times =>
       $composableBuilder(column: $table.times, builder: (column) => column);
+
+  GeneratedColumn<String> get doses =>
+      $composableBuilder(column: $table.doses, builder: (column) => column);
+
+  GeneratedColumn<String> get intakeHints => $composableBuilder(
+    column: $table.intakeHints,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get weekdays =>
       $composableBuilder(column: $table.weekdays, builder: (column) => column);
@@ -22500,6 +22638,8 @@ class $$MedicationPlansTableTableManager
                 Value<String> form = const Value.absent(),
                 Value<String> scheduleType = const Value.absent(),
                 Value<String> times = const Value.absent(),
+                Value<String> doses = const Value.absent(),
+                Value<String> intakeHints = const Value.absent(),
                 Value<String> weekdays = const Value.absent(),
                 Value<int> intervalHours = const Value.absent(),
                 Value<DateTime?> startDate = const Value.absent(),
@@ -22528,6 +22668,8 @@ class $$MedicationPlansTableTableManager
                 form: form,
                 scheduleType: scheduleType,
                 times: times,
+                doses: doses,
+                intakeHints: intakeHints,
                 weekdays: weekdays,
                 intervalHours: intervalHours,
                 startDate: startDate,
@@ -22558,6 +22700,8 @@ class $$MedicationPlansTableTableManager
                 Value<String> form = const Value.absent(),
                 Value<String> scheduleType = const Value.absent(),
                 Value<String> times = const Value.absent(),
+                Value<String> doses = const Value.absent(),
+                Value<String> intakeHints = const Value.absent(),
                 Value<String> weekdays = const Value.absent(),
                 Value<int> intervalHours = const Value.absent(),
                 Value<DateTime?> startDate = const Value.absent(),
@@ -22586,6 +22730,8 @@ class $$MedicationPlansTableTableManager
                 form: form,
                 scheduleType: scheduleType,
                 times: times,
+                doses: doses,
+                intakeHints: intakeHints,
                 weekdays: weekdays,
                 intervalHours: intervalHours,
                 startDate: startDate,

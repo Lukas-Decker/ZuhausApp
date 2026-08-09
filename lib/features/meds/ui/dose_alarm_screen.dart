@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/i18n/app_texts.dart';
 import '../../../core/notifications/notification_providers.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/providers.dart';
-import '../../../core/settings/app_settings.dart';
 import '../../../core/scope/app_scope.dart';
+import '../../../core/settings/app_settings.dart';
 import '../../../data/db/app_database.dart';
+import '../domain/dose_slots.dart';
 import '../domain/medication_schedule.dart';
 import '../meds_providers.dart';
+import 'intake_hint_sheet.dart';
 
 /// Vollbild-Ansicht einer faelligen Einnahme.
 ///
@@ -169,7 +172,8 @@ class _ContentState extends ConsumerState<_Content> {
     final plan = widget.plan;
     final form = medicationForm(plan.form);
     final scheme = Theme.of(context).colorScheme;
-    final dosage = plan.dosage.trim();
+    final dosage = DoseScheme.amountAt(plan, widget.scheduledFor).trim();
+    final hints = IntakeHint.parseAll(plan.intakeHints);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -198,10 +202,30 @@ class _ContentState extends ConsumerState<_Content> {
           if (dosage.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              // Gleiche Schreibweise wie in der Benachrichtigung.
-              medicationDoseLabel(plan.form, dosage),
+              // Gleiche Schreibweise wie in der Benachrichtigung, beim
+              // Schema die Menge dieser Tageszeit.
+              medicationDoseLabel(plan.form, dosage, context.l10n),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+          if (hints.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            // Antippen erklaert den Hinweis: halb wach weiss man nicht
+            // unbedingt, was "nuechtern" genau heisst.
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final hint in hints)
+                  ActionChip(
+                    avatar: const Icon(Icons.info_outline_rounded, size: 18),
+                    label: Text(hint.label(context.l10n)),
+                    onPressed: () =>
+                        showIntakeHintExplanations(context, only: hint),
+                  ),
+              ],
             ),
           ],
           const Spacer(),

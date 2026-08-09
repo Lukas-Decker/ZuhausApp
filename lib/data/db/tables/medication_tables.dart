@@ -16,11 +16,24 @@ class MedicationPlans extends Table with SyncedRecord {
   /// Schlüssel aus [medicationForms], z.B. tablet, drop, spray.
   TextColumn get form => text().withDefault(const Constant('tablet'))();
 
-  /// 'daily' (feste Uhrzeiten an Wochentagen) oder 'interval' (alle N Stunden).
+  /// 'daily' (feste Uhrzeiten an Wochentagen), 'scheme' (Morgens/Mittags/
+  /// Abends/Nachts mit eigener Menge) oder 'interval' (alle N Stunden).
   TextColumn get scheduleType => text().withDefault(const Constant('daily'))();
 
-  /// Bei 'daily': Uhrzeiten als CSV "HH:mm", z.B. "08:00,20:00".
+  /// Bei 'daily' und 'scheme': Uhrzeiten als CSV "HH:mm", z.B. "08:00,20:00".
+  ///
+  /// Bei 'scheme' stehen hier immer alle vier Tageszeiten in fester
+  /// Reihenfolge (morgens, mittags, abends, nachts).
   TextColumn get times => text().withDefault(const Constant('08:00'))();
+
+  /// Bei 'scheme': Menge je Uhrzeit als CSV, gleiche Reihenfolge wie [times],
+  /// z.B. "1,0,1,0" für das klassische 1-0-1. Eine 0 bedeutet: zu dieser
+  /// Tageszeit keine Einnahme. Leer heißt: überall die Menge aus [dosage].
+  TextColumn get doses => text().withDefault(const Constant(''))();
+
+  /// Einnahmehinweise als CSV von Schlüsseln, z.B. "fasting,water".
+  /// Die Texte dazu stehen übersetzt in den ARB-Dateien.
+  TextColumn get intakeHints => text().withDefault(const Constant(''))();
 
   /// Bei 'daily': aktive Wochentage als CSV 1-7 (Mo-So), leer = alle Tage.
   TextColumn get weekdays => text().withDefault(const Constant(''))();

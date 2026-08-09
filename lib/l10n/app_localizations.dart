@@ -212,6 +212,204 @@ abstract class AppLocalizations {
   /// **'Zeit für {name}'**
   String medsReminderBody(String name);
 
+  /// No description provided for @medsScheduleDaily.
+  ///
+  /// In de, this message translates to:
+  /// **'Feste Uhrzeiten'**
+  String get medsScheduleDaily;
+
+  /// No description provided for @medsScheduleScheme.
+  ///
+  /// In de, this message translates to:
+  /// **'Tageszeiten (1-0-1)'**
+  String get medsScheduleScheme;
+
+  /// No description provided for @medsScheduleInterval.
+  ///
+  /// In de, this message translates to:
+  /// **'Im Abstand'**
+  String get medsScheduleInterval;
+
+  /// No description provided for @medsSlotMorning.
+  ///
+  /// In de, this message translates to:
+  /// **'Morgens'**
+  String get medsSlotMorning;
+
+  /// No description provided for @medsSlotNoon.
+  ///
+  /// In de, this message translates to:
+  /// **'Mittags'**
+  String get medsSlotNoon;
+
+  /// No description provided for @medsSlotEvening.
+  ///
+  /// In de, this message translates to:
+  /// **'Abends'**
+  String get medsSlotEvening;
+
+  /// No description provided for @medsSlotNight.
+  ///
+  /// In de, this message translates to:
+  /// **'Nachts'**
+  String get medsSlotNight;
+
+  /// No description provided for @medsSchemeHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Menge je Tageszeit. Leer oder 0 heißt: dann nichts einnehmen.'**
+  String get medsSchemeHint;
+
+  /// z.B. '1-0-1 (08:00, 18:00)'
+  ///
+  /// In de, this message translates to:
+  /// **'{scheme} ({times})'**
+  String medsSchemeSummary(String scheme, String times);
+
+  /// No description provided for @medsSchemeEmpty.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte für mindestens eine Tageszeit eine Menge angeben.'**
+  String get medsSchemeEmpty;
+
+  /// No description provided for @medsHintsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Einnahmehinweise'**
+  String get medsHintsTitle;
+
+  /// No description provided for @medsHintsExplainTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Was bedeuten die Hinweise?'**
+  String get medsHintsExplainTitle;
+
+  /// No description provided for @medsHintsDisclaimer.
+  ///
+  /// In de, this message translates to:
+  /// **'Allgemeine Erklärungen, keine ärztliche Beratung. Im Zweifel gilt der Beipackzettel oder die Aussage deiner Ärztin.'**
+  String get medsHintsDisclaimer;
+
+  /// No description provided for @medsHintsNoteLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Eigene Anmerkung'**
+  String get medsHintsNoteLabel;
+
+  /// No description provided for @medsHintsNoteHint.
+  ///
+  /// In de, this message translates to:
+  /// **'z.B. mit der blauen Dose verwechselbar'**
+  String get medsHintsNoteHint;
+
+  /// No description provided for @medsHintFasting.
+  ///
+  /// In de, this message translates to:
+  /// **'Auf nüchternen Magen'**
+  String get medsHintFasting;
+
+  /// No description provided for @medsHintFastingInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Mindestens eine Stunde vor oder zwei Stunden nach dem Essen einnehmen. Nahrung im Magen würde die Aufnahme des Wirkstoffs stören.'**
+  String get medsHintFastingInfo;
+
+  /// No description provided for @medsHintWithFood.
+  ///
+  /// In de, this message translates to:
+  /// **'Zum Essen'**
+  String get medsHintWithFood;
+
+  /// No description provided for @medsHintWithFoodInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Während einer Mahlzeit einnehmen. Das schont den Magen und hilft bei Wirkstoffen, die mit Fett besser aufgenommen werden.'**
+  String get medsHintWithFoodInfo;
+
+  /// No description provided for @medsHintBeforeFood.
+  ///
+  /// In de, this message translates to:
+  /// **'Vor dem Essen'**
+  String get medsHintBeforeFood;
+
+  /// No description provided for @medsHintBeforeFoodInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Etwa 15 bis 30 Minuten vor der Mahlzeit einnehmen.'**
+  String get medsHintBeforeFoodInfo;
+
+  /// No description provided for @medsHintAfterFood.
+  ///
+  /// In de, this message translates to:
+  /// **'Nach dem Essen'**
+  String get medsHintAfterFood;
+
+  /// No description provided for @medsHintAfterFoodInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Direkt im Anschluss an die Mahlzeit einnehmen.'**
+  String get medsHintAfterFoodInfo;
+
+  /// No description provided for @medsHintUpright.
+  ///
+  /// In de, this message translates to:
+  /// **'Danach aufrecht bleiben'**
+  String get medsHintUpright;
+
+  /// No description provided for @medsHintUprightInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Nach der Einnahme etwa 30 Minuten nicht hinlegen, damit die Tablette nicht in der Speiseröhre liegen bleibt.'**
+  String get medsHintUprightInfo;
+
+  /// No description provided for @medsHintWater.
+  ///
+  /// In de, this message translates to:
+  /// **'Mit viel Wasser'**
+  String get medsHintWater;
+
+  /// No description provided for @medsHintWaterInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Mit einem vollen Glas Wasser einnehmen, nicht mit Kaffee, Tee oder Saft.'**
+  String get medsHintWaterInfo;
+
+  /// No description provided for @medsHintNoDairy.
+  ///
+  /// In de, this message translates to:
+  /// **'Nicht mit Milch'**
+  String get medsHintNoDairy;
+
+  /// No description provided for @medsHintNoDairyInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Milch, Käse und Joghurt zwei Stunden vorher und nachher meiden: Kalzium kann den Wirkstoff binden.'**
+  String get medsHintNoDairyInfo;
+
+  /// No description provided for @medsHintNoAlcohol.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Alkohol'**
+  String get medsHintNoAlcohol;
+
+  /// No description provided for @medsHintNoAlcoholInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Während der Einnahme keinen Alkohol trinken.'**
+  String get medsHintNoAlcoholInfo;
+
+  /// No description provided for @medsHintAvoidSun.
+  ///
+  /// In de, this message translates to:
+  /// **'Sonne meiden'**
+  String get medsHintAvoidSun;
+
+  /// No description provided for @medsHintAvoidSunInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Haut reagiert empfindlicher auf Sonne. Direkte Sonne und Solarium meiden, Sonnenschutz verwenden.'**
+  String get medsHintAvoidSunInfo;
+
   /// No description provided for @medsFormTablet.
   ///
   /// In de, this message translates to:

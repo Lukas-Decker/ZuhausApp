@@ -8,7 +8,9 @@ import '../../../core/providers.dart';
 import '../../../core/widgets/scope_banner.dart';
 import '../../../core/widgets/sheet_insets.dart';
 import '../../../data/db/app_database.dart';
+import '../domain/dose_slots.dart';
 import '../domain/medication_schedule.dart';
+import 'intake_hint_sheet.dart';
 import '../meds_providers.dart';
 
 /// Formular zum Anlegen und Bearbeiten eines Medikamentenplans.
@@ -45,6 +47,8 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
   late List<TimeOfDay> _times;
   late Set<int> _weekdays;
   late int _intervalHours;
+  late List<DoseSlotEntry> _scheme;
+  late Set<IntakeHint> _hints;
   DateTime? _startDate;
   DateTime? _endDate;
   late bool _remindersEnabled;
@@ -73,6 +77,10 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
     if (_times.isEmpty) _times = [const TimeOfDay(hour: 8, minute: 0)];
     _weekdays = plan == null ? {} : ScheduleWeekdays.parse(plan.weekdays);
     _intervalHours = plan?.intervalHours ?? 8;
+    // Beim Wechsel auf das Schema stehen sonst leere Zeilen da: ohne Plan
+    // werden die ueblichen Uhrzeiten mit leerer Menge vorbelegt.
+    _scheme = DoseScheme.parse(plan?.times ?? '', plan?.doses ?? '');
+    _hints = IntakeHint.parseAll(plan?.intakeHints ?? '').toSet();
     _startDate = plan?.startDate;
     _endDate = plan?.endDate;
     _remindersEnabled = plan?.remindersEnabled ?? true;
@@ -181,6 +189,13 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
                   onWeekdaysChanged: (w) => setState(() => _weekdays = w),
                   intervalHours: _intervalHours,
                   onIntervalChanged: (h) => setState(() => _intervalHours = h),
+                  scheme: _scheme,
+                  onSchemeChanged: (s) => setState(() => _scheme = s),
+                ),
+                const SizedBox(height: 20),
+                _HintsSection(
+                  selected: _hints,
+                  onChanged: (h) => setState(() => _hints = h),
                 ),
                 const SizedBox(height: 20),
                 _DateRow(
@@ -286,6 +301,16 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
       );
       return;
     }
+    // Ein Schema ohne einzige Menge wuerde nie erinnern.
+    if (_scheduleType == ScheduleType.scheme &&
+        !_scheme.any((entry) => entry.isActive)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.medsSchemeEmpty)),
+      );
+      return;
+    }
+
+    final isScheme = _scheduleType == ScheduleType.scheme;
 
     await ref
         .read(medicationRepositoryProvider)
@@ -297,7 +322,11 @@ class _MedicationPlanEditorState extends ConsumerState<MedicationPlanEditor> {
           dosage: _dosage.text.trim(),
           form: _form,
           scheduleType: _scheduleType.key,
-          times: ScheduleTimes.format(_times),
+          times: isScheme
+              ? DoseScheme.formatTimes(_scheme)
+              : ScheduleTimes.format(_times),
+          doses: isScheme ? DoseScheme.formatDoses(_scheme) : '',
+          intakeHints: IntakeHint.formatAll(_hints),
           weekdays: ScheduleWeekdays.format(_weekdays),
           intervalHours: _intervalHours,
           startDate: _startDate,
@@ -324,12 +353,16 @@ class _ScheduleSection extends StatelessWidget {
     required this.onWeekdaysChanged,
     required this.intervalHours,
     required this.onIntervalChanged,
+    required this.scheme,
+    required this.onSchemeChanged,
   });
 
   final ScheduleType type;
   final ValueChanged<ScheduleType> onTypeChanged;
   final List<TimeOfDay> times;
   final ValueChanged<List<TimeOfDay>> onTimesChanged;
+  final List<DoseSlotEntry> scheme;
+  final ValueChanged<List<DoseSlotEntry>> onSchemeChanged;
   final Set<int> weekdays;
   final ValueChanged<Set<int>> onWeekdaysChanged;
   final int intervalHours;
@@ -342,16 +375,25 @@ class _ScheduleSection extends StatelessWidget {
       children: [
         Text('Einnahme', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
-        SegmentedButton<ScheduleType>(
-          segments: [
+        // Wrap statt SegmentedButton: drei Beschriftungen passen auf
+        // schmalen Telefonen nicht nebeneinander.
+        Wrap(
+          spacing: 8,
+          children: [
             for (final t in ScheduleType.values)
-              ButtonSegment(value: t, label: Text(t.label)),
+              ChoiceChip(
+                label: Text(t.label(context.l10n)),
+                selected: type == t,
+                onSelected: (_) => onTypeChanged(t),
+              ),
           ],
-          selected: {type},
-          onSelectionChanged: (s) => onTypeChanged(s.first),
         ),
         const SizedBox(height: 12),
-        if (type == ScheduleType.daily) ...[
+        if (type == ScheduleType.scheme) ...[
+          _SchemeEditor(entries: scheme, onChanged: onSchemeChanged),
+          const SizedBox(height: 12),
+          _WeekdayPicker(selected: weekdays, onChanged: onWeekdaysChanged),
+        ] else if (type == ScheduleType.daily) ...[
           _TimesEditor(times: times, onChanged: onTimesChanged),
           const SizedBox(height: 12),
           _WeekdayPicker(selected: weekdays, onChanged: onWeekdaysChanged),
@@ -370,6 +412,141 @@ class _ScheduleSection extends StatelessWidget {
               const Text(' Stunden'),
             ],
           ),
+      ],
+    );
+  }
+}
+
+/// Vier Zeilen für das klassische Schema: Tageszeit, Uhrzeit und Menge.
+///
+/// Leer oder 0 bedeutet, dass zu dieser Tageszeit nichts eingenommen wird;
+/// dafür gibt es bewusst keinen extra Schalter.
+class _SchemeEditor extends StatelessWidget {
+  const _SchemeEditor({required this.entries, required this.onChanged});
+
+  final List<DoseSlotEntry> entries;
+  final ValueChanged<List<DoseSlotEntry>> onChanged;
+
+  void _update(int index, DoseSlotEntry entry) {
+    final next = [...entries];
+    next[index] = entry;
+    onChanged(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        for (final (index, entry) in entries.indexed)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(
+                  entry.slot.icon,
+                  size: 20,
+                  color: entry.isActive ? scheme.primary : scheme.outline,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    entry.slot.label(context.l10n),
+                    style: TextStyle(
+                      color: entry.isActive ? null : scheme.outline,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: entry.time,
+                    );
+                    if (picked != null) {
+                      _update(index, entry.copyWith(time: picked));
+                    }
+                  },
+                  child: Text(ScheduleTimes.formatTime(entry.time)),
+                ),
+                SizedBox(
+                  width: 72,
+                  child: TextFormField(
+                    initialValue: entry.amount,
+                    textAlign: TextAlign.center,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: '0',
+                    ),
+                    onChanged: (value) =>
+                        _update(index, entry.copyWith(amount: value)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            context.l10n.medsSchemeHint,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Auswahl der Einnahmehinweise samt Erklärung hinter dem Fragezeichen.
+class _HintsSection extends StatelessWidget {
+  const _HintsSection({required this.selected, required this.onChanged});
+
+  final Set<IntakeHint> selected;
+  final ValueChanged<Set<IntakeHint>> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              context.l10n.medsHintsTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            IconButton(
+              tooltip: context.l10n.medsHintsExplainTitle,
+              onPressed: () => showIntakeHintExplanations(context),
+              icon: const Icon(Icons.help_outline_rounded, size: 20),
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final hint in IntakeHint.values)
+              FilterChip(
+                label: Text(hint.label(context.l10n)),
+                selected: selected.contains(hint),
+                onSelected: (value) {
+                  final next = {...selected};
+                  if (value) {
+                    next.add(hint);
+                  } else {
+                    next.remove(hint);
+                  }
+                  onChanged(next);
+                },
+              ),
+          ],
+        ),
       ],
     );
   }

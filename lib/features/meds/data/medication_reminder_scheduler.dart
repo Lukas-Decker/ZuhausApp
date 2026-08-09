@@ -1,4 +1,5 @@
 import '../../../core/diagnostics/debug_log.dart';
+import '../../../core/i18n/app_texts.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../domain/dose_schedule.dart';
@@ -64,12 +65,19 @@ class MedicationReminderScheduler {
 
   ScheduledReminder _reminderFor(DoseOccurrence occ) {
     // Menge und Form zusammen: "2 Tabletten nehmen" statt "Tablette nehmen".
-    final dose = medicationDoseLabel(occ.plan.form, occ.plan.dosage);
+    // Beim Tageszeiten-Schema die Menge dieser Tageszeit.
+    final dose = medicationDoseLabel(occ.plan.form, occ.amount);
+    final hints = IntakeHint.parseAll(occ.plan.intakeHints);
+    final body = AppTexts.current.medsReminderBody(occ.plan.name);
 
     return ScheduledReminder(
       id: notificationIdFromKey(occ.slotKey),
-      title: '$dose nehmen',
-      body: 'Zeit für ${occ.plan.name}',
+      title: AppTexts.current.medsReminderTitle(dose),
+      // Hinweise gehoeren in die Meldung: sie sind der Grund, warum die
+      // Einnahme genau jetzt und genau so passieren soll.
+      body: hints.isEmpty
+          ? body
+          : '$body  -  ${hints.map((h) => h.label()).join(', ')}',
       when: occ.scheduledFor,
       // Plan und genauer Zeitpunkt, damit die Aktionen die richtige Einnahme
       // treffen: "med:<planId>|<scheduledForIso>".

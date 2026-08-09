@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/i18n/app_texts.dart';
 import '../../../core/notifications/notification_providers.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/providers.dart';
@@ -12,6 +13,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/medication_repository.dart';
+import '../domain/dose_slots.dart';
 import '../domain/medication_schedule.dart';
 import '../meds_providers.dart';
 import 'medication_plan_editor.dart';
@@ -510,10 +512,19 @@ class _PlanTile extends ConsumerWidget {
     final form = medicationForm(plan.form);
     final scheme = Theme.of(context).colorScheme;
 
-    final schedule = ScheduleType.parse(plan.scheduleType) == ScheduleType.daily
-        ? '${ScheduleWeekdays.describe(plan.weekdays)} · '
-              '${ScheduleTimes.parse(plan.times).map(ScheduleTimes.formatTime).join(", ")}'
-        : 'Alle ${plan.intervalHours} h';
+    final schedule = switch (ScheduleType.parse(plan.scheduleType)) {
+      ScheduleType.daily =>
+        '${ScheduleWeekdays.describe(plan.weekdays)} · '
+            '${ScheduleTimes.parse(plan.times).map(ScheduleTimes.formatTime).join(", ")}',
+      ScheduleType.scheme => () {
+        final entries = DoseScheme.parse(plan.times, plan.doses);
+        return context.l10n.medsSchemeSummary(
+          DoseScheme.pattern(entries),
+          DoseScheme.activeTimes(entries),
+        );
+      }(),
+      ScheduleType.interval => 'Alle ${plan.intervalHours} h',
+    };
 
     final lowStock = plan.stockCount != null &&
         plan.stockThreshold != null &&

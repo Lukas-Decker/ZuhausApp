@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/i18n/app_texts.dart';
@@ -107,16 +108,88 @@ String medicationFormLabel(String formKey, [AppLocalizations? l10n]) {
 }
 
 enum ScheduleType {
-  daily('daily', 'Feste Uhrzeiten'),
-  interval('interval', 'Im Abstand');
+  daily('daily'),
+  scheme('scheme'),
+  interval('interval');
 
-  const ScheduleType(this.key, this.label);
+  const ScheduleType(this.key);
 
   final String key;
-  final String label;
+
+  String label([AppLocalizations? l10n]) {
+    final texts = l10n ?? AppTexts.current;
+    return switch (this) {
+      ScheduleType.daily => texts.medsScheduleDaily,
+      ScheduleType.scheme => texts.medsScheduleScheme,
+      ScheduleType.interval => texts.medsScheduleInterval,
+    };
+  }
 
   static ScheduleType parse(String? value) => ScheduleType.values
       .firstWhere((s) => s.key == value, orElse: () => ScheduleType.daily);
+}
+
+/// Einnahmehinweise mit kurzer Erklärung hinter dem Fragezeichen.
+enum IntakeHint {
+  fasting('fasting'),
+  withFood('with_food'),
+  beforeFood('before_food'),
+  afterFood('after_food'),
+  upright('upright'),
+  water('water'),
+  noDairy('no_dairy'),
+  noAlcohol('no_alcohol'),
+  avoidSun('avoid_sun');
+
+  const IntakeHint(this.key);
+
+  final String key;
+
+  String label([AppLocalizations? l10n]) {
+    final texts = l10n ?? AppTexts.current;
+    return switch (this) {
+      IntakeHint.fasting => texts.medsHintFasting,
+      IntakeHint.withFood => texts.medsHintWithFood,
+      IntakeHint.beforeFood => texts.medsHintBeforeFood,
+      IntakeHint.afterFood => texts.medsHintAfterFood,
+      IntakeHint.upright => texts.medsHintUpright,
+      IntakeHint.water => texts.medsHintWater,
+      IntakeHint.noDairy => texts.medsHintNoDairy,
+      IntakeHint.noAlcohol => texts.medsHintNoAlcohol,
+      IntakeHint.avoidSun => texts.medsHintAvoidSun,
+    };
+  }
+
+  /// Was der Hinweis bedeutet, in einem Satz.
+  String explanation([AppLocalizations? l10n]) {
+    final texts = l10n ?? AppTexts.current;
+    return switch (this) {
+      IntakeHint.fasting => texts.medsHintFastingInfo,
+      IntakeHint.withFood => texts.medsHintWithFoodInfo,
+      IntakeHint.beforeFood => texts.medsHintBeforeFoodInfo,
+      IntakeHint.afterFood => texts.medsHintAfterFoodInfo,
+      IntakeHint.upright => texts.medsHintUprightInfo,
+      IntakeHint.water => texts.medsHintWaterInfo,
+      IntakeHint.noDairy => texts.medsHintNoDairyInfo,
+      IntakeHint.noAlcohol => texts.medsHintNoAlcoholInfo,
+      IntakeHint.avoidSun => texts.medsHintAvoidSunInfo,
+    };
+  }
+
+  /// Liest die gespeicherte Liste ("fasting,water"), unbekannte Schlüssel
+  /// werden übergangen.
+  static List<IntakeHint> parseAll(String csv) => csv
+      .split(',')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .map(
+        (key) => IntakeHint.values.where((h) => h.key == key).firstOrNull,
+      )
+      .whereType<IntakeHint>()
+      .toList();
+
+  static String formatAll(Iterable<IntakeHint> hints) =>
+      hints.map((h) => h.key).join(',');
 }
 
 /// Status eines Einnahmeereignisses.
@@ -156,6 +229,9 @@ abstract final class ScheduleTimes {
 
   static String formatTime(TimeOfDay t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  /// Einzelne Uhrzeit "HH:mm" lesen, `null` bei Unsinn.
+  static TimeOfDay? parseTime(String value) => _parseTime(value);
 
   static TimeOfDay? _parseTime(String value) {
     final parts = value.split(':');

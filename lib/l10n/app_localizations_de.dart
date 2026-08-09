@@ -76,6 +76,119 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get medsScheduleDaily => 'Feste Uhrzeiten';
+
+  @override
+  String get medsScheduleScheme => 'Tageszeiten (1-0-1)';
+
+  @override
+  String get medsScheduleInterval => 'Im Abstand';
+
+  @override
+  String get medsSlotMorning => 'Morgens';
+
+  @override
+  String get medsSlotNoon => 'Mittags';
+
+  @override
+  String get medsSlotEvening => 'Abends';
+
+  @override
+  String get medsSlotNight => 'Nachts';
+
+  @override
+  String get medsSchemeHint =>
+      'Menge je Tageszeit. Leer oder 0 heißt: dann nichts einnehmen.';
+
+  @override
+  String medsSchemeSummary(String scheme, String times) {
+    return '$scheme ($times)';
+  }
+
+  @override
+  String get medsSchemeEmpty =>
+      'Bitte für mindestens eine Tageszeit eine Menge angeben.';
+
+  @override
+  String get medsHintsTitle => 'Einnahmehinweise';
+
+  @override
+  String get medsHintsExplainTitle => 'Was bedeuten die Hinweise?';
+
+  @override
+  String get medsHintsDisclaimer =>
+      'Allgemeine Erklärungen, keine ärztliche Beratung. Im Zweifel gilt der Beipackzettel oder die Aussage deiner Ärztin.';
+
+  @override
+  String get medsHintsNoteLabel => 'Eigene Anmerkung';
+
+  @override
+  String get medsHintsNoteHint => 'z.B. mit der blauen Dose verwechselbar';
+
+  @override
+  String get medsHintFasting => 'Auf nüchternen Magen';
+
+  @override
+  String get medsHintFastingInfo =>
+      'Mindestens eine Stunde vor oder zwei Stunden nach dem Essen einnehmen. Nahrung im Magen würde die Aufnahme des Wirkstoffs stören.';
+
+  @override
+  String get medsHintWithFood => 'Zum Essen';
+
+  @override
+  String get medsHintWithFoodInfo =>
+      'Während einer Mahlzeit einnehmen. Das schont den Magen und hilft bei Wirkstoffen, die mit Fett besser aufgenommen werden.';
+
+  @override
+  String get medsHintBeforeFood => 'Vor dem Essen';
+
+  @override
+  String get medsHintBeforeFoodInfo =>
+      'Etwa 15 bis 30 Minuten vor der Mahlzeit einnehmen.';
+
+  @override
+  String get medsHintAfterFood => 'Nach dem Essen';
+
+  @override
+  String get medsHintAfterFoodInfo =>
+      'Direkt im Anschluss an die Mahlzeit einnehmen.';
+
+  @override
+  String get medsHintUpright => 'Danach aufrecht bleiben';
+
+  @override
+  String get medsHintUprightInfo =>
+      'Nach der Einnahme etwa 30 Minuten nicht hinlegen, damit die Tablette nicht in der Speiseröhre liegen bleibt.';
+
+  @override
+  String get medsHintWater => 'Mit viel Wasser';
+
+  @override
+  String get medsHintWaterInfo =>
+      'Mit einem vollen Glas Wasser einnehmen, nicht mit Kaffee, Tee oder Saft.';
+
+  @override
+  String get medsHintNoDairy => 'Nicht mit Milch';
+
+  @override
+  String get medsHintNoDairyInfo =>
+      'Milch, Käse und Joghurt zwei Stunden vorher und nachher meiden: Kalzium kann den Wirkstoff binden.';
+
+  @override
+  String get medsHintNoAlcohol => 'Kein Alkohol';
+
+  @override
+  String get medsHintNoAlcoholInfo =>
+      'Während der Einnahme keinen Alkohol trinken.';
+
+  @override
+  String get medsHintAvoidSun => 'Sonne meiden';
+
+  @override
+  String get medsHintAvoidSunInfo =>
+      'Die Haut reagiert empfindlicher auf Sonne. Direkte Sonne und Solarium meiden, Sonnenschutz verwenden.';
+
+  @override
   String get medsFormTablet => 'Tablette';
 
   @override

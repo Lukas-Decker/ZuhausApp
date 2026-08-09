@@ -54,8 +54,9 @@ class AppDatabase extends _$AppDatabase {
   /// 6: Tiere, Aufgaben, Gesundheit, Gewicht (v0.6)
   /// 7: Sync-Outbox und -Metadaten (v0.9)
   /// 8: Inventar-Chargen mit eigenem MHD (v0.15)
+  /// 9: Menge je Tageszeit und Einnahmehinweise bei Pillen (v0.23)
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +94,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 8) {
         await m.createTable(inventoryBatches);
+      }
+      if (from < 9) {
+        await m.addColumn(medicationPlans, medicationPlans.doses);
+        await m.addColumn(medicationPlans, medicationPlans.intakeHints);
       }
     },
     beforeOpen: (details) async {

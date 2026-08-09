@@ -61,6 +61,54 @@
     }
   },
 
+  "medsScheduleDaily": "Feste Uhrzeiten",
+  "medsScheduleScheme": "Tageszeiten (1-0-1)",
+  "medsScheduleInterval": "Im Abstand",
+
+  "medsSlotMorning": "Morgens",
+  "medsSlotNoon": "Mittags",
+  "medsSlotEvening": "Abends",
+  "medsSlotNight": "Nachts",
+  "medsSchemeHint": "Menge je Tageszeit. Leer oder 0 heißt: dann nichts einnehmen.",
+  "medsSchemeSummary": "{scheme} ({times})",
+  "@medsSchemeSummary": {
+    "description": "z.B. '1-0-1 (08:00, 18:00)'",
+    "placeholders": {
+      "scheme": {
+        "type": "String"
+      },
+      "times": {
+        "type": "String"
+      }
+    }
+  },
+
+  "medsSchemeEmpty": "Bitte für mindestens eine Tageszeit eine Menge angeben.",
+  "medsHintsTitle": "Einnahmehinweise",
+  "medsHintsExplainTitle": "Was bedeuten die Hinweise?",
+  "medsHintsDisclaimer": "Allgemeine Erklärungen, keine ärztliche Beratung. Im Zweifel gilt der Beipackzettel oder die Aussage deiner Ärztin.",
+  "medsHintsNoteLabel": "Eigene Anmerkung",
+  "medsHintsNoteHint": "z.B. mit der blauen Dose verwechselbar",
+
+  "medsHintFasting": "Auf nüchternen Magen",
+  "medsHintFastingInfo": "Mindestens eine Stunde vor oder zwei Stunden nach dem Essen einnehmen. Nahrung im Magen würde die Aufnahme des Wirkstoffs stören.",
+  "medsHintWithFood": "Zum Essen",
+  "medsHintWithFoodInfo": "Während einer Mahlzeit einnehmen. Das schont den Magen und hilft bei Wirkstoffen, die mit Fett besser aufgenommen werden.",
+  "medsHintBeforeFood": "Vor dem Essen",
+  "medsHintBeforeFoodInfo": "Etwa 15 bis 30 Minuten vor der Mahlzeit einnehmen.",
+  "medsHintAfterFood": "Nach dem Essen",
+  "medsHintAfterFoodInfo": "Direkt im Anschluss an die Mahlzeit einnehmen.",
+  "medsHintUpright": "Danach aufrecht bleiben",
+  "medsHintUprightInfo": "Nach der Einnahme etwa 30 Minuten nicht hinlegen, damit die Tablette nicht in der Speiseröhre liegen bleibt.",
+  "medsHintWater": "Mit viel Wasser",
+  "medsHintWaterInfo": "Mit einem vollen Glas Wasser einnehmen, nicht mit Kaffee, Tee oder Saft.",
+  "medsHintNoDairy": "Nicht mit Milch",
+  "medsHintNoDairyInfo": "Milch, Käse und Joghurt zwei Stunden vorher und nachher meiden: Kalzium kann den Wirkstoff binden.",
+  "medsHintNoAlcohol": "Kein Alkohol",
+  "medsHintNoAlcoholInfo": "Während der Einnahme keinen Alkohol trinken.",
+  "medsHintAvoidSun": "Sonne meiden",
+  "medsHintAvoidSunInfo": "Die Haut reagiert empfindlicher auf Sonne. Direkte Sonne und Solarium meiden, Sonnenschutz verwenden.",
+
   "medsFormTablet": "Tablette",
   "medsFormCapsule": "Kapsel",
   "medsFormDrop": "Tropfen",

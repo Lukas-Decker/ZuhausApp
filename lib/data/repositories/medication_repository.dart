@@ -60,6 +60,10 @@ class MedicationRepository {
     required String times,
     required String weekdays,
     required int intervalHours,
+    /// Menge je Tageszeit beim Schema-Modus, sonst leer.
+    String doses = '',
+    /// Einnahmehinweise als CSV von Schluesseln.
+    String intakeHints = '',
     DateTime? startDate,
     DateTime? endDate,
     double? stockCount,
@@ -81,6 +85,8 @@ class MedicationRepository {
       form: Value(form),
       scheduleType: Value(scheduleType),
       times: Value(times),
+      doses: Value(doses),
+      intakeHints: Value(intakeHints),
       weekdays: Value(weekdays),
       intervalHours: Value(intervalHours),
       startDate: Value(startDate),

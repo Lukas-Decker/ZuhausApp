@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:multiapp/data/db/app_database.dart';
 import 'package:multiapp/features/meds/domain/dose_schedule.dart';
+import 'package:multiapp/features/meds/domain/dose_slots.dart';
 import 'package:multiapp/features/meds/domain/medication_schedule.dart';
 
 MedicationPlan _plan({
   String scheduleType = 'daily',
   String times = '08:00,20:00',
+  String doses = '',
+  String intakeHints = '',
   String weekdays = '',
   int intervalHours = 8,
   DateTime? startDate,
@@ -23,6 +26,8 @@ MedicationPlan _plan({
     form: 'tablet',
     scheduleType: scheduleType,
     times: times,
+    doses: doses,
+    intakeHints: intakeHints,
     weekdays: weekdays,
     intervalHours: intervalHours,
     startDate: startDate,
@@ -133,6 +138,31 @@ void main() {
         ]),
         '08:05,20:00',
       );
+    });
+  });
+
+  group('Tageszeiten-Schema', () {
+    test('erinnert nur zu den Zeiten mit einer Menge', () {
+      final plan = _plan(
+        scheduleType: 'scheme',
+        times: '08:00,12:00,18:00,22:00',
+        doses: '1,0,2,0',
+      );
+      final occurrences = DoseSchedule.forDay(plan, DateTime(2026, 3, 2));
+
+      expect(occurrences.map((o) => o.scheduledFor.hour), [8, 18]);
+      expect(occurrences.map((o) => o.amount), ['1', '2']);
+    });
+
+    test('amountAt findet die Menge der Tageszeit', () {
+      final plan = _plan(
+        scheduleType: 'scheme',
+        times: '08:00,12:00,18:00,22:00',
+        doses: '1,0,2,0',
+      );
+      expect(DoseScheme.amountAt(plan, DateTime(2026, 3, 2, 18)), '2');
+      // Uhrzeit ohne Eintrag faellt auf die Menge des Plans zurueck.
+      expect(DoseScheme.amountAt(plan, DateTime(2026, 3, 2, 9)), '1');
     });
   });
 

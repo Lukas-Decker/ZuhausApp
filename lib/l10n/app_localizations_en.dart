@@ -76,6 +76,117 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get medsScheduleDaily => 'Fixed times';
+
+  @override
+  String get medsScheduleScheme => 'Times of day (1-0-1)';
+
+  @override
+  String get medsScheduleInterval => 'Every few hours';
+
+  @override
+  String get medsSlotMorning => 'Morning';
+
+  @override
+  String get medsSlotNoon => 'Noon';
+
+  @override
+  String get medsSlotEvening => 'Evening';
+
+  @override
+  String get medsSlotNight => 'Night';
+
+  @override
+  String get medsSchemeHint =>
+      'Amount per time of day. Empty or 0 means: nothing to take then.';
+
+  @override
+  String medsSchemeSummary(String scheme, String times) {
+    return '$scheme ($times)';
+  }
+
+  @override
+  String get medsSchemeEmpty =>
+      'Please enter an amount for at least one time of day.';
+
+  @override
+  String get medsHintsTitle => 'Intake notes';
+
+  @override
+  String get medsHintsExplainTitle => 'What do these notes mean?';
+
+  @override
+  String get medsHintsDisclaimer =>
+      'General explanations, not medical advice. When in doubt, follow the leaflet or your doctor.';
+
+  @override
+  String get medsHintsNoteLabel => 'Your own note';
+
+  @override
+  String get medsHintsNoteHint => 'e.g. easy to mix up with the blue box';
+
+  @override
+  String get medsHintFasting => 'On an empty stomach';
+
+  @override
+  String get medsHintFastingInfo =>
+      'Take at least one hour before or two hours after eating. Food in the stomach would interfere with absorption.';
+
+  @override
+  String get medsHintWithFood => 'With a meal';
+
+  @override
+  String get medsHintWithFoodInfo =>
+      'Take during a meal. This is gentler on the stomach and helps with substances absorbed better with fat.';
+
+  @override
+  String get medsHintBeforeFood => 'Before eating';
+
+  @override
+  String get medsHintBeforeFoodInfo =>
+      'Take about 15 to 30 minutes before the meal.';
+
+  @override
+  String get medsHintAfterFood => 'After eating';
+
+  @override
+  String get medsHintAfterFoodInfo => 'Take right after the meal.';
+
+  @override
+  String get medsHintUpright => 'Stay upright afterwards';
+
+  @override
+  String get medsHintUprightInfo =>
+      'Do not lie down for about 30 minutes so the tablet does not stay in the oesophagus.';
+
+  @override
+  String get medsHintWater => 'With plenty of water';
+
+  @override
+  String get medsHintWaterInfo =>
+      'Take with a full glass of water, not with coffee, tea or juice.';
+
+  @override
+  String get medsHintNoDairy => 'No dairy';
+
+  @override
+  String get medsHintNoDairyInfo =>
+      'Avoid milk, cheese and yoghurt two hours before and after: calcium can bind the substance.';
+
+  @override
+  String get medsHintNoAlcohol => 'No alcohol';
+
+  @override
+  String get medsHintNoAlcoholInfo => 'Do not drink alcohol while taking this.';
+
+  @override
+  String get medsHintAvoidSun => 'Avoid the sun';
+
+  @override
+  String get medsHintAvoidSunInfo =>
+      'Skin reacts more sensitively to sunlight. Avoid direct sun and tanning beds, use sunscreen.';
+
+  @override
   String get medsFormTablet => 'Tablet';
 
   @override

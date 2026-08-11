@@ -41,11 +41,13 @@ nie wieder eintippen.
 ./tool/publish_update.ps1 -Build
 ```
 
-Der Änderungstext kommt automatisch aus `CHANGELOG.md`: Vor jedem Release
-dort einen Abschnitt `## <Version> - <Datum>` mit Stichpunkten aus
-Nutzersicht ergänzen. Das Skript übernimmt genau diesen Abschnitt in das
-Manifest, und die App zeigt ihn im Update-Hinweis an. `-Notes "..."` bleibt
-als Ausnahme-Override.
+Die Änderungen kommen automatisch aus `CHANGELOG.md`: Vor jedem Release dort
+einen Abschnitt `## <Version> - <Datum>` mit Stichpunkten aus Nutzersicht
+ergänzen. Das Skript legt **alle** Abschnitte als `changelog` ins Manifest,
+und die App zeigt hinter dem Knopf "Änderungen ansehen" genau die, die neuer
+sind als die installierte Version. Wer drei Updates übersprungen hat, sieht
+also alle drei. `-Notes "..."` bleibt als Ausnahme-Override und füllt nur
+das Feld `notes` (das ältere App-Versionen lesen).
 
 Das Skript
 
@@ -98,6 +100,10 @@ hochzählen sowie den passenden Abschnitt in `CHANGELOG.md` schreiben.
   "minVersion": "0.20.0",
   "publishedAt": "2026-08-07T10:00:00Z",
   "notes": "- Live-Updates\n- Kleinkram",
+  "changelog": [
+    { "version": "0.21.0", "date": "2026-08-07", "notes": "- Live-Updates\n- Kleinkram" },
+    { "version": "0.20.0", "date": "2026-08-05", "notes": "- Vorherige Version" }
+  ],
   "android": {
     "arm64-v8a": {
       "url": "https://<projekt>.supabase.co/storage/v1/object/public/releases/Android-0.21.0-arm64-v8a.apk",

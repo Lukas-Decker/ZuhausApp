@@ -8,6 +8,13 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.0 - 2026-08-11
+
+- Der Update-Hinweis zeigt jetzt alle Änderungen seit der installierten
+  Version, nicht nur die der neuesten. Wer mehrere Updates übersprungen
+  hat, sieht sie über den Knopf "Änderungen ansehen" nach Versionen
+  sortiert.
+
 ## 0.24.12 - 2026-08-11
 
 - Kleinere Textkorrekturen (echte Umlaute in den Werkzeug-Ausgaben).

@@ -47,6 +47,39 @@ void main() {
     });
   });
 
+  group('changesSince', () {
+    final manifest = ReleaseManifest.fromJson({
+      'latestVersion': '0.24.2',
+      'notes': '- neuester Punkt',
+      'changelog': [
+        {'version': '0.24.2', 'notes': '- C', 'date': '2026-08-11'},
+        {'version': '0.24.0', 'notes': '- A'},
+        {'version': '0.24.1', 'notes': '- B'},
+        {'version': '0.24.1', 'notes': ''},
+      ],
+    });
+
+    test('liefert nur neuere Versionen, neueste zuerst', () {
+      final changes = manifest.changesSince(AppVersion.tryParse('0.24.0')!);
+      expect(changes.map((e) => e.version.toString()), ['0.24.2', '0.24.1']);
+      expect(changes.first.date, isNotNull);
+    });
+
+    test('meldet nichts, wenn die laufende Version die neueste ist', () {
+      expect(manifest.changesSince(AppVersion.tryParse('0.24.2')!), isEmpty);
+    });
+
+    test('faellt ohne Changelog auf notes zurueck', () {
+      final legacy = ReleaseManifest.fromJson({
+        'latestVersion': '0.24.2',
+        'notes': '- nur ein Text',
+      });
+      final changes = legacy.changesSince(AppVersion.tryParse('0.20.0')!);
+      expect(changes.single.notes, '- nur ein Text');
+      expect(changes.single.version.toString(), '0.24.2');
+    });
+  });
+
   group('evaluateUpdate', () {
     final current = AppVersion.tryParse('0.20.0')!;
     const abis = ['arm64-v8a'];

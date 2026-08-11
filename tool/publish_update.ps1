@@ -170,9 +170,44 @@ if ($MinVersion) {
   $manifest['minVersion'] = $published.minVersion
 }
 
-# Änderungen: Parameter, sonst dist/notes-<version>.txt, sonst der
-# Abschnitt dieser Version aus CHANGELOG.md (alles zwischen der
-# "## <version>"-Überschrift und der nächsten "## "-Überschrift).
+# Changelog: alle Versionsabschnitte aus CHANGELOG.md ins Manifest legen.
+# Die App zeigt daraus genau die Abschnitte, die neuer sind als die
+# installierte Version - wer mehrere Updates übersprungen hat, sieht alles.
+$changelogFile = Join-Path $root 'CHANGELOG.md'
+$entries = @()
+if (Test-Path $changelogFile) {
+  $lines = @(Get-Content $changelogFile -Encoding UTF8)
+  # Zeilennummern der Versions-Überschriften einsammeln, dann die Blöcke
+  # dazwischen als Änderungstext nehmen.
+  $heads = @()
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i] -match '^##\s+v?(\d+\.\d+(?:\.\d+)?)\s*(?:[-–]\s*(\d{4}-\d{2}-\d{2}))?\s*$') {
+      $heads += , @{ index = $i; version = $Matches[1]; date = $Matches[2] }
+    }
+  }
+  for ($h = 0; $h -lt $heads.Count; $h++) {
+    $from = $heads[$h].index + 1
+    $to = if ($h + 1 -lt $heads.Count) { $heads[$h + 1].index - 1 } else { $lines.Count - 1 }
+    if ($to -lt $from) { continue }
+    $text = (($lines[$from..$to] -join "`n")).Trim()
+    if (-not $text) { continue }
+    $entry = [ordered]@{ version = $heads[$h].version; notes = $text }
+    if ($heads[$h].date) { $entry['date'] = $heads[$h].date }
+    $entries += , $entry
+  }
+}
+
+if ($entries.Count -gt 0) {
+  $manifest['changelog'] = $entries
+  Write-Host "$($entries.Count) Changelog-Abschnitte übernommen."
+  if (-not ($entries | Where-Object { $_.version -eq $version })) {
+    Write-Warning "CHANGELOG.md hat keinen Abschnitt für $version."
+  }
+}
+
+# notes: Änderungen der neuesten Version. Parameter schlägt
+# dist/notes-<version>.txt, sonst der passende Changelog-Abschnitt.
+# Bleibt erhalten, damit ältere App-Versionen weiterhin etwas anzeigen.
 if (-not $Notes) {
   $notesFile = Join-Path $distDir "notes-$version.txt"
   if (Test-Path $notesFile) {
@@ -180,23 +215,8 @@ if (-not $Notes) {
   }
 }
 if (-not $Notes) {
-  $changelog = Join-Path $root 'CHANGELOG.md'
-  if (Test-Path $changelog) {
-    $inSection = $false
-    $lines = foreach ($line in Get-Content $changelog -Encoding UTF8) {
-      if ($line -match '^##\s') {
-        $inSection = $line -match ("^##\s+" + [regex]::Escape($version) + "(\s|$)")
-        continue
-      }
-      if ($inSection) { $line }
-    }
-    $Notes = (($lines -join "`n")).Trim()
-    if ($Notes) {
-      Write-Host "Änderungen aus CHANGELOG.md ($version) übernommen."
-    } else {
-      Write-Warning "CHANGELOG.md hat keinen Abschnitt für $version."
-    }
-  }
+  $match = $entries | Where-Object { $_.version -eq $version } | Select-Object -First 1
+  if ($match) { $Notes = $match.notes }
 }
 if ($Notes) { $manifest['notes'] = $Notes }
 

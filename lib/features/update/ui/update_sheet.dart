@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 
 import '../../../core/app_info.dart';
 import '../../../core/widgets/sheet_insets.dart';
+import '../domain/release_manifest.dart';
 import '../update_providers.dart';
+import 'changelog_dialog.dart';
 
 /// Zeigt den Update-Hinweis.
 ///
@@ -102,6 +104,10 @@ class _UpdateSheetBodyState extends ConsumerState<UpdateSheetBody> {
 
     final asset = status.asset;
     final published = manifest.publishedAt;
+    // Nur was seit der installierten Version dazugekommen ist.
+    final changes = manifest.changesSince(
+      AppVersion.tryParse(appVersion) ?? const AppVersion(0, 0, 0),
+    );
 
     return SingleChildScrollView(
       child: Column(
@@ -153,22 +159,18 @@ class _UpdateSheetBodyState extends ConsumerState<UpdateSheetBody> {
               style: theme.textTheme.bodyMedium?.copyWith(color: scheme.error),
             ),
           ],
-          if (manifest.notes != null) ...[
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Neu in dieser Version', style: theme.textTheme.labelLarge),
-                  const SizedBox(height: 6),
-                  Text(manifest.notes!, style: theme.textTheme.bodyMedium),
-                ],
+          if (changes.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => showChangelogDialog(context, entries: changes),
+                icon: const Icon(Icons.notes_rounded),
+                label: Text(
+                  changes.length == 1
+                      ? 'Änderungen ansehen'
+                      : 'Änderungen aus ${changes.length} Versionen ansehen',
+                ),
               ),
             ),
           ],

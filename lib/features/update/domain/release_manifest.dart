@@ -115,6 +115,35 @@ class ReleaseAsset {
   }
 }
 
+/// Ein Changelog-Abschnitt: die Änderungen genau einer Version.
+@immutable
+class ChangelogEntry {
+  const ChangelogEntry({
+    required this.version,
+    required this.notes,
+    this.date,
+  });
+
+  final AppVersion version;
+
+  /// Die Änderungen dieser Version, eine Zeile pro Punkt.
+  final String notes;
+
+  final DateTime? date;
+
+  static ChangelogEntry? fromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final version = AppVersion.tryParse('${raw['version'] ?? ''}');
+    final notes = '${raw['notes'] ?? ''}'.trim();
+    if (version == null || notes.isEmpty) return null;
+    return ChangelogEntry(
+      version: version,
+      notes: notes,
+      date: DateTime.tryParse('${raw['date'] ?? ''}'),
+    );
+  }
+}
+
 /// Das Manifest, das auf dem Server liegt und die aktuelle Version beschreibt.
 @immutable
 class ReleaseManifest {
@@ -122,6 +151,7 @@ class ReleaseManifest {
     required this.latest,
     this.minimum,
     this.notes,
+    this.changelog = const [],
     this.publishedAt,
     this.assets = const {},
     this.androidAbis = const {},
@@ -134,8 +164,16 @@ class ReleaseManifest {
   /// Pflicht-Update, das sich nicht wegklicken lässt.
   final AppVersion? minimum;
 
-  /// Änderungen dieser Version, eine Zeile pro Punkt.
+  /// Änderungen der neuesten Version, eine Zeile pro Punkt.
+  ///
+  /// Rückfall für Manifeste ohne [changelog].
   final String? notes;
+
+  /// Alle bekannten Versionsabschnitte, neueste zuerst.
+  ///
+  /// Damit sieht ein Nutzer, der mehrere Versionen übersprungen hat, alles
+  /// was seit seinem Stand dazugekommen ist, nicht nur den letzten Eintrag.
+  final List<ChangelogEntry> changelog;
 
   final DateTime? publishedAt;
 
@@ -147,6 +185,28 @@ class ReleaseManifest {
   /// Eine APK für alle Prozessorarten waere fast dreimal so gross, deshalb
   /// wird pro ABI eine gebaut und das Geraet sucht sich die passende.
   final Map<String, ReleaseAsset> androidAbis;
+
+  /// Die Änderungen, die [current] noch nicht kennt: alle Abschnitte neuer
+  /// als die laufende Version, neueste zuerst.
+  ///
+  /// Hat das Manifest kein Changelog (ältere Veröffentlichung), wird
+  /// [notes] als einzelner Abschnitt der neuesten Version geliefert.
+  List<ChangelogEntry> changesSince(AppVersion current) {
+    if (changelog.isEmpty) {
+      final fallback = notes;
+      if (fallback == null || !(current < latest)) return const [];
+      return [
+        ChangelogEntry(
+          version: latest,
+          notes: fallback,
+          date: publishedAt,
+        ),
+      ];
+    }
+    final newer = changelog.where((e) => current < e.version).toList()
+      ..sort((a, b) => b.version.compareTo(a.version));
+    return newer;
+  }
 
   /// Sucht das Paket für diese Plattform.
   ///
@@ -191,10 +251,21 @@ class ReleaseManifest {
     }
 
     final notes = '${json['notes'] ?? ''}'.trim();
+    final changelog = <ChangelogEntry>[];
+    final rawChangelog = json['changelog'];
+    if (rawChangelog is List) {
+      for (final entry in rawChangelog) {
+        final parsed = ChangelogEntry.fromJson(entry);
+        if (parsed != null) changelog.add(parsed);
+      }
+      changelog.sort((a, b) => b.version.compareTo(a.version));
+    }
+
     return ReleaseManifest(
       latest: latest,
       minimum: AppVersion.tryParse('${json['minVersion'] ?? ''}'),
       notes: notes.isEmpty ? null : notes,
+      changelog: changelog,
       publishedAt: DateTime.tryParse('${json['publishedAt'] ?? ''}')?.toLocal(),
       assets: assets,
       androidAbis: androidAbis,

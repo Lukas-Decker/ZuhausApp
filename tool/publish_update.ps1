@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Veroeffentlicht die Pakete aus dist/ im eigenen Update-Kanal
   (oeffentlicher Supabase-Storage-Bucket "releases").
@@ -170,9 +170,9 @@ if ($MinVersion) {
   $manifest['minVersion'] = $published.minVersion
 }
 
-# Aenderungen: Parameter, sonst dist/notes-<version>.txt, sonst der
+# Änderungen: Parameter, sonst dist/notes-<version>.txt, sonst der
 # Abschnitt dieser Version aus CHANGELOG.md (alles zwischen der
-# "## <version>"-Ueberschrift und der naechsten "## "-Ueberschrift).
+# "## <version>"-Überschrift und der nächsten "## "-Überschrift).
 if (-not $Notes) {
   $notesFile = Join-Path $distDir "notes-$version.txt"
   if (Test-Path $notesFile) {
@@ -192,9 +192,9 @@ if (-not $Notes) {
     }
     $Notes = (($lines -join "`n")).Trim()
     if ($Notes) {
-      Write-Host "Aenderungen aus CHANGELOG.md ($version) uebernommen."
+      Write-Host "Änderungen aus CHANGELOG.md ($version) übernommen."
     } else {
-      Write-Warning "CHANGELOG.md hat keinen Abschnitt fuer $version."
+      Write-Warning "CHANGELOG.md hat keinen Abschnitt für $version."
     }
   }
 }

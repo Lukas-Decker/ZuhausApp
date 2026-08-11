@@ -8,6 +8,10 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.24.12 - 2026-08-11
+
+- Kleinere Textkorrekturen (echte Umlaute in den Werkzeug-Ausgaben).
+
 ## 0.24.11 - 2026-08-11
 
 - Update-Hinweise zeigen jetzt ein richtiges Changelog: die Änderungen

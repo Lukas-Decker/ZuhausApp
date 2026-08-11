@@ -28,7 +28,9 @@
 
 .PARAMETER Notes
   Aenderungen dieser Version, eine Zeile pro Punkt. Ohne Angabe wird
-  dist/notes-<version>.txt gelesen, falls vorhanden.
+  dist/notes-<version>.txt gelesen, falls vorhanden; sonst der Abschnitt
+  der Version aus CHANGELOG.md. Das Changelog ist der Normalweg, der
+  Parameter nur noch der Ausnahme-Override.
 
 .PARAMETER MinVersion
   Kleinste noch erlaubte Version. Wer darunter liegt, bekommt ein
@@ -168,11 +170,32 @@ if ($MinVersion) {
   $manifest['minVersion'] = $published.minVersion
 }
 
-# Aenderungen: Parameter, sonst dist/notes-<version>.txt.
+# Aenderungen: Parameter, sonst dist/notes-<version>.txt, sonst der
+# Abschnitt dieser Version aus CHANGELOG.md (alles zwischen der
+# "## <version>"-Ueberschrift und der naechsten "## "-Ueberschrift).
 if (-not $Notes) {
   $notesFile = Join-Path $distDir "notes-$version.txt"
   if (Test-Path $notesFile) {
     $Notes = (Get-Content $notesFile -Raw -Encoding UTF8).Trim()
+  }
+}
+if (-not $Notes) {
+  $changelog = Join-Path $root 'CHANGELOG.md'
+  if (Test-Path $changelog) {
+    $inSection = $false
+    $lines = foreach ($line in Get-Content $changelog -Encoding UTF8) {
+      if ($line -match '^##\s') {
+        $inSection = $line -match ("^##\s+" + [regex]::Escape($version) + "(\s|$)")
+        continue
+      }
+      if ($inSection) { $line }
+    }
+    $Notes = (($lines -join "`n")).Trim()
+    if ($Notes) {
+      Write-Host "Aenderungen aus CHANGELOG.md ($version) uebernommen."
+    } else {
+      Write-Warning "CHANGELOG.md hat keinen Abschnitt fuer $version."
+    }
   }
 }
 if ($Notes) { $manifest['notes'] = $Notes }

@@ -38,8 +38,14 @@ nie wieder eintippen.
 ## 2. Version veröffentlichen
 
 ```bash
-./tool/publish_update.ps1 -Build -Notes "Was neu ist"
+./tool/publish_update.ps1 -Build
 ```
+
+Der Änderungstext kommt automatisch aus `CHANGELOG.md`: Vor jedem Release
+dort einen Abschnitt `## <Version> - <Datum>` mit Stichpunkten aus
+Nutzersicht ergänzen. Das Skript übernimmt genau diesen Abschnitt in das
+Manifest, und die App zeigt ihn im Update-Hinweis an. `-Notes "..."` bleibt
+als Ausnahme-Override.
 
 Das Skript
 
@@ -74,13 +80,13 @@ Nützliche Schalter:
 | Schalter | Wirkung |
 | --- | --- |
 | `-Build` | vorher `package.ps1` laufen lassen |
-| `-Notes "..."` | Änderungstext; ohne Angabe wird `dist/notes-<version>.txt` gelesen |
+| `-Notes "..."` | Änderungstext-Override; ohne Angabe zählt `dist/notes-<version>.txt`, sonst der Versionsabschnitt aus `CHANGELOG.md` |
 | `-MinVersion 0.20.0` | Pflicht-Update für alles darunter; ohne Angabe bleibt der bisherige Wert |
 | `-ServiceKey ...` | Schlüssel direkt statt aus `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_KEY` |
 
 Die Version kommt immer aus `pubspec.yaml`. Vor dem Veröffentlichen also
 `version:` in `pubspec.yaml` **und** `appVersion` in `lib/core/app_info.dart`
-hochzählen.
+hochzählen sowie den passenden Abschnitt in `CHANGELOG.md` schreiben.
 
 ## 3. Aufbau des Manifests
 

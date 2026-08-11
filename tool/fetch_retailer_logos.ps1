@@ -92,9 +92,11 @@ foreach ($id in $sources.Keys) {
   # Die Aldi-Artikel tragen ein kombiniertes Bild (Nord links, Sued rechts),
   # das hier in die jeweilige Haelfte zugeschnitten wird.
   $out = Join-Path $outDir "$id.webp"
+  # Relativ zur Bildbreite, weil Wikipedia je nach Abruf unterschiedliche
+  # Thumbnail-Groessen liefert.
   $filter = switch ($id) {
-    'aldi-nord' { "crop=250:283:0:0,scale='min(256,iw)':-2" }
-    'aldi-sued' { "crop=254:283:258:0,scale='min(256,iw)':-2" }
+    'aldi-nord' { "crop=iw*0.49:ih:0:0,scale='min(256,iw)':-2" }
+    'aldi-sued' { "crop=iw*0.463:ih:iw*0.537:0,scale='min(256,iw)':-2" }
     default     { "scale='min(256,iw)':-2" }
   }
   ffmpeg -y -loglevel error -i $raw -vf $filter -c:v libwebp -lossless 1 $out

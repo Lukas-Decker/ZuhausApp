@@ -1,0 +1,78 @@
+[
+  {
+    "n": "DE8920",
+    "slf": "BakingFresh,GourmetFood,Echarging,DelicatessenService,Barrier-freeWC,SelfScanning,Tchibo,WCWomen,WCMen,Sausage,Cheese,Fish,MobilePayment,LoyaltyProgram,LoyaltyPointsProgram,LoyaltyCoupons,AdBanner,PartnerBenefits,Xtra",
+    "lat": "52.5223268",
+    "lng": "13.40808",
+    "cn": "Kaufland Berlin-Mitte",
+    "p": "030240888290",
+    "pc": "10178",
+    "sn": "Karl-Liebknecht-Straße 13",
+    "t": "Berlin",
+    "opd": "2017-08-03T00:00:00Z",
+    "wod": [
+      "Monday|07:00|22:00",
+      "Tuesday|07:00|22:00",
+      "Wednesday|07:00|22:00",
+      "Thursday|07:00|22:00",
+      "Friday|07:00|22:00",
+      "Saturday|07:00|22:00",
+      "Sunday|00:00|00:00"
+    ],
+    "friendlyUrl": "berlin-mitte-8920",
+    "eod": ""
+  },
+  {
+    "n": "DE1690",
+    "slf": "BakingFresh,Echarging,Elevators,Barrier-freeWC,ParkingLevel,MeatSpecialChest,Tchibo,WCWomen,WCMen,MobilePayment,LoyaltyProgram,LoyaltyPointsProgram,LoyaltyCoupons,AdBanner,PartnerBenefits,Xtra",
+    "lat": "53.5877138",
+    "lng": "10.0955916",
+    "cn": "Kaufland Hamburg-Wandsbek",
+    "p": "040/734356580",
+    "pc": "22047",
+    "sn": "Helbingtwiete 7/9",
+    "t": "Hamburg",
+    "opd": "2009-11-12T00:00:00Z",
+    "wod": [
+      "Monday|07:00|22:00",
+      "Tuesday|07:00|22:00",
+      "Wednesday|07:00|22:00",
+      "Thursday|07:00|22:00",
+      "Friday|07:00|22:00",
+      "Saturday|07:00|22:00",
+      "Sunday|00:00|00:00"
+    ],
+    "f": {
+      "from": "2017-05-15",
+      "to": "2017-05-17"
+    },
+    "friendlyUrl": "hamburg-wandsbek-1690",
+    "eod": ""
+  },
+  {
+    "n": "DE1633",
+    "slf": "BakingFresh,GourmetFood,DelicatessenService,Barrier-freeWC,SelfScanning,MeatSpecialChest,Tchibo,WCWomen,WCMen,Meat,Sausage,Cheese,Fish,MobilePayment,LoyaltyProgram,LoyaltyPointsProgram,LoyaltyCoupons,AdBanner,PartnerBenefits,KScanDZ,Xtra",
+    "lat": "48.1793908",
+    "lng": "11.5057513",
+    "cn": "Kaufland München-Moosach",
+    "p": "089/143408790",
+    "pc": "80992",
+    "sn": "Bunzlauer Platz 5-7",
+    "t": "München",
+    "opd": "2015-09-24T00:00:00Z",
+    "sod": [
+      "2026-08-15|00:00|00:00"
+    ],
+    "wod": [
+      "Monday|07:00|20:00",
+      "Tuesday|07:00|20:00",
+      "Wednesday|07:00|20:00",
+      "Thursday|07:00|20:00",
+      "Friday|07:00|20:00",
+      "Saturday|07:00|20:00",
+      "Sunday|00:00|00:00"
+    ],
+    "friendlyUrl": "muenchen-moosach-1633",
+    "eod": ""
+  }
+]

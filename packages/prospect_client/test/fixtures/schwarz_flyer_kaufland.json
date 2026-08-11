@@ -1,0 +1,430 @@
+{
+  "self": "v4/flyer",
+  "message": "Requested Flyer found.",
+  "flyer": {
+    "id": "019fa326-84d2-778b-a79a-46cf00c1a583",
+    "name": "Prospekt",
+    "title": "06.08.2026 - 12.08.2026",
+    "locale": "de-DE",
+    "clientLocale": "kaufland/de-DE",
+    "apiCountryCode": "DE",
+    "countryCode": "DE",
+    "category": "Germany- German",
+    "subcategory": "KDZ1",
+    "quitUrl": "https://filiale.kaufland.de/prospekte.html",
+    "homeUrl": "https://filiale.kaufland.de/prospekte.html",
+    "homeUrlTitle": "",
+    "privacyUrl": "https://filiale.kaufland.de/datenschutz.html",
+    "imprintUrl": "https://filiale.kaufland.de/impressum.html",
+    "isActive": true,
+    "showProductDetails": false,
+    "showProductLinks": false,
+    "showRclAnimation": true,
+    "showRecommendedProducts": false,
+    "showNewsletter": false,
+    "showNotificationCenter": false,
+    "enableSharing": true,
+    "enableDownload": true,
+    "myAccount": false,
+    "shoppingCart": false,
+    "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fa326-84d2-778b-a79a-46cf00c1a583/Prospekt-06-08-2026-12-08-2026-00.pdf",
+    "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fa326-84d2-778b-a79a-46cf00c1a583/Prospekt-06-08-2026-12-08-2026-00.pdf",
+    "hiResFileSize": 30859370,
+    "fileSize": 30859370,
+    "teasers": {
+      "teaser_150x107": "https://imgproxy.leaflets.schwarz/eqyoktEI772GmSPj6-41GPt5sbLNNbUj4gResZY8_2Y/rs:fill:150:107:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_322x230": "https://imgproxy.leaflets.schwarz/vrjdEpO0JvMxY5EYtogrtXoqFfGynBpYkkrOog6AYQc/rs:fill:322:230:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_666x475": "https://imgproxy.leaflets.schwarz/LppT5PalLF3Uz7Ds4g9oB9KsjTXO1GRdWHzAdVGetOk/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_1010x720": "https://imgproxy.leaflets.schwarz/y43x0TpU3RX1Ta415Pnxba7c_SePknkdPXPftat3xaA/rs:fill:1010:720:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_1354x965": "https://imgproxy.leaflets.schwarz/bBNCvPqVr5KhJbXXHQeZhw0hazCb_DIZlTN_9_cijZs/rs:fill:1354:965:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/AnNt4SJBjMZdN-FQcet0KkRWLc9B3K5TqHKfHB_8hOQ/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_2708x1930": "https://imgproxy.leaflets.schwarz/tLT8n2mEBa-u1hUGmTzi88Dqb7mo-alYHDKB2kqgWLM/rs:fill:2708:1930:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_w150": "https://imgproxy.leaflets.schwarz/Y0zxQDapJlAiF8UYgVMO-aV8IxeTKMwD_TF-eiIx4iU/rs:fit:150:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_w322": "https://imgproxy.leaflets.schwarz/jLxcneOHP32EyNlo5qwcsbBDyCMPQERJ9ZeUmMznY_8/rs:fit:322:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_w666": "https://imgproxy.leaflets.schwarz/WAJgjPYp8hi4IAa2g21ySlj_7xjYFU-5paJQqQtNKJI/rs:fit:666:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+      "teaser_w1010": "https://imgproxy.leaflets.schwarz/rrb2f_r5YmipfFTdqShscQvWS38uGOwon1A4z3htzSI/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg"
+    },
+    "regions": [
+      {
+        "code": "2010"
+      },
+      {
+        "code": "3000"
+      },
+      {
+        "code": "5190"
+      },
+      {
+        "code": "6220"
+      },
+      {
+        "code": "6250"
+      },
+      {
+        "code": "6400"
+      },
+      {
+        "code": "6710"
+      },
+      {
+        "code": "8950"
+      }
+    ],
+    "thumbnailUrl": "https://imgproxy.leaflets.schwarz/0ry4wQ57LUKGY6kGf83xSg3k-kot1LYfehnrLMyL_0o/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+    "publicThumbnail": "https://imgproxy.leaflets.schwarz/0ry4wQ57LUKGY6kGf83xSg3k-kot1LYfehnrLMyL_0o/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+    "flyerUrlAbsolute": "https://leaflets.kaufland.com/de-DE/DE_de_KDZ1_2010_D32/ar/2010",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-12",
+    "offerStartDate": "2026-08-06",
+    "offerEndDate": "2026-08-12",
+    "showLinks": true,
+    "showTopics": true,
+    "showSearch": true,
+    "showRelatedFlyers": true,
+    "isRecommended": true,
+    "status": "current",
+    "cookieConsent": {
+      "type": "oneTrust",
+      "domainId": "7dd66e1e-3291-407e-aa19-c1449e17d681"
+    },
+    "pages": [
+      {
+        "id": "019fa81f-01c9-7a24-a6e6-27b495b1f369",
+        "number": 1,
+        "width": 1458,
+        "height": 2400,
+        "type": "STANDARD",
+        "links": [
+          {
+            "id": "019fa81f-1070-75ce-b195-41550856602a",
+            "displayType": "standard",
+            "url": "https://kauf.land/hqgvj",
+            "title": "Link",
+            "icon": "link",
+            "width": 65.145228215768,
+            "height": 40.176322418136,
+            "top": 7.304785894207001,
+            "left": 34.02489626556
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-4155064c51ea",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=00014395.advertisingWeek=32.iframe.html",
+            "title": "K-PURLAND Schweinerückensteak Mediterran Style",
+            "icon": "link",
+            "width": 16.390041493776,
+            "height": 9.9496221662469,
+            "top": 31.989924433249,
+            "left": 66.804979253112,
+            "productDetails": {
+              "productId": "00014395",
+              "title": "K-PURLAND Schweinerückensteak Mediterran Style"
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415506d59be3",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=00510784.advertisingWeek=32.iframe.html",
+            "title": "GÉRAMONT Weichkäse",
+            "icon": "link",
+            "width": 27.385892116183,
+            "height": 9.9496221662469,
+            "top": 45.591939546599,
+            "left": 1.8672199170124,
+            "productDetails": {
+              "productId": "00510784",
+              "title": "GÉRAMONT Weichkäse "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550a0f0978",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=02749281.advertisingWeek=32.iframe.html",
+            "title": "TOFFIFEE Haselnuss in Caramel",
+            "icon": "link",
+            "width": 13.485477178423,
+            "height": 9.9496221662469,
+            "top": 58.438287153652,
+            "left": 34.647302904564,
+            "productDetails": {
+              "productId": "02749281",
+              "title": "TOFFIFEE Haselnuss in Caramel "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415509478a87",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=01465743.advertisingWeek=32.iframe.html",
+            "title": "DANONE Actimel XXL",
+            "icon": "link",
+            "width": 15.767634854772,
+            "height": 9.9496221662469,
+            "top": 58.438287153652,
+            "left": 67.427385892116,
+            "productDetails": {
+              "productId": "01465743",
+              "title": "DANONE Actimel XXL "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415507abe989",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=20620263.advertisingWeek=32.iframe.html",
+            "title": "PERSIL Color- oder Vollwaschmittel",
+            "icon": "link",
+            "width": 15.352697095436,
+            "height": 13.224181360202,
+            "top": 68.387909319899,
+            "left": 49.170124481328,
+            "productDetails": {
+              "productId": "20620263",
+              "title": "PERSIL Color- oder Vollwaschmittel "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415506061e0c",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=01452473.advertisingWeek=32.iframe.html",
+            "title": "HIRSCHQUELLE Heilwasser",
+            "icon": "link",
+            "width": 12.863070539419,
+            "height": 9.9496221662469,
+            "top": 81.234256926952,
+            "left": 1.8672199170124,
+            "productDetails": {
+              "productId": "01452473",
+              "title": "HIRSCHQUELLE Heilwasser "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415506c813e5",
+            "displayType": "product",
+            "url": "https://filiale-fc.kaufland.de/angebote/detail.storeName=DE3000.articleId=20759418.advertisingWeek=32.iframe.html",
+            "title": "K-CLASSIC Toilettenpapier Soft XXL",
+            "icon": "link",
+            "width": 13.070539419087,
+            "height": 9.9496221662469,
+            "top": 81.234256926952,
+            "left": 67.427385892116,
+            "productDetails": {
+              "productId": "20759418",
+              "title": "K-CLASSIC Toilettenpapier Soft XXL "
+            }
+          }
+        ],
+        "keyWords": "Frisch Risc Stall Platz Donnerstag Mittwoch Hirsch- Quelle Heilwasser Knüller K-Purland Rückensteak Mediterran Style Schwein Mariniert -24% -42% -33% K-Classic Toiletten- Papier Soft Xxl 3-Lagig Blatt -21% Géramont Weichkäse Sorten Fett -23% Persil Color- Vollwaschmittel Pulver 396 Kg Discs 102 Flüssig 36 Anwendungen Anwendung Rispentomaten Lose Tion Danone Actimel Joghurtdrink Milchanteil Toffifee Haselnuss Caramel Original White Chocolate Bananen Flaschen Günstiger Rollen 1_D32_3000_Ts *Aktionsware Begrenzter Vorratsmengen Laufe Angebotstages Ausverkauft Abgaben Haushaltsüblichen Mengen Vorrat Artikel Abbildungen Irrtum Druckfehler • Filialangebote Informationen Produktsiegeln Haltungsform-Kennzeichnung Aktuell Stufen Umstellungszeitraum Verkaufen Bisherigen Gekennzeichneten Kaufland Card Xtra Vorteile Vorzeigen Kasse Dienstleistung & Rötelstraße 35 Neckarsulm Firma Anschrift Vertriebsgesellschaften Filialauswahl Mittels Service-Nummer 352 E-Mail -Marktplatz-Angebot Verkäufer »Kaufland« Marketplace Stiftsbergstraße Druck Appl Senefelderstraße 3-11 Wemding Bad Friedrichshall-Kochendorfindustriestraße %§# Rappenauraiffeisenstraße %§& Heilbronnolgastraße Heilbronnstuttgarter Straße %§+& Heilbronn-Böckingenneckargartacher Ilsfeldrobert-Mayer-Straße Neckarsulmrötelstraße %§+&# Weinsberghaller %§+# Angebote Gültig Filialen Frischetheken Wurst- Käsetheke Feinkosttheke Fleischtheke Fischtheke Fisch Selbstbedienung",
+        "altText": "Kaufland-Prospekt Titelseite mit aktuellen Angeboten ab Donnerstag, darunter Schweine-Rückensteaks, Toilettenpapier, Géramont Weichkäse, Persil Waschmittel und Rispentomaten.",
+        "image": "https://imgproxy.leaflets.schwarz/VFGnZV9u5ntxiv7uuXs3j3RDwNq0S3sQ8eleN4EULEQ/rs:fit:1200:1200:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+        "zoom": "https://imgproxy.leaflets.schwarz/66wG2ao9FGPMngcM1tDDQ2-mHCFI1eIPZ5Y69LlUWv0/rs:fit:2400:2400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+        "thumbnail": "https://imgproxy.leaflets.schwarz/0ry4wQ57LUKGY6kGf83xSg3k-kot1LYfehnrLMyL_0o/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDFfZTUxZTUyNzZiYzE1NmNiNGQ2MjExYWFiOWVhZjdjZjMucG5n.jpg",
+        "pageType": "page"
+      },
+      {
+        "id": "019fa81f-01c9-7a24-a6e6-27b4962334ac",
+        "number": 2,
+        "width": 1458,
+        "height": 2400,
+        "type": "STANDARD",
+        "links": [
+          {
+            "id": "019fa81f-1070-75ce-b195-41550da0cb28",
+            "displayType": "standard",
+            "url": "https://kauf.land/3enhr",
+            "title": "Link",
+            "icon": "link",
+            "width": 95.643153526971,
+            "height": 23.173803526448,
+            "top": 0.629722921913995,
+            "left": 1.2448132780083
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550aa4af6e",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=01110090.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Zucchini, lose",
+            "icon": "link",
+            "width": 21.369294605809,
+            "height": 9.9496221662469,
+            "top": 52.015113350126,
+            "left": 1.8672199170124,
+            "productDetails": {
+              "productId": "01110090",
+              "title": "Dtsch. Zucchini, lose  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550cf71513",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=01537591.advertisingWeek=32.iframe.html",
+            "title": "Bioland dtsch. Zwiebeln",
+            "icon": "link",
+            "width": 12.240663900415,
+            "height": 9.9496221662469,
+            "top": 56.675062972292,
+            "left": 50.207468879668,
+            "productDetails": {
+              "productId": "01537591",
+              "title": "Bioland dtsch. Zwiebeln  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550c1c291c",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=01290682.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Speisefrühkartoffeln »Pellissimo«",
+            "icon": "link",
+            "width": 22.614107883817,
+            "height": 16.498740554156,
+            "top": 78.33753148614599,
+            "left": 50.207468879668,
+            "productDetails": {
+              "productId": "01290682",
+              "title": "Dtsch. Speisefrühkartoffeln »Pellissimo«  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550b3bad27",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=01437483.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Kräuter XXL",
+            "icon": "link",
+            "width": 27.593360995851,
+            "height": 9.9496221662469,
+            "top": 84.886649874055,
+            "left": 1.8672199170124,
+            "productDetails": {
+              "productId": "01437483",
+              "title": "Dtsch. Kräuter XXL  "
+            }
+          }
+        ],
+        "keyWords": "Zucchini Lose Kräuter Basilikum Topf Xxl Minze Petersilie Glatt Schnittlauch Dill Koriander -42% -25% Speisefrüh- Kartoffeln »Pellissimo« Vorwiegend Festkochend Sorte Auszeichnung Qualität 2-Kg-Sack -13% Bioland Zwiebeln 1-Kg-Netz -44% Donnerstag Utsc Wirt Sch Deutsc Irt Abwechslung Grill 2_D32_6640_Ogp *Aktionsware Begrenzter Vorratsmengen Laufe Angebotstages Ausverkauft Abgaben Haushaltsüblichen Mengen Vorrat Artikel Abbildungen Irrtum Druckfehler",
+        "altText": "Frische-Angebote für Gemüse und Kräuter ab Donnerstag, darunter Zucchini, Kräutertöpfe, Pellissimo-Kartoffeln und Bioland-Zwiebeln.",
+        "image": "https://imgproxy.leaflets.schwarz/FgA7CbOIVWm6viYM5nVdexpR5nKybXmtPBdE9GsIktc/rs:fit:1200:1200:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDJfYTdmOGUyYmU2YWJlZDIyNzNiY2VmMDk0OWFmYmMwN2EucG5n.jpg",
+        "zoom": "https://imgproxy.leaflets.schwarz/ROBZAKtExgRubCNes0zdSU55cXTGhXuY3kQiInOnZt4/rs:fit:2400:2400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDJfYTdmOGUyYmU2YWJlZDIyNzNiY2VmMDk0OWFmYmMwN2EucG5n.jpg",
+        "thumbnail": "https://imgproxy.leaflets.schwarz/nDQKFzonioBl8q_RF9zq79WqM0K3UA9UsL5W-rVN5tY/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDJfYTdmOGUyYmU2YWJlZDIyNzNiY2VmMDk0OWFmYmMwN2EucG5n.jpg",
+        "pageType": "page"
+      },
+      {
+        "id": "019fa81f-01c9-7a24-a6e6-27b4968e905a",
+        "number": 3,
+        "width": 1458,
+        "height": 2400,
+        "type": "STANDARD",
+        "links": [
+          {
+            "id": "019fa81f-1070-75ce-b195-4155100ed61f",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=00946350.advertisingWeek=32.iframe.html",
+            "title": "Ungar./marokk. Spitzpaprika, rot oder weiß",
+            "icon": "link",
+            "width": 25.103734439834,
+            "height": 9.9496221662469,
+            "top": 13.979848866498997,
+            "left": 3.7344398340249,
+            "productDetails": {
+              "productId": "00946350",
+              "title": "Ungar./marokk. Spitzpaprika, rot oder weiß  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-415510d87eba",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=20837617.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Cherryrispentomaten, lose",
+            "icon": "link",
+            "width": 23.651452282158,
+            "height": 9.9496221662469,
+            "top": 38.664987405542,
+            "left": 51.867219917012,
+            "productDetails": {
+              "productId": "20837617",
+              "title": "Dtsch. Cherryrispentomaten, lose  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550f330d4b",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=00945544.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Spitzkohl",
+            "icon": "link",
+            "width": 10.995850622407,
+            "height": 9.9496221662469,
+            "top": 61.335012594458,
+            "left": 3.7344398340249,
+            "productDetails": {
+              "productId": "00945544",
+              "title": "Dtsch. Spitzkohl  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550e8a6eb6",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=00370379.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Buschbohnen",
+            "icon": "link",
+            "width": 15.767634854772,
+            "height": 9.9496221662469,
+            "top": 61.335012594458,
+            "left": 51.867219917012,
+            "productDetails": {
+              "productId": "00370379",
+              "title": "Dtsch. Buschbohnen  "
+            }
+          },
+          {
+            "id": "019fa81f-1070-75ce-b195-41550f8ef1ec",
+            "displayType": "product",
+            "url": "https://filiale.kaufland.de/angebote/detail.storeName=DE3000.articleId=00374835.advertisingWeek=32.iframe.html",
+            "title": "Dtsch. Möhren",
+            "icon": "link",
+            "width": 12.448132780083,
+            "height": 9.9496221662469,
+            "top": 84.886649874055,
+            "left": 51.867219917012,
+            "productDetails": {
+              "productId": "00374835",
+              "title": "Dtsch. Möhren  "
+            }
+          }
+        ],
+        "keyWords": "Frische- Versprechen Frische Obst- Gemüseartikel Saisonal Sortiment Täglich Frisch Geliefert Ständige Qualitätskontrollen Busch- Bohnen -40% -25% Spitzkohl Stück -33% Möhren 2-Kg-Beutel Spitzpaprika Rot Cherryrispen- Tomaten Lose Bioland Cocktail- Rispen- -16% -60% Donnerstag Utsc Wirt Sch Deutsc Ernte Entspricht 3_D32_6640_Ogp Filialangebote • Informationen Produktsiegeln",
+        "altText": "Frischeversprechen für Obst und Gemüse mit Angeboten für Buschbohnen, Spitzkohl, Möhren, Spitzpaprika und Bioland-Cocktailtomaten.",
+        "image": "https://imgproxy.leaflets.schwarz/3ylhWuQLulcqLqZLHopYzndia2QvR_yguSZutsn1HOw/rs:fit:1200:1200:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDNfOGQxNDZjZGMzZWRkZDMyMTViOTA5ZWNjMTViNTQ4Y2MucG5n.jpg",
+        "zoom": "https://imgproxy.leaflets.schwarz/weTcGb2gE5B5swqd4aA6Q9y06Z51mmp-cfCF2MP-sHo/rs:fit:2400:2400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDNfOGQxNDZjZGMzZWRkZDMyMTViOTA5ZWNjMTViNTQ4Y2MucG5n.jpg",
+        "thumbnail": "https://imgproxy.leaflets.schwarz/84bTcdqeFlbVWfRz3nqQBLNslVfWvG_NGmaJABE6QBg/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmEzMjYtODRkMi03NzhiLWE3OWEtNDZjZjAwYzFhNTgzL3BhZ2UtMDNfOGQxNDZjZGMzZWRkZDMyMTViOTA5ZWNjMTViNTQ4Y2MucG5n.jpg",
+        "pageType": "page"
+      }
+    ],
+    "topics": [],
+    "videos": [],
+    "texts": [],
+    "products": {
+      "019fa81f-1070-75ce-b195-4155064c51ea": {
+        "productId": "00014395",
+        "title": "K-PURLAND Schweinerückensteak Mediterran Style",
+        "image": "https://kaufland.media.schwarz/is/image/schwarz/DE00014395-P"
+      },
+      "019fa81f-1070-75ce-b195-415506d59be3": {
+        "productId": "00510784",
+        "title": "GÉRAMONT Weichkäse ",
+        "image": "https://kaufland.media.schwarz/is/image/schwarz/00535807"
+      },
+      "019fa81f-1070-75ce-b195-41550a0f0978": {
+        "productId": "02749281",
+        "title": "TOFFIFEE Haselnuss in Caramel ",
+        "image": "https://kaufland.media.schwarz/is/image/schwarz/02749281"
+      },
+      "019fa81f-1070-75ce-b195-415509478a87": {
+        "productId": "01465743",
+        "title": "DANONE Actimel XXL ",
+        "image": "https://kaufland.media.schwarz/is/image/schwarz/01465743"
+      }
+    },
+    "notifications": [],
+    "relatedFlyers": []
+  },
+  "version": 4,
+  "success": true,
+  "numberOfEntries": 1
+}

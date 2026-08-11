@@ -1,0 +1,168 @@
+[
+  {
+    "id": "0iaaLe1u",
+    "ern": "ern:catalog:0iaaLe1u",
+    "label": "Netto Prospekt KW 33",
+    "background": "#FFFFFF",
+    "run_from": "2026-08-10T00:00:00+02:00",
+    "run_till": "2026-08-15T23:59:59+02:00",
+    "display_run_till": true,
+    "publish": "2026-08-03T03:00:00+02:00",
+    "page_count": 33,
+    "offer_count": 285,
+    "branding": {
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      }
+    },
+    "dealer_id": "90f2VL",
+    "dealer_url": "https://www.netto.de/",
+    "dealer": {
+      "id": "90f2VL",
+      "ern": "ern:dealer:90f2VL",
+      "graph_id": null,
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "description_markdown": "",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      },
+      "category_ids": [],
+      "country": {
+        "id": "DE",
+        "unsubscribe_print_url": null
+      },
+      "markets": [
+        {
+          "slug": "Netto",
+          "country_code": "DE"
+        }
+      ],
+      "favorite_count": 0,
+      "facebook_page_id": null,
+      "youtube_user_id": null,
+      "twitter_handle": null
+    },
+    "store_id": null,
+    "store_url": null,
+    "dimensions": {
+      "height": 1.7647057,
+      "width": 1
+    },
+    "images": {
+      "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F2heR_K7M%2Fp-1.webp&w=250&s=990b031908c6a26564118acbf3335f66",
+      "view": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F2heR_K7M%2Fp-1.webp&w=700&s=a95f45e4fd3b92849d2801f42867e415",
+      "zoom": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F2heR_K7M%2Fp-1.webp&w=1400&s=c7e1e17e1ce617c11583e9529ca47fc3"
+    },
+    "pages": {
+      "thumb": [],
+      "view": [],
+      "zoom": []
+    },
+    "category_ids": [
+      "groceries"
+    ],
+    "pdf_url": "https://squid-api.tjek.com/v2/catalogs/0iaaLe1u/download",
+    "all_stores": true,
+    "incito_publication_id": null,
+    "types": [
+      "paged"
+    ],
+    "tags": [
+      "trade"
+    ]
+  },
+  {
+    "id": "3sBnfFlz",
+    "ern": "ern:catalog:3sBnfFlz",
+    "label": "Netto Prospekt KW 34",
+    "background": "#FFFFFF",
+    "run_from": "2026-08-17T00:00:00+02:00",
+    "run_till": "2026-08-22T23:59:59+02:00",
+    "display_run_till": true,
+    "publish": "2026-08-07T03:00:00+02:00",
+    "page_count": 33,
+    "offer_count": 272,
+    "branding": {
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      }
+    },
+    "dealer_id": "90f2VL",
+    "dealer_url": "https://www.netto.de/",
+    "dealer": {
+      "id": "90f2VL",
+      "ern": "ern:dealer:90f2VL",
+      "graph_id": null,
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "description_markdown": "",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      },
+      "category_ids": [],
+      "country": {
+        "id": "DE",
+        "unsubscribe_print_url": null
+      },
+      "markets": [
+        {
+          "slug": "Netto",
+          "country_code": "DE"
+        }
+      ],
+      "favorite_count": 0,
+      "facebook_page_id": null,
+      "youtube_user_id": null,
+      "twitter_handle": null
+    },
+    "store_id": null,
+    "store_url": null,
+    "dimensions": {
+      "height": 1.7647057,
+      "width": 1
+    },
+    "images": {
+      "thumb": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FZLHdAw2t%2Fp-1.webp&w=250&s=c72676a5bab03ef64ed816e9ffcfa43c",
+      "view": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FZLHdAw2t%2Fp-1.webp&w=700&s=bcde85f4892ecbe9c026d1c4d63de1b0",
+      "zoom": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FZLHdAw2t%2Fp-1.webp&w=1400&s=e7d5f72ac695e5c71b40a72a7f054355"
+    },
+    "pages": {
+      "thumb": [],
+      "view": [],
+      "zoom": []
+    },
+    "category_ids": [
+      "groceries"
+    ],
+    "pdf_url": "https://squid-api.tjek.com/v2/catalogs/3sBnfFlz/download",
+    "all_stores": true,
+    "incito_publication_id": null,
+    "types": [
+      "paged"
+    ],
+    "tags": [
+      "trade"
+    ]
+  }
+]

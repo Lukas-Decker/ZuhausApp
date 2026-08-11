@@ -1,0 +1,199 @@
+[
+  {
+    "id": "161f4YU",
+    "ern": "ern:store:161f4YU",
+    "graph_id": "161f4YU",
+    "street": "Hauptstraße 87",
+    "city": "Koserow",
+    "zip_code": "17459",
+    "country": {
+      "id": "DE",
+      "unsubscribe_print_url": null
+    },
+    "name": "Netto Koserow",
+    "latitude": 54.0465,
+    "longitude": 14.003013,
+    "dealer_url": "https://squid-api.tjek.com/v2/dealers/90f2VL",
+    "dealer_id": "90f2VL",
+    "branding": {
+      "name": "Netto",
+      "website": "https://www.netto.de/?utm_source=tjek&utm_medium=referral",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      }
+    },
+    "opening_hours": [
+      {
+        "opens": "12:00:00",
+        "closes": "18:00:00",
+        "day_of_week": "sunday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "monday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "tuesday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "wednesday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "thursday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "friday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "21:00:00",
+        "day_of_week": "saturday"
+      }
+    ],
+    "dealer": {
+      "id": "90f2VL",
+      "ern": "ern:dealer:90f2VL",
+      "graph_id": null,
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "description_markdown": "",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      },
+      "category_ids": [],
+      "country": {
+        "id": "DE",
+        "unsubscribe_print_url": null
+      },
+      "markets": [
+        {
+          "slug": "Netto",
+          "country_code": "DE"
+        }
+      ],
+      "favorite_count": 0,
+      "facebook_page_id": null,
+      "youtube_user_id": null,
+      "twitter_handle": null
+    },
+    "self_checkout": null,
+    "contact": null,
+    "category_ids": [],
+    "facebook_page_id": null,
+    "youtube_user_id": null,
+    "twitter_handle": null
+  },
+  {
+    "id": "b263c6q",
+    "ern": "ern:store:b263c6q",
+    "graph_id": "b263c6q",
+    "street": "Hölzern-Kreuz-Weg 13b",
+    "city": "Barth",
+    "zip_code": "18356",
+    "country": {
+      "id": "DE",
+      "unsubscribe_print_url": null
+    },
+    "name": "Netto Barth",
+    "latitude": 54.356769,
+    "longitude": 12.721763,
+    "dealer_url": "https://squid-api.tjek.com/v2/dealers/90f2VL",
+    "dealer_id": "90f2VL",
+    "branding": {
+      "name": "Netto",
+      "website": "https://www.netto.de/?utm_source=tjek&utm_medium=referral",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      }
+    },
+    "opening_hours": [
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "monday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "tuesday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "wednesday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "thursday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "friday"
+      },
+      {
+        "opens": "07:00:00",
+        "closes": "20:00:00",
+        "day_of_week": "saturday"
+      }
+    ],
+    "dealer": {
+      "id": "90f2VL",
+      "ern": "ern:dealer:90f2VL",
+      "graph_id": null,
+      "name": "Netto",
+      "website": "https://www.netto.de/",
+      "description": "Der schwarz-gelbe Lebensmitteldiscounter Netto mit dem Hund Scottie im Logo bietet Dir ein Sortiment aus mehr als 1.700 Artikeln und wöchentlich wechselnden Aktionsangeboten.",
+      "description_markdown": "",
+      "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FKj2nqdG0KLcP6qEHorKKh&w=300&s=fbb434fbfa308b80a14480aad8d75a21",
+      "color": "fad85b",
+      "pageflip": {
+        "logo": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F90f2VL%2FMjM95sf-n9yJROK8JBDGb&w=300&s=6e4e0283cae50a10b679f39717a9d77e",
+        "color": "fad85b"
+      },
+      "category_ids": [],
+      "country": {
+        "id": "DE",
+        "unsubscribe_print_url": null
+      },
+      "markets": [
+        {
+          "slug": "Netto",
+          "country_code": "DE"
+        }
+      ],
+      "favorite_count": 0,
+      "facebook_page_id": null,
+      "youtube_user_id": null,
+      "twitter_handle": null
+    },
+    "self_checkout": null,
+    "contact": null,
+    "category_ids": [],
+    "facebook_page_id": null,
+    "youtube_user_id": null,
+    "twitter_handle": null
+  }
+]

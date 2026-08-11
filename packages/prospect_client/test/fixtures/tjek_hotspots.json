@@ -1,0 +1,185 @@
+[
+  {
+    "type": "offer",
+    "locations": {
+      "1": [
+        [
+          0.346,
+          0.31058820319999997
+        ],
+        [
+          0.346,
+          0.776470508
+        ],
+        [
+          0.668,
+          0.776470508
+        ],
+        [
+          0.668,
+          0.31058820319999997
+        ]
+      ]
+    },
+    "id": "v0eelxql6GgOdaeWIORYw",
+    "run_from": 1786917600,
+    "run_till": 1787435999,
+    "heading": "Grünländer*",
+    "webshop": null,
+    "offer": {
+      "id": "v0eelxql6GgOdaeWIORYw",
+      "ern": "ern:offer:v0eelxql6GgOdaeWIORYw",
+      "heading": "Grünländer*",
+      "pricing": {
+        "price": 1.49,
+        "pre_price": null,
+        "currency": "EUR"
+      },
+      "quantity": {
+        "unit": {
+          "symbol": "g",
+          "si": {
+            "symbol": "kg",
+            "factor": 0.001
+          }
+        },
+        "size": {
+          "from": 156,
+          "to": 156
+        },
+        "pieces": {
+          "from": 1,
+          "to": 1,
+          "min": null,
+          "max": null
+        }
+      },
+      "run_from": "2026-08-17T00:00:00+02:00",
+      "run_till": "2026-08-22T23:59:59+02:00",
+      "publish": "2026-08-07T03:00:00+02:00"
+    },
+    "id_collection": []
+  },
+  {
+    "type": "offer",
+    "locations": {
+      "1": [
+        [
+          0.346,
+          1.217646933
+        ],
+        [
+          0.346,
+          1.7435292316
+        ],
+        [
+          0.66,
+          1.7435292316
+        ],
+        [
+          0.66,
+          1.217646933
+        ]
+      ]
+    },
+    "id": "K6YqaTgNel-hjSvjePXMU",
+    "run_from": 1786917600,
+    "run_till": 1787435999,
+    "heading": "Persil Waschmittel*",
+    "webshop": null,
+    "offer": {
+      "id": "K6YqaTgNel-hjSvjePXMU",
+      "ern": "ern:offer:K6YqaTgNel-hjSvjePXMU",
+      "heading": "Persil Waschmittel*",
+      "pricing": {
+        "price": 4.99,
+        "pre_price": null,
+        "currency": "EUR"
+      },
+      "quantity": {
+        "unit": {
+          "symbol": "pcs",
+          "si": {
+            "symbol": "pcs",
+            "factor": 1
+          }
+        },
+        "size": {
+          "from": 1,
+          "to": 1
+        },
+        "pieces": {
+          "from": 1,
+          "to": 1,
+          "min": null,
+          "max": null
+        }
+      },
+      "run_from": "2026-08-17T00:00:00+02:00",
+      "run_till": "2026-08-22T23:59:59+02:00",
+      "publish": "2026-08-07T03:00:00+02:00"
+    },
+    "id_collection": []
+  },
+  {
+    "type": "offer",
+    "locations": {
+      "1": [
+        [
+          0.666,
+          1.2035292873999999
+        ],
+        [
+          0.666,
+          1.7435292316
+        ],
+        [
+          0.988,
+          1.7435292316
+        ],
+        [
+          0.988,
+          1.2035292873999999
+        ]
+      ]
+    },
+    "id": "UqKdRJxnJ6i3ko2jEEvwS",
+    "run_from": 1786917600,
+    "run_till": 1787435999,
+    "heading": "Rindenmulch*",
+    "webshop": null,
+    "offer": {
+      "id": "UqKdRJxnJ6i3ko2jEEvwS",
+      "ern": "ern:offer:UqKdRJxnJ6i3ko2jEEvwS",
+      "heading": "Rindenmulch*",
+      "pricing": {
+        "price": 3.99,
+        "pre_price": null,
+        "currency": "EUR"
+      },
+      "quantity": {
+        "unit": {
+          "symbol": "l",
+          "si": {
+            "symbol": "l",
+            "factor": 1
+          }
+        },
+        "size": {
+          "from": 40,
+          "to": 40
+        },
+        "pieces": {
+          "from": 1,
+          "to": 1,
+          "min": null,
+          "max": null
+        }
+      },
+      "run_from": "2026-08-17T00:00:00+02:00",
+      "run_till": "2026-08-22T23:59:59+02:00",
+      "publish": "2026-08-07T03:00:00+02:00"
+    },
+    "id_collection": []
+  }
+]

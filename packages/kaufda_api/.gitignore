@@ -1,0 +1,12 @@
+.dart_tool/
+.packages
+pubspec.lock
+build/
+doc/api/
+*.iml
+.idea/
+.vscode/
+
+# Lokale Dumps und Downloads der CLI
+out/
+dump/

@@ -1,0 +1,39 @@
+[
+  {
+    "flight": {
+      "id": 287528,
+      "advertiser": { "majorPlayer": true, "id": "retailers/126802", "name": "REWE" },
+      "industry": { "id": 1009, "name": "Supermarkt" },
+      "mainLeafletId": 5759348,
+      "mainLeafletPageIndex": 0,
+      "mainLeafletImages": {
+        "count": 1,
+        "metadata": [{ "aspectRatio": 0.5655250495329748, "width": 1, "height": 1.7682682682682682 }]
+      },
+      "validFrom": "2026-08-09T22:00:00Z",
+      "validTo": "2026-08-15T21:59:00Z",
+      "highlightText": null,
+      "pageCount": 16,
+      "offerCount": 129,
+      "campaignCount": 0,
+      "promotionLevel": 101,
+      "leafletCount": 4
+    },
+    "promotionLevel": 101
+  },
+  {
+    "flight": {
+      "id": 287493,
+      "advertiser": { "majorPlayer": true, "id": "retailers/126992", "name": "dm-drogerie markt" },
+      "industry": { "id": 1013, "name": "Drogerie" },
+      "mainLeafletId": 5756343,
+      "mainLeafletPageIndex": 0,
+      "validFrom": "2026-08-09T22:00:00Z",
+      "validTo": "2026-08-22T21:59:00Z",
+      "highlightText": null,
+      "pageCount": 8,
+      "offerCount": 0,
+      "leafletCount": 1
+    }
+  }
+]

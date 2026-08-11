@@ -1,0 +1,179 @@
+{
+  "self": "v4/overview?client_locale=lidl%2Fde-DE",
+  "version": 4,
+  "success": true,
+  "message": "50 flyers in 5 subcategories and 4 categories found.",
+  "dateTime": "2026-08-10T23:01:07+02:00",
+  "numberOfEntries": 4,
+  "isRegionalized": true,
+  "categories": [
+    {
+      "id": "7fcdd790-fb6e-11e7-b1f4-005056ab0fb6",
+      "name": "Filial-Angebote",
+      "subcategories": [
+        {
+          "id": "f5771509-f19a-11e9-b196-005056ab0fb6",
+          "name": "Unsere Aktionsprospekte",
+          "flyers": [
+            {
+              "id": "019fc77f-6c07-7656-8b45-d0373729e3d4",
+              "name": "Aktionsprospekt",
+              "title": "10.08.2026 – 15.08.2026",
+              "isActive": true,
+              "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc77f-6c07-7656-8b45-d0373729e3d4/Aktionsprospekt-10-08-2026-15-08-2026-02.pdf",
+              "enableSharing": true,
+              "enableDownload": false,
+              "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc77f-6c07-7656-8b45-d0373729e3d4/Aktionsprospekt-10-08-2026-15-08-2026-02.pdf",
+              "hiResFileSize": 51927250,
+              "fileSize": 51927250,
+              "thumbnailUrl": "https://imgproxy.leaflets.schwarz/Jh3braBNt0bef71k68rC9LUbyA4rFi-EJ-W3KYPb5ag/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3N2YtNmMwNy03NjU2LThiNDUtZDAzNzM3MjllM2Q0L3BhZ2UtMDFfYzNiNjgwZjk1MWY4ODU1NmIyZTc3NmI0MzMwNDZjNDEucG5n.jpg",
+              "publicThumbnail": "https://imgproxy.leaflets.schwarz/Jh3braBNt0bef71k68rC9LUbyA4rFi-EJ-W3KYPb5ag/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3N2YtNmMwNy03NjU2LThiNDUtZDAzNzM3MjllM2Q0L3BhZ2UtMDFfYzNiNjgwZjk1MWY4ODU1NmIyZTc3NmI0MzMwNDZjNDEucG5n.jpg",
+              "flyerUrlAbsolute": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-4ea5fb/ar/0?_ab=1&lf=HHZ",
+              "regionAliasAbsoluteUrl": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-4ea5fb/ar/0?_ab=1&lf=HHZ",
+              "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=aktionsprospekt-10-08-2026-15-08-2026-4ea5fb&client=lidl",
+              "startDate": "2026-08-08",
+              "endDate": "2026-08-15",
+              "offerStartDate": "2026-08-10",
+              "offerEndDate": "2026-08-15",
+              "status": "current",
+              "discoverable": false,
+              "target": "flyer",
+              "teasers": {
+                "teaser_666x475": "https://imgproxy.leaflets.schwarz/-jv_NGuq5Knet_9-G0Ge4wqBh7iLPs51MeZiiA6Oh78/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3N2YtNmMwNy03NjU2LThiNDUtZDAzNzM3MjllM2Q0L3BhZ2UtMDFfYzNiNjgwZjk1MWY4ODU1NmIyZTc3NmI0MzMwNDZjNDEucG5n.jpg",
+                "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/sbC4lyYNsOXqM53t3woNAgAJJ8ii353ImO5sIa0-0qc/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3N2YtNmMwNy03NjU2LThiNDUtZDAzNzM3MjllM2Q0L3BhZ2UtMDFfYzNiNjgwZjk1MWY4ODU1NmIyZTc3NmI0MzMwNDZjNDEucG5n.jpg",
+                "teaser_w1010": "https://imgproxy.leaflets.schwarz/WAwHQs1JYzXlcAxda9QJtSBOPJE10aI28jj4Pv5hKYw/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3N2YtNmMwNy03NjU2LThiNDUtZDAzNzM3MjllM2Q0L3BhZ2UtMDFfYzNiNjgwZjk1MWY4ODU1NmIyZTc3NmI0MzMwNDZjNDEucG5n.jpg"
+              },
+              "regions": [
+                {
+                  "type": "national",
+                  "code": "0"
+                }
+              ],
+              "thumbnailDimensions": {
+                "width": 236,
+                "height": 400
+              }
+            },
+            {
+              "id": "019fc780-2463-7a42-ace3-317eb6621494",
+              "name": "Aktionsprospekt",
+              "title": "10.08.2026 – 15.08.2026",
+              "isActive": true,
+              "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc780-2463-7a42-ace3-317eb6621494/Aktionsprospekt-10-08-2026-15-08-2026-02.pdf",
+              "enableSharing": true,
+              "enableDownload": false,
+              "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc780-2463-7a42-ace3-317eb6621494/Aktionsprospekt-10-08-2026-15-08-2026-02.pdf",
+              "hiResFileSize": 55080054,
+              "fileSize": 55080054,
+              "thumbnailUrl": "https://imgproxy.leaflets.schwarz/v6OWjLiU58X7nKQIM8txxLe-qOeFLGGj8szUthdHxqk/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtMjQ2My03YTQyLWFjZTMtMzE3ZWI2NjIxNDk0L3BhZ2UtMDFfZjkwMWRjYTE3MzRiN2RmOWY2NmJmYmE1ZWIyOGVkODUucG5n.jpg",
+              "publicThumbnail": "https://imgproxy.leaflets.schwarz/v6OWjLiU58X7nKQIM8txxLe-qOeFLGGj8szUthdHxqk/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtMjQ2My03YTQyLWFjZTMtMzE3ZWI2NjIxNDk0L3BhZ2UtMDFfZjkwMWRjYTE3MzRiN2RmOWY2NmJmYmE1ZWIyOGVkODUucG5n.jpg",
+              "flyerUrlAbsolute": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-37276e/ar/31?_ab=1&lf=HHZ",
+              "regionAliasAbsoluteUrl": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-37276e/ar/31?_ab=1&lf=HHZ",
+              "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=aktionsprospekt-10-08-2026-15-08-2026-37276e&client=lidl",
+              "startDate": "2026-08-08",
+              "endDate": "2026-08-15",
+              "offerStartDate": "2026-08-10",
+              "offerEndDate": "2026-08-15",
+              "status": "current",
+              "discoverable": false,
+              "target": "flyer",
+              "teasers": {
+                "teaser_666x475": "https://imgproxy.leaflets.schwarz/R53UVrZ9ROhEwrBiyaEEEXiHt_7Pctbwlzj1GFVpFps/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtMjQ2My03YTQyLWFjZTMtMzE3ZWI2NjIxNDk0L3BhZ2UtMDFfZjkwMWRjYTE3MzRiN2RmOWY2NmJmYmE1ZWIyOGVkODUucG5n.jpg",
+                "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/arXSyGbD5NV89KfdACd39XMWuv-9Olle9e4QdhXixpw/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtMjQ2My03YTQyLWFjZTMtMzE3ZWI2NjIxNDk0L3BhZ2UtMDFfZjkwMWRjYTE3MzRiN2RmOWY2NmJmYmE1ZWIyOGVkODUucG5n.jpg",
+                "teaser_w1010": "https://imgproxy.leaflets.schwarz/heybQZQKAGoF-qpCsvZ7Z2P9-_GMJQ4HE9K5JigkHoo/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtMjQ2My03YTQyLWFjZTMtMzE3ZWI2NjIxNDk0L3BhZ2UtMDFfZjkwMWRjYTE3MzRiN2RmOWY2NmJmYmE1ZWIyOGVkODUucG5n.jpg"
+              },
+              "regions": [
+                {
+                  "type": "offer_region",
+                  "code": "31"
+                },
+                {
+                  "type": "offer_region",
+                  "code": "4"
+                },
+                {
+                  "type": "offer_region",
+                  "code": "647"
+                },
+                {
+                  "type": "offer_region",
+                  "code": "9"
+                }
+              ],
+              "thumbnailDimensions": {
+                "width": 236,
+                "height": 400
+              }
+            },
+            {
+              "id": "019fc780-7958-7f30-b3da-56749e383d40",
+              "name": "Aktionsprospekt",
+              "title": "10.08.2026 – 15.08.2026",
+              "isActive": true,
+              "pdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc780-7958-7f30-b3da-56749e383d40/Aktionsprospekt-10-08-2026-15-08-2026-00.pdf",
+              "enableSharing": true,
+              "enableDownload": false,
+              "hiResPdfUrl": "https://assets.leaflets.schwarz/leaflets/pdfs/019fc780-7958-7f30-b3da-56749e383d40/Aktionsprospekt-10-08-2026-15-08-2026-00.pdf",
+              "hiResFileSize": 59566677,
+              "fileSize": 59566677,
+              "thumbnailUrl": "https://imgproxy.leaflets.schwarz/F31-4FLK6MPfRsGE18_930zgk-7CRwmPWTwz5R3Yfp4/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtNzk1OC03ZjMwLWIzZGEtNTY3NDllMzgzZDQwL3BhZ2UtMDFfNWUwY2I3YWUwMzA0YmNmNmQ2OTk1YTRkODFiZTM3ZjUucG5n.jpg",
+              "publicThumbnail": "https://imgproxy.leaflets.schwarz/F31-4FLK6MPfRsGE18_930zgk-7CRwmPWTwz5R3Yfp4/rs:fit:400:400:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtNzk1OC03ZjMwLWIzZGEtNTY3NDllMzgzZDQwL3BhZ2UtMDFfNWUwY2I3YWUwMzA0YmNmNmQ2OTk1YTRkODFiZTM3ZjUucG5n.jpg",
+              "flyerUrlAbsolute": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-8fad80/ar/19?_ab=1&lf=HHZ",
+              "regionAliasAbsoluteUrl": "https://www.lidl.de/l/prospekte/aktionsprospekt-10-08-2026-15-08-2026-8fad80/ar/19?_ab=1&lf=HHZ",
+              "flyerJson": "https://endpoints.leaflets.schwarz/v4/flyer?version=4&flyer_identifier=aktionsprospekt-10-08-2026-15-08-2026-8fad80&client=lidl",
+              "startDate": "2026-08-08",
+              "endDate": "2026-08-15",
+              "offerStartDate": "2026-08-10",
+              "offerEndDate": "2026-08-15",
+              "status": "current",
+              "discoverable": false,
+              "target": "flyer",
+              "teasers": {
+                "teaser_666x475": "https://imgproxy.leaflets.schwarz/LWOu2tvLNN9iniXYbQEWeFpmFirAktAIqGfx7AgVTTU/rs:fill:666:475:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtNzk1OC03ZjMwLWIzZGEtNTY3NDllMzgzZDQwL3BhZ2UtMDFfNWUwY2I3YWUwMzA0YmNmNmQ2OTk1YTRkODFiZTM3ZjUucG5n.jpg",
+                "teaser_2020x1440": "https://imgproxy.leaflets.schwarz/95MOPrbiGpherCkAiDyhRCaFFuEZkn2cb9Zg1OKBGYU/rs:fill:2020:1440:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtNzk1OC03ZjMwLWIzZGEtNTY3NDllMzgzZDQwL3BhZ2UtMDFfNWUwY2I3YWUwMzA0YmNmNmQ2OTk1YTRkODFiZTM3ZjUucG5n.jpg",
+                "teaser_w1010": "https://imgproxy.leaflets.schwarz/dJytwfCfQ2N6bGT5WK1RU-HA9_RozhwlmuKxR6xyXH8/rs:fit:1010:0:1/g:no/czM6Ly9sZWFmbGV0cy9pbWFnZXMvMDE5ZmM3ODAtNzk1OC03ZjMwLWIzZGEtNTY3NDllMzgzZDQwL3BhZ2UtMDFfNWUwY2I3YWUwMzA0YmNmNmQ2OTk1YTRkODFiZTM3ZjUucG5n.jpg"
+              },
+              "regions": [
+                {
+                  "type": "offer_region",
+                  "code": "19"
+                },
+                {
+                  "type": "offer_region",
+                  "code": "20"
+                },
+                {
+                  "type": "offer_region",
+                  "code": "32"
+                }
+              ],
+              "thumbnailDimensions": {
+                "width": 236,
+                "height": 400
+              }
+            }
+          ],
+          "overviewPromotions": []
+        }
+      ]
+    }
+  ],
+  "translations": {
+    "overviewWidgetLeaflets": "Prospekte",
+    "overviewWidgetDiscoverOffers": "Jede Woche neue Angebote entdecken!",
+    "overviewWidgetSelectStore": "Wähle eine Filiale aus, um Angebote aus deiner Region zu erhalten",
+    "overviewWidgetToLeaflet": "Zum Prospekt",
+    "overviewWidgetOverlayHeading": "Lege deine Lidl Filiale fest",
+    "overviewWidgetStoreFinderClaim": "Wähle deine Filiale",
+    "overviewWidgetStoreFinderSubClaim": "für weitere Angebote",
+    "overviewWidgetStoreFinderButtonLabel": "Mehr entdecken",
+    "overviewWidgetOverlayText": "Wähle deine Filiale aus, um unsere speziellen Angebote und Prospekte für deine Region zu entdecken.",
+    "overviewWidgetSelectStoreClaim": "Finde passende Angebote in deiner Filiale",
+    "overviewWidgetNextPromoLabel": "Neue Ansicht",
+    "overviewWidgetNextPromoHint": "Du findest den Prospekt auf unserer Angebotsseite.",
+    "overviewWidgetTitle": "Angebote & Prospekte",
+    "overviewWidgetOverlayCloseButtonText": "Übersicht schließen",
+    "overviewWidgetStoreSelection": "Filialauswahl",
+    "overviewWidgetOverlayButtonText": "Wähle deine Filiale"
+  }
+}

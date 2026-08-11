@@ -155,6 +155,10 @@ class KaufdaMapper {
       link: _uri(raw.linkOuts.isEmpty ? null : raw.linkOuts.first.url),
       validFrom: raw.validFrom,
       validUntil: raw.validUntil,
+      retailerName: raw.publisher?.name,
+      brochureRef: raw.parentContent == null
+          ? null
+          : BrochureId(sourceId, raw.parentContent!.id).toString(),
     );
   }
 
@@ -216,6 +220,10 @@ class KaufdaMapper {
             : raw.categoryPaths.first)
           if (ref.name.isNotEmpty) ref.name,
       ],
+      retailerName: raw.publisherName,
+      brochureRef: raw.parent == null
+          ? null
+          : BrochureId(sourceId, raw.parent!.id).toString(),
     );
   }
 

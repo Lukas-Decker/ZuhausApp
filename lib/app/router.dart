@@ -5,6 +5,8 @@ import '../features/inventory/ui/inventory_screen.dart';
 import '../features/meds/ui/meds_screen.dart';
 import '../features/notes/ui/notes_screen.dart';
 import '../features/pets/ui/pets_screen.dart';
+import '../features/prospekte/ui/brochure_viewer_screen.dart';
+import '../features/prospekte/ui/prospekte_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shopping/ui/shopping_screen.dart';
 import 'navigation.dart';
@@ -24,7 +26,29 @@ final appRouter = GoRouter(
           AppShell(navigationShell: navigationShell),
       branches: [
         _branch(AppModule.inventory, const InventoryScreen()),
-        _branch(AppModule.shopping, const ShoppingScreen()),
+        _branch(
+          AppModule.shopping,
+          const ShoppingScreen(),
+          routes: [
+            // Prospekte haengen als Unterseite am Einkauf-Modul, damit die
+            // Navigationsleiste bei fuenf Modulen bleibt.
+            GoRoute(
+              path: 'prospekte',
+              builder: (context, state) => const ProspekteScreen(),
+              routes: [
+                GoRoute(
+                  path: 'ansicht',
+                  builder: (context, state) => BrochureViewerScreen(
+                    brochureRef: state.uri.queryParameters['id'] ?? '',
+                    initialPage: int.tryParse(
+                      state.uri.queryParameters['seite'] ?? '',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         _branch(AppModule.notes, const NotesScreen()),
         _branch(AppModule.meds, const MedsScreen()),
         _branch(AppModule.pets, const PetsScreen()),
@@ -38,10 +62,18 @@ final appRouter = GoRouter(
   ],
 );
 
-StatefulShellBranch _branch(AppModule module, Widget child) {
+StatefulShellBranch _branch(
+  AppModule module,
+  Widget child, {
+  List<RouteBase> routes = const [],
+}) {
   return StatefulShellBranch(
     routes: [
-      GoRoute(path: module.path, builder: (context, state) => child),
+      GoRoute(
+        path: module.path,
+        builder: (context, state) => child,
+        routes: routes,
+      ),
     ],
   );
 }

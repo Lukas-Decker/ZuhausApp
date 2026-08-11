@@ -37,6 +37,9 @@ dependencies:
   timezone: ^0.11.1
   flutter_timezone: ^5.1.0
   supabase_flutter: ^2.16.0
+  # Prospekte und Angebote deutscher Supermaerkte (kaufDA, Tjek, Schwarz).
+  prospect_client:
+    path: packages/prospect_client
   app_links: ^7.2.1
   win32_registry: ^3.0.3
   # Biometrisches App-Schloss (Windows Hello / Fingerabdruck / Gesicht).

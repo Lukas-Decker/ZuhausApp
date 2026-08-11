@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 void main() {
   const mapper = KaufdaMapper();
 
-  test('Seiten werden 1-basiert, Hotspots auf Prozent skaliert', () {
+  test('kaufDA-Konventionen: 1-basierte Seiten, Prozent-Hotspots, Preise', () {
     final meta = kd.Brochure.fromJson({
       'id': 'b-1',
       'title': 'Wochenangebote',
@@ -67,17 +67,21 @@ void main() {
     expect(offer.pageNumber, 1);
     expect(offer.price!.current, 4.99);
     expect(offer.price!.previous, 6.99);
-  });
 
-  test('Suchtreffer: Streichpreis 0 bedeutet kein Streichpreis', () {
-    final offer = mapper.searchOffer(
+    // Suchtreffer: Streichpreis 0 bedeutet kein Streichpreis.
+    final searchOffer = mapper.searchOffer(
       kd.SearchOffer.fromJson({
         'id': 's-1',
         'title': 'Butter',
+        'publisherName': 'Lidl',
         'prices': {'mainPrice': 1.99, 'secondaryPrice': 0.0},
+        'parentContent': {'id': 'b-1', 'page': {'number': 2}},
       }),
     );
-    expect(offer!.price!.current, 1.99);
-    expect(offer.price!.previous, isNull);
+    expect(searchOffer!.price!.current, 1.99);
+    expect(searchOffer.price!.previous, isNull);
+    expect(searchOffer.retailerName, 'Lidl');
+    expect(searchOffer.brochureRef, 'kaufda:b-1');
+    expect(searchOffer.pageNumber, 3);
   });
 }

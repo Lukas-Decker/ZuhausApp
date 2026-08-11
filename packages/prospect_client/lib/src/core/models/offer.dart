@@ -24,6 +24,8 @@ class Offer {
     this.externalProductId,
     this.validFrom,
     this.validUntil,
+    this.retailerName,
+    this.brochureRef,
   });
 
   /// Innerhalb einer Quelle eindeutig, nicht quellenuebergreifend.
@@ -61,6 +63,18 @@ class Offer {
   final DateTime? validFrom;
   final DateTime? validUntil;
 
+  /// Anzeigename des Haendlers, sofern die Quelle ihn am Angebot mitliefert.
+  ///
+  /// Wichtig fuer die quellenuebergreifende Angebotssuche: ein Preisvergleich
+  /// ohne Haendler ist wertlos. Null, wenn die Quelle nur prospektbezogen
+  /// antwortet und der Haendler sich aus dem Kontext ergibt.
+  final String? retailerName;
+
+  /// Prospekt, aus dem das Angebot stammt, als serialisierte [BrochureId]
+  /// (`kaufda:72a3...`). Als String gefuehrt, damit dieses Modell nicht vom
+  /// Prospektmodell abhaengt. Null, wenn die Quelle keinen Bezug liefert.
+  final String? brochureRef;
+
   bool get hasPrice => price != null;
 
   bool isExpiredAt(DateTime now) {
@@ -82,6 +96,8 @@ class Offer {
         externalProductId: externalProductId,
         validFrom: validFrom,
         validUntil: validUntil,
+        retailerName: retailerName,
+        brochureRef: brochureRef,
       );
 
   Map<String, Object?> toJson() => {
@@ -98,6 +114,8 @@ class Offer {
         if (externalProductId != null) 'externalProductId': externalProductId,
         if (validFrom != null) 'validFrom': validFrom!.toIso8601String(),
         if (validUntil != null) 'validUntil': validUntil!.toIso8601String(),
+        if (retailerName != null) 'retailerName': retailerName,
+        if (brochureRef != null) 'brochureRef': brochureRef,
       };
 
   static Offer fromJson(Map<String, Object?> json) => Offer(
@@ -118,6 +136,8 @@ class Offer {
         externalProductId: json['externalProductId'] as String?,
         validFrom: _date(json['validFrom']),
         validUntil: _date(json['validUntil']),
+        retailerName: json['retailerName'] as String?,
+        brochureRef: json['brochureRef'] as String?,
       );
 
   static DateTime? _date(Object? value) =>

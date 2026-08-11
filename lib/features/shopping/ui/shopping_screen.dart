@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/navigation.dart';
 import '../../../core/providers.dart';
 import '../../../core/widgets/add_fab.dart';
 import '../../../core/widgets/add_ghost_tile.dart';
@@ -28,6 +30,12 @@ class ShoppingScreen extends ConsumerWidget {
     return ModuleScaffold(
       title: active?.name ?? 'Einkauf',
       actions: [
+        IconButton(
+          tooltip: 'Prospekte und Angebote',
+          onPressed: () =>
+              context.go('${AppModule.shopping.path}/prospekte'),
+          icon: const Icon(Icons.local_offer_outlined),
+        ),
         if ((lists.value ?? const []).length > 1)
           _ListSwitcher(lists: lists.value ?? const []),
         IconButton(

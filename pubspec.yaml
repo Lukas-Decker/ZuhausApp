@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.25.0+65
+version: 0.25.1+66
 
 environment:
   sdk: ^3.12.2
@@ -58,6 +58,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  # build_runner bleibt auf 2.15.x und drift_dev entsprechend auf 2.34.0:
+  # ab build_runner 2.15.2 wird analyzer >=13.3 und damit meta ^1.18.3
+  # verlangt, das SDK-Paket flutter_test pinnt aber meta 1.18.0. Erst mit
+  # einem neueren Flutter-SDK loesbar. Dasselbe gilt fuer intl 0.20.3
+  # (flutter_localizations haelt 0.20.2 fest).
   drift_dev: ^2.34.0
   build_runner: ^2.15.1
   # App-Icon: Quellgrafik zeichnen (image) und auf die Plattformen verteilen.

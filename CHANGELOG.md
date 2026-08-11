@@ -8,6 +8,12 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.1 - 2026-08-11
+
+- Die verwendeten Bibliotheken sind auf den aktuellen Stand gebracht,
+  darunter Firebase, Supabase und die Navigation. Am Verhalten der App
+  ändert sich nichts.
+
 ## 0.25.0 - 2026-08-11
 
 - Der Update-Hinweis zeigt jetzt alle Änderungen seit der installierten

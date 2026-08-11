@@ -8,6 +8,7 @@ import '../../../app/navigation.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../prospekte_providers.dart';
+import '../retailer_logos.dart';
 import 'location_dialog.dart';
 
 /// Prospekte und Angebote: Unterseite des Einkauf-Moduls.
@@ -362,7 +363,10 @@ class _BrochureGrid extends ConsumerWidget {
                   final brochures = groups[retailerId]!;
                   return _RetailerCard(
                     name: nameFor(retailerId, brochures),
-                    logo: retailers[retailerId]?.logo.smallest,
+                    logoCandidates: retailerLogoCandidates(
+                      retailerId,
+                      retailers[retailerId],
+                    ),
                     brochures: brochures,
                     now: now,
                   );
@@ -381,13 +385,13 @@ class _BrochureGrid extends ConsumerWidget {
 class _RetailerCard extends StatelessWidget {
   const _RetailerCard({
     required this.name,
-    required this.logo,
+    required this.logoCandidates,
     required this.brochures,
     required this.now,
   });
 
   final String name;
-  final Uri? logo;
+  final List<Uri> logoCandidates;
   final List<Brochure> brochures;
   final DateTime now;
 
@@ -408,11 +412,7 @@ class _RetailerCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     Center(
-                      child: _Thumb(
-                        uri: logo,
-                        icon: Icons.storefront_outlined,
-                        size: 56,
-                      ),
+                      child: _LogoThumb(candidates: logoCandidates, size: 56),
                     ),
                     if (hasCurrent)
                       Positioned(
@@ -487,7 +487,7 @@ class _RetailerCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
-                  _Thumb(uri: logo, icon: Icons.storefront_outlined, size: 32),
+                  _LogoThumb(candidates: logoCandidates, size: 32),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -653,14 +653,14 @@ class _BrochureCard extends StatelessWidget {
 // --- Bausteine --------------------------------------------------------------
 
 class _Thumb extends StatelessWidget {
-  const _Thumb({required this.uri, required this.icon, this.fit, this.size = 48});
+  const _Thumb({required this.uri, required this.icon, this.fit});
 
   final Uri? uri;
   final IconData icon;
   final BoxFit? fit;
 
   /// Kantenlaenge, wenn kein [fit] gesetzt ist (feste Kachel).
-  final double size;
+  static const double size = 48;
 
   @override
   Widget build(BuildContext context) {
@@ -690,6 +690,70 @@ class _Thumb extends StatelessWidget {
             ),
           )
         : image;
+  }
+}
+
+/// Haendler-Logo mit Rueckfallkette: schlaegt ein Kandidat fehl, wird der
+/// naechste versucht, am Ende bleibt das neutrale Laden-Symbol.
+class _LogoThumb extends StatefulWidget {
+  const _LogoThumb({required this.candidates, required this.size});
+
+  final List<Uri> candidates;
+  final double size;
+
+  @override
+  State<_LogoThumb> createState() => _LogoThumbState();
+}
+
+class _LogoThumbState extends State<_LogoThumb> {
+  int _index = 0;
+
+  @override
+  void didUpdateWidget(covariant _LogoThumb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.candidates != widget.candidates) _index = 0;
+  }
+
+  void _tryNext() {
+    // Nicht mitten im Build umschalten: der errorBuilder laeuft im Build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _index < widget.candidates.length) {
+        setState(() => _index++);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final placeholder = Container(
+      color: scheme.surfaceContainerHighest,
+      alignment: Alignment.center,
+      child: Icon(Icons.storefront_outlined, color: scheme.onSurfaceVariant),
+    );
+
+    Widget child;
+    if (_index >= widget.candidates.length) {
+      child = placeholder;
+    } else {
+      child = Image.network(
+        widget.candidates[_index].toString(),
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) {
+          _tryNext();
+          return placeholder;
+        },
+      );
+    }
+
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: child,
+      ),
+    );
   }
 }
 

@@ -3,7 +3,7 @@ description: "Haushalts-App: Inventar, Einkaufsliste, Notizen, Pillen- und Tier-
 publish_to: 'none'
 
 # Semantische Versionierung: major.minor.patch (+ Build-Nummer).
-version: 0.24.7+59
+version: 0.24.8+60
 
 environment:
   sdk: ^3.12.2
@@ -68,6 +68,9 @@ flutter:
   uses-material-design: true
   # Erzeugt AppLocalizations aus lib/l10n/*.arb (Einstellungen: l10n.yaml).
   generate: true
+  assets:
+    # Eingebackene Haendler-Logos (WebP), siehe tool/fetch_retailer_logos.ps1.
+    - assets/logos/
 
 # App-Icon (weisses Haus auf blauem Grund). Neu erzeugen mit:
 #   dart run tool/generate_icon.dart

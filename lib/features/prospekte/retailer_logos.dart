@@ -1,70 +1,51 @@
-/// Logo-Beschaffung mit Rueckfallkette.
+/// Haendler-Logos, fest in die App eingebacken.
 ///
-/// Nicht jede Prospekt-Quelle liefert zu jedem Haendler ein Logo. Deshalb
-/// werden mehrere Kandidaten in fester Reihenfolge versucht:
+/// Die Logos der gaengigen deutschen Ketten liegen als WebP unter
+/// assets/logos/ (bezogen ueber Wikipedia/Wikimedia Commons, siehe
+/// tool/fetch_retailer_logos.ps1). Eingebacken statt zur Laufzeit geladen,
+/// weil die Prospekt-Quellen nicht zu jedem Haendler ein Logo liefern und
+/// Favicon-Dienste zu kleine, pixelige Bilder ergeben.
 ///
-/// 1. Logo aus den Prospekt-Quellen (kaufDA, Tjek), quellenuebergreifend
-///    zusammengefuehrt.
-/// 2. Clearbit-Logo zur Haendler-Domain (grosse, saubere Markenlogos).
-/// 3. Google-Favicon-Dienst zur selben Domain (liefert praktisch immer
-///    etwas, notfalls klein).
-///
-/// Die Domain kommt aus der Tabelle bekannter Ketten, sonst aus der
-/// Website, die eine Quelle am Haendler mitliefert.
+/// Fuer Ketten ohne eingebautes Logo bleibt das Logo aus den
+/// Prospekt-Quellen der Rueckfall, danach das neutrale Symbol.
 library;
 
 import 'package:prospect_client/prospect_client.dart';
 
-/// Domains der gaengigen deutschen Ketten, Schluessel ist die kanonische
-/// Haendler-ID aus der RetailerRegistry.
-const Map<String, String> _knownDomains = {
-  'aldi-nord': 'aldi-nord.de',
-  'aldi-sued': 'aldi-sued.de',
-  'citti': 'citti-markt.de',
-  'dm': 'dm.de',
-  'edeka': 'edeka.de',
-  'famila-nordost': 'famila-nordost.de',
-  'famila-nordwest': 'famila.de',
-  'globus': 'globus.de',
-  'hit': 'hit.de',
-  'kaufland': 'kaufland.de',
-  'lidl': 'lidl.de',
-  'mueller': 'mueller.de',
-  'netto': 'netto-online.de',
-  'norma': 'norma-online.de',
-  'penny': 'penny.de',
-  'rewe': 'rewe.de',
-  'rossmann': 'rossmann.de',
-  'tegut': 'tegut.com',
-  'xxxlutz': 'xxxlutz.de',
+/// Kanonische Haendler-IDs (RetailerRegistry), zu denen ein Logo unter
+/// `assets/logos/<id>.webp` eingebacken ist.
+const Set<String> _bakedLogoIds = {
+  'aldi-nord',
+  'aldi-sued',
+  'citti',
+  'dm',
+  'edeka',
+  'famila-nordost',
+  'famila-nordwest',
+  'globus',
+  'hit',
+  'kaufland',
+  'lidl',
+  'mueller',
+  'netto',
+  'norma',
+  'penny',
+  'rewe',
+  'rossmann',
+  'tegut',
+  'xxxlutz',
 };
 
-/// Logo-Kandidaten fuer einen Haendler, beste Quelle zuerst.
-///
-/// Die Liste kann leer sein, dann bleibt nur das neutrale Platzhalter-Icon.
+/// Asset-Pfad des eingebackenen Logos, null wenn keines vorliegt.
+String? retailerLogoAsset(String retailerId) =>
+    _bakedLogoIds.contains(retailerId)
+        ? 'assets/logos/$retailerId.webp'
+        : null;
+
+/// Netzwerk-Rueckfall fuer Haendler ohne eingebautes Logo: das Logo, das
+/// eine Prospekt-Quelle mitliefert. Kein Favicon-Dienst, die Bilder dort
+/// sind zu klein und wirken pixelig.
 List<Uri> retailerLogoCandidates(String retailerId, Retailer? retailer) {
   final sourceLogo = retailer?.logo.smallest;
-  final domain = _knownDomains[retailerId] ?? _domainFromWebsite(retailer);
-
-  return [
-    ?sourceLogo,
-    if (domain != null) ...[
-      Uri.https('logo.clearbit.com', '/$domain'),
-      Uri.https('www.google.com', '/s2/favicons', {
-        'domain': domain,
-        'sz': '128',
-      }),
-    ],
-  ];
-}
-
-String? _domainFromWebsite(Retailer? retailer) {
-  final website = retailer?.website;
-  if (website == null || website.isEmpty) return null;
-  final uri = Uri.tryParse(
-    website.contains('://') ? website : 'https://$website',
-  );
-  final host = uri?.host ?? '';
-  if (host.isEmpty) return null;
-  return host.startsWith('www.') ? host.substring(4) : host;
+  return [?sourceLogo];
 }

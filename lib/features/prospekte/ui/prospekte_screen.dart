@@ -363,6 +363,7 @@ class _BrochureGrid extends ConsumerWidget {
                   final brochures = groups[retailerId]!;
                   return _RetailerCard(
                     name: nameFor(retailerId, brochures),
+                    logoAsset: retailerLogoAsset(retailerId),
                     logoCandidates: retailerLogoCandidates(
                       retailerId,
                       retailers[retailerId],
@@ -385,12 +386,14 @@ class _BrochureGrid extends ConsumerWidget {
 class _RetailerCard extends StatelessWidget {
   const _RetailerCard({
     required this.name,
+    required this.logoAsset,
     required this.logoCandidates,
     required this.brochures,
     required this.now,
   });
 
   final String name;
+  final String? logoAsset;
   final List<Uri> logoCandidates;
   final List<Brochure> brochures;
   final DateTime now;
@@ -412,7 +415,11 @@ class _RetailerCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     Center(
-                      child: _LogoThumb(candidates: logoCandidates, size: 56),
+                      child: _LogoThumb(
+                        asset: logoAsset,
+                        candidates: logoCandidates,
+                        size: 56,
+                      ),
                     ),
                     if (hasCurrent)
                       Positioned(
@@ -487,7 +494,11 @@ class _RetailerCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
-                  _LogoThumb(candidates: logoCandidates, size: 32),
+                  _LogoThumb(
+                    asset: logoAsset,
+                    candidates: logoCandidates,
+                    size: 32,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -693,11 +704,16 @@ class _Thumb extends StatelessWidget {
   }
 }
 
-/// Haendler-Logo mit Rueckfallkette: schlaegt ein Kandidat fehl, wird der
-/// naechste versucht, am Ende bleibt das neutrale Laden-Symbol.
+/// Haendler-Logo mit Rueckfallkette: zuerst das eingebackene Asset, dann die
+/// Netz-Kandidaten der Quellen, am Ende das neutrale Symbol.
 class _LogoThumb extends StatefulWidget {
-  const _LogoThumb({required this.candidates, required this.size});
+  const _LogoThumb({
+    required this.asset,
+    required this.candidates,
+    required this.size,
+  });
 
+  final String? asset;
   final List<Uri> candidates;
   final double size;
 
@@ -706,12 +722,16 @@ class _LogoThumb extends StatefulWidget {
 }
 
 class _LogoThumbState extends State<_LogoThumb> {
-  int _index = 0;
+  /// -1 steht fuer das Asset, ab 0 zaehlen die Netz-Kandidaten.
+  late int _index = widget.asset != null ? -1 : 0;
 
   @override
   void didUpdateWidget(covariant _LogoThumb oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.candidates != widget.candidates) _index = 0;
+    if (oldWidget.asset != widget.asset ||
+        oldWidget.candidates != widget.candidates) {
+      _index = widget.asset != null ? -1 : 0;
+    }
   }
 
   void _tryNext() {
@@ -733,7 +753,16 @@ class _LogoThumbState extends State<_LogoThumb> {
     );
 
     Widget child;
-    if (_index >= widget.candidates.length) {
+    if (_index == -1) {
+      child = Image.asset(
+        widget.asset!,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) {
+          _tryNext();
+          return placeholder;
+        },
+      );
+    } else if (_index >= widget.candidates.length) {
       child = placeholder;
     } else {
       child = Image.network(

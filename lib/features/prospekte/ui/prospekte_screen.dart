@@ -338,8 +338,6 @@ class _BrochureGrid extends ConsumerWidget {
           });
         }
 
-        final width = MediaQuery.sizeOf(context).width;
-        final columns = (width / 180).floor().clamp(2, 6);
         final retailers =
             ref.watch(retailerIndexProvider).value ?? const <String, Retailer>{};
 
@@ -347,18 +345,28 @@ class _BrochureGrid extends ConsumerWidget {
           children: [
             _PartialWarning(result: result),
             Expanded(
-              child: ListView(
+              // Kompaktes Haendler-Grid nach dem Muster
+              // repeat(auto-fit, minmax(140, 1fr)): so viele Spalten wie
+              // hineinpassen, jede mindestens 140 und flexibel gestreckt.
+              child: GridView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  for (final retailerId in orderedIds)
-                    _RetailerSection(
-                      name: nameFor(retailerId, groups[retailerId]!),
-                      logo: retailers[retailerId]?.logo.smallest,
-                      brochures: groups[retailerId]!,
-                      columns: columns,
-                      now: now,
-                    ),
-                ],
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 190,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.15,
+                ),
+                itemCount: orderedIds.length,
+                itemBuilder: (context, index) {
+                  final retailerId = orderedIds[index];
+                  final brochures = groups[retailerId]!;
+                  return _RetailerCard(
+                    name: nameFor(retailerId, brochures),
+                    logo: retailers[retailerId]?.logo.smallest,
+                    brochures: brochures,
+                    now: now,
+                  );
+                },
               ),
             ),
           ],
@@ -368,78 +376,151 @@ class _BrochureGrid extends ConsumerWidget {
   }
 }
 
-/// Eine Haendler-Gruppe: Card mit Logo und Name als Kopf, darunter die
-/// Prospekte des Haendlers.
-class _RetailerSection extends StatelessWidget {
-  const _RetailerSection({
+/// Kompakte Haendler-Kachel: Logo gross, Name darunter, Prospekt-Anzahl.
+/// Ein Tipp oeffnet die Prospektauswahl des Haendlers.
+class _RetailerCard extends StatelessWidget {
+  const _RetailerCard({
     required this.name,
     required this.logo,
     required this.brochures,
-    required this.columns,
     required this.now,
   });
 
   final String name;
   final Uri? logo;
   final List<Brochure> brochures;
-  final int columns;
   final DateTime now;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final hasCurrent = brochures.any((b) => b.isActiveAt(now));
+
     return Card(
-      margin: const EdgeInsets.only(top: 12),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        child: Column(
+      child: InkWell(
+        onTap: () => _openSelection(context),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Center(
+                      child: _Thumb(
+                        uri: logo,
+                        icon: Icons.storefront_outlined,
+                        size: 56,
+                      ),
+                    ),
+                    if (hasCurrent)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.primary,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'Aktuell',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: scheme.onPrimary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              Text(
+                brochures.length == 1
+                    ? '1 Prospekt'
+                    : '${brochures.length} Prospekte',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSelection(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 900),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                _Thumb(
-                  uri: logo,
-                  icon: Icons.storefront_outlined,
-                  size: 36,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  _Thumb(uri: logo, icon: Icons.storefront_outlined, size: 32),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
                   ),
-                ),
-                Text(
-                  '${brochures.length}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.62,
+                ],
               ),
-              itemCount: brochures.length,
-              itemBuilder: (context, index) {
-                final brochure = brochures[index];
-                return _BrochureCard(
-                  brochure: brochure,
-                  isCurrent: brochure.isActiveAt(now),
-                );
-              },
+            ),
+            Expanded(
+              child: GridView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.62,
+                ),
+                itemCount: brochures.length,
+                itemBuilder: (context, index) {
+                  final brochure = brochures[index];
+                  return _BrochureCard(
+                    brochure: brochure,
+                    isCurrent: brochure.isActiveAt(now),
+                    popBeforeOpen: true,
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -449,13 +530,21 @@ class _RetailerSection extends StatelessWidget {
 }
 
 class _BrochureCard extends StatelessWidget {
-  const _BrochureCard({required this.brochure, this.isCurrent = false});
+  const _BrochureCard({
+    required this.brochure,
+    this.isCurrent = false,
+    this.popBeforeOpen = false,
+  });
 
   final Brochure brochure;
 
   /// True, wenn der Prospekt gerade laeuft: farbiger Rahmen plus
   /// "Aktuell"-Marke, damit er zwischen kommenden Varianten hervorsticht.
   final bool isCurrent;
+
+  /// True, wenn die Karte in einem Bottom-Sheet liegt: das Sheet muss zu,
+  /// bevor der Viewer aufgeht, sonst bleibt es ueber ihm stehen.
+  final bool popBeforeOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -477,12 +566,16 @@ class _BrochureCard extends StatelessWidget {
             )
           : null,
       child: InkWell(
-        onTap: () => context.go(
-          Uri(
-            path: '${AppModule.shopping.path}/prospekte/ansicht',
-            queryParameters: {'id': brochure.id.toString()},
-          ).toString(),
-        ),
+        onTap: () {
+          final router = GoRouter.of(context);
+          if (popBeforeOpen) Navigator.of(context).pop();
+          router.go(
+            Uri(
+              path: '${AppModule.shopping.path}/prospekte/ansicht',
+              queryParameters: {'id': brochure.id.toString()},
+            ).toString(),
+          );
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

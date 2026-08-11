@@ -8,6 +8,12 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.3 - 2026-08-11
+
+- Angebote lassen sich direkt auf die Einkaufsliste setzen: In der
+  Angebotssuche gibt es dafür neben dem Preis einen Knopf. Händler, Preis
+  und Gültigkeit stehen danach als Notiz am Posten.
+
 ## 0.25.2 - 2026-08-11
 
 - Der Windows-Build läuft jetzt ohne Warnungen durch. Für die App ändert

@@ -4,6 +4,10 @@ env.json
 # Verpackte Build-Artefakte (tool/package.ps1): Windows-<version>.zip, APK ...
 /dist/
 
+# Arbeitsverzeichnis der Entwicklungsumgebung, u.a. angelegte Worktrees.
+# Die liegen zwar im Projekt, gehoeren aber nicht in die Versionsverwaltung.
+/.claude/
+
 # Firebase-Konfiguration (FCM). Enthaelt projektbezogene Schluessel.
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist

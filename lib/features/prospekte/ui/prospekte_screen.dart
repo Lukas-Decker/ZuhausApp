@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:prospect_client/prospect_client.dart';
 
 import '../../../app/navigation.dart';
+import '../../../core/providers.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
+import '../../shopping/domain/shopping_category.dart';
+import '../../shopping/shopping_providers.dart';
 import '../prospekte_providers.dart';
 import '../retailer_logos.dart';
 import 'location_dialog.dart';
@@ -216,7 +219,7 @@ class _OfferResults extends ConsumerWidget {
   }
 }
 
-class _OfferTile extends StatelessWidget {
+class _OfferTile extends ConsumerWidget {
   const _OfferTile({required this.offer, this.store});
 
   final Offer offer;
@@ -225,9 +228,11 @@ class _OfferTile extends StatelessWidget {
   final Store? store;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final price = offer.price;
+    // Ohne Liste (Kontext noch nicht geladen) bleibt der Knopf aus.
+    final list = ref.watch(activeShoppingListProvider);
     final validity = _validityText(offer.validFrom, offer.validUntil);
     final storeLabel = store == null ? '' : _storeShort(store!);
     final subtitle = [
@@ -243,9 +248,11 @@ class _OfferTile extends StatelessWidget {
       leading: _Thumb(uri: offer.image.smallest, icon: Icons.local_offer_outlined),
       title: Text(offer.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: subtitle.isEmpty ? null : Text(subtitle),
-      trailing: price == null
-          ? null
-          : Column(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (price != null)
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -267,6 +274,14 @@ class _OfferTile extends StatelessWidget {
                   ),
               ],
             ),
+          IconButton(
+            tooltip: 'Auf die Einkaufsliste',
+            onPressed:
+                list == null ? null : () => _aufDieListe(context, ref, list.id),
+            icon: const Icon(Icons.add_shopping_cart_rounded),
+          ),
+        ],
+      ),
       onTap: offer.brochureRef == null
           ? null
           : () => context.go(
@@ -280,6 +295,52 @@ class _OfferTile extends StatelessWidget {
                 ).toString(),
               ),
     );
+  }
+
+  /// Setzt das Angebot auf die aktive Einkaufsliste.
+  ///
+  /// Händler, Preis und Gültigkeit landen als Notiz am Posten, damit beim
+  /// Einkauf noch erkennbar ist, worauf sich das Angebot bezog.
+  Future<void> _aufDieListe(
+    BuildContext context,
+    WidgetRef ref,
+    String listId,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final repository = ref.read(shoppingRepositoryProvider);
+    final userId = ref.read(identityProvider).userId;
+
+    final itemId = await repository.addItem(
+      scope: ref.read(activeScopeProvider),
+      listId: listId,
+      userId: userId,
+      name: offer.title,
+      category: ShoppingCategory.guess(offer.title).name,
+      note: _angebotsNotiz(),
+    );
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('"${offer.title}" steht auf der Einkaufsliste.'),
+        action: SnackBarAction(
+          label: 'Rückgängig',
+          onPressed: () => repository.deleteItem(itemId, userId),
+        ),
+      ),
+    );
+  }
+
+  /// Kurznotiz zum Angebot: Händler, Preis und Gültigkeit, soweit bekannt.
+  String? _angebotsNotiz() {
+    final price = offer.price;
+    final teile = [
+      if (offer.retailerName != null) offer.retailerName!,
+      if (price != null)
+        price.formatted ?? '${price.current.toStringAsFixed(2)} €',
+      _validityText(offer.validFrom, offer.validUntil),
+    ].where((teil) => teil.isNotEmpty);
+
+    return teile.isEmpty ? null : teile.join(' · ');
   }
 }
 

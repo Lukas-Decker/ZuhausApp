@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'brochure_page.dart';
 import 'image_set.dart';
 import 'offer.dart';
+import 'store.dart';
 
 /// Wie tief die Daten eines Prospekts strukturiert sind.
 ///
@@ -113,6 +114,7 @@ class Brochure {
     this.pages = const [],
     this.offers = const [],
     this.webUrl,
+    this.closestStore,
   });
 
   final BrochureId id;
@@ -160,6 +162,11 @@ class Brochure {
   /// Menschenlesbare Seite beim Haendler, fuer "im Browser oeffnen".
   final Uri? webUrl;
 
+  /// Naechstgelegene Filiale zum abgefragten Standort, sofern die Quelle sie
+  /// direkt am Prospekt mitliefert (kaufDA-Shelf tut das). Beantwortet die
+  /// Nutzerfrage "wo gilt das bei mir", ohne einen eigenen Filialabruf.
+  final Store? closestStore;
+
   String get sourceId => id.sourceId;
 
   /// True, sobald Seiten oder Angebote geladen wurden.
@@ -200,6 +207,7 @@ class Brochure {
         pages: pages ?? this.pages,
         offers: offers ?? this.offers,
         webUrl: webUrl,
+        closestStore: closestStore,
       );
 
   Map<String, Object?> toJson() => {
@@ -217,6 +225,7 @@ class Brochure {
         'coverage': coverage.name,
         if (regionCodes.isNotEmpty) 'regionCodes': regionCodes,
         if (webUrl != null) 'webUrl': webUrl.toString(),
+        if (closestStore != null) 'closestStore': closestStore!.toJson(),
         if (pages.isNotEmpty) 'pages': pages.map((p) => p.toJson()).toList(),
         if (offers.isNotEmpty) 'offers': offers.map((o) => o.toJson()).toList(),
       };
@@ -248,6 +257,9 @@ class Brochure {
                 const [],
         webUrl:
             json['webUrl'] is String ? Uri.tryParse(json['webUrl']! as String) : null,
+        closestStore: json['closestStore'] is Map<String, Object?>
+            ? Store.fromJson(json['closestStore']! as Map<String, Object?>)
+            : null,
         pages: (json['pages'] as List?)
                 ?.whereType<Map<String, Object?>>()
                 .map(BrochurePage.fromJson)

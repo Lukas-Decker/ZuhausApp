@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:prospect_client/prospect_client.dart';
@@ -39,6 +41,15 @@ class _BrochureViewerScreenState extends ConsumerState<BrochureViewerScreen> {
     final start = (widget.initialPage ?? 1).clamp(1, brochure.pages.length);
     _current = start;
     return _controller = PageController(initialPage: start - 1);
+  }
+
+  void _goTo(int page, int pageCount) {
+    final target = page.clamp(1, pageCount);
+    _controller?.animateToPage(
+      target - 1,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -93,31 +104,110 @@ class _BrochureViewerScreenState extends ConsumerState<BrochureViewerScreen> {
             return const Center(child: Text('Dieser Prospekt hat keine Seiten.'));
           }
           final controller = _controllerFor(brochure);
-          return Column(
-            children: [
-              Expanded(
-                child: PageView.builder(
-                  controller: controller,
-                  itemCount: brochure.pages.length,
-                  onPageChanged: (index) =>
-                      setState(() => _current = index + 1),
-                  itemBuilder: (context, index) =>
-                      _PageView(page: brochure.pages[index]),
-                ),
-              ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Text(
-                    'Seite $_current von ${brochure.pages.length}',
-                    style: Theme.of(context).textTheme.bodySmall,
+          final pageCount = brochure.pages.length;
+          return Focus(
+            autofocus: true,
+            onKeyEvent: (node, event) {
+              if (event is! KeyDownEvent) return KeyEventResult.ignored;
+              if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                _goTo(_current + 1, pageCount);
+                return KeyEventResult.handled;
+              }
+              if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                _goTo(_current - 1, pageCount);
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      // Am Desktop blaettert ein PageView standardmaessig
+                      // nicht per Maus, deshalb Maus/Trackpad ausdruecklich
+                      // als Zieh-Geraete zulassen.
+                      ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          dragDevices: {
+                            PointerDeviceKind.touch,
+                            PointerDeviceKind.mouse,
+                            PointerDeviceKind.stylus,
+                            PointerDeviceKind.trackpad,
+                          },
+                        ),
+                        child: PageView.builder(
+                          controller: controller,
+                          itemCount: pageCount,
+                          onPageChanged: (index) =>
+                              setState(() => _current = index + 1),
+                          itemBuilder: (context, index) =>
+                              _PageView(page: brochure.pages[index]),
+                        ),
+                      ),
+                      _PageArrow(
+                        alignment: Alignment.centerLeft,
+                        icon: Icons.chevron_left_rounded,
+                        tooltip: 'Vorherige Seite',
+                        onPressed: _current <= 1
+                            ? null
+                            : () => _goTo(_current - 1, pageCount),
+                      ),
+                      _PageArrow(
+                        alignment: Alignment.centerRight,
+                        icon: Icons.chevron_right_rounded,
+                        tooltip: 'Nächste Seite',
+                        onPressed: _current >= pageCount
+                            ? null
+                            : () => _goTo(_current + 1, pageCount),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Text(
+                      'Seite $_current von $pageCount',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Halbtransparenter Blaetterpfeil am Seitenrand.
+class _PageArrow extends StatelessWidget {
+  const _PageArrow({
+    required this.alignment,
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final Alignment alignment;
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: IconButton.filledTonal(
+          tooltip: tooltip,
+          onPressed: onPressed,
+          icon: Icon(icon, size: 28),
+        ),
       ),
     );
   }

@@ -2,10 +2,12 @@ import 'package:kaufda_api/kaufda_api.dart' as kd;
 
 import '../../core/models/brochure.dart';
 import '../../core/models/brochure_page.dart';
+import '../../core/models/geo.dart';
 import '../../core/models/image_set.dart';
 import '../../core/models/offer.dart';
 import '../../core/models/price.dart';
 import '../../core/models/retailer.dart';
+import '../../core/models/store.dart';
 import '../../core/source/retailer_registry.dart';
 
 /// Uebersetzt kaufDA-Modelle in das neutrale Datenmodell.
@@ -61,6 +63,27 @@ class KaufdaMapper {
       // also ortsbezogen und ohne Ortsangabe nicht sinnvoll anzeigbar.
       coverage: BrochureCoverage.regional,
       webUrl: webUrlFor(raw.id),
+      closestStore: _store(raw),
+    );
+  }
+
+  Store? _store(kd.ShelfBrochure raw) {
+    final store = raw.closestStore;
+    if (store == null) return null;
+    return Store(
+      id: '${store.id}',
+      retailerId: RetailerRegistry.canonicalId(raw.publisher.name),
+      name: store.name.isEmpty ? null : store.name,
+      street: [
+        if (store.street != null && store.street!.isNotEmpty) store.street!,
+        if (store.streetNumber != null && store.streetNumber!.isNotEmpty)
+          store.streetNumber!,
+      ].join(' '),
+      zipCode: store.zip,
+      city: store.city,
+      location: store.lat != null && store.lng != null
+          ? GeoPoint(store.lat!, store.lng!)
+          : null,
     );
   }
 
@@ -188,7 +211,13 @@ class KaufdaMapper {
     );
   }
 
-  Offer? searchOffer(kd.SearchOffer raw) {
+  /// [validFrom]/[validUntil] kommen vom zugehoerigen Prospekt-Treffer:
+  /// der Suchendpunkt liefert die Gueltigkeit nicht am Angebot selbst.
+  Offer? searchOffer(
+    kd.SearchOffer raw, {
+    DateTime? validFrom,
+    DateTime? validUntil,
+  }) {
     if (raw.id.isEmpty || raw.title.isEmpty) return null;
     final main = raw.price?.mainPrice;
     final previous = raw.price?.secondaryPrice;
@@ -224,6 +253,8 @@ class KaufdaMapper {
       brochureRef: raw.parent == null
           ? null
           : BrochureId(sourceId, raw.parent!.id).toString(),
+      validFrom: validFrom,
+      validUntil: validUntil,
     );
   }
 

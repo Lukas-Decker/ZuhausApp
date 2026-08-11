@@ -121,12 +121,23 @@ class KaufdaSource implements ProspectSource {
       () => _client.search(query.query, location: location, limit: query.limit),
     );
 
+    // Die Gueltigkeit steht nicht am Angebot, sondern am Prospekt-Treffer
+    // derselben Antwort. Ueber die Prospekt-ID zusammengefuehrt.
+    final validity = <String, kd.SearchBrochure>{
+      for (final brochure in result.brochureContents) brochure.id: brochure,
+    };
+
     // Der Endpunkt filtert selbst nicht nach Haendler, das passiert hier.
     final publisherId = query.binding?.nativeId;
     final offers = <Offer>[];
     for (final entry in result.offers) {
       if (publisherId != null && entry.publisherId != publisherId) continue;
-      final offer = _mapper.searchOffer(entry);
+      final parent = validity[entry.parent?.id];
+      final offer = _mapper.searchOffer(
+        entry,
+        validFrom: parent?.validFrom,
+        validUntil: parent?.validUntil,
+      );
       if (offer != null) offers.add(offer);
     }
     return offers;

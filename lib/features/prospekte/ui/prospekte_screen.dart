@@ -103,9 +103,24 @@ class _ProspekteScreenState extends ConsumerState<ProspekteScreen> {
 
 String _validityText(DateTime? from, DateTime? until) {
   final format = DateFormat('d.M.');
-  if (from == null && until == null) return '';
-  if (until == null) return 'ab ${format.format(from!)}';
-  return 'bis ${format.format(until)}';
+  // Immer der volle Zeitraum: ein blosses "bis 29.8." verschweigt, dass ein
+  // Prospekt womoeglich erst naechste Woche startet.
+  if (from != null && until != null) {
+    return '${format.format(from)} - ${format.format(until)}';
+  }
+  if (until != null) return 'bis ${format.format(until)}';
+  if (from != null) return 'ab ${format.format(from)}';
+  return '';
+}
+
+/// Kurzform einer Filiale fuer Listenzeilen: Strasse und Ort, ohne PLZ.
+String _storeShort(Store store) {
+  final street = store.street ?? '';
+  final city = store.city ?? '';
+  if (street.isNotEmpty && city.isNotEmpty) return '$street, $city';
+  if (street.isNotEmpty) return street;
+  if (city.isNotEmpty) return city;
+  return store.name ?? '';
 }
 
 /// Hinweisbanner für Teilausfälle: Daten sind da, aber eine Quelle fehlte.
@@ -152,6 +167,15 @@ class _OfferResults extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final results = ref.watch(offerSearchProvider(query));
 
+    // Filiale je Prospekt aus der (ohnehin geladenen) Prospektuebersicht,
+    // damit ein Angebot sagen kann, wo es in der Naehe gilt.
+    final stores = <String, Store>{
+      for (final brochure
+          in ref.watch(nearbyBrochuresProvider).value?.data ?? const [])
+        if (brochure.closestStore != null)
+          brochure.id.toString(): brochure.closestStore!,
+    };
+
     return results.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorState(
@@ -175,8 +199,13 @@ class _OfferResults extends ConsumerWidget {
               child: ListView.builder(
                 padding: const EdgeInsets.only(bottom: 24),
                 itemCount: result.data.length,
-                itemBuilder: (context, index) =>
-                    _OfferTile(offer: result.data[index]),
+                itemBuilder: (context, index) {
+                  final offer = result.data[index];
+                  return _OfferTile(
+                    offer: offer,
+                    store: stores[offer.brochureRef],
+                  );
+                },
               ),
             ),
           ],
@@ -187,21 +216,29 @@ class _OfferResults extends ConsumerWidget {
 }
 
 class _OfferTile extends StatelessWidget {
-  const _OfferTile({required this.offer});
+  const _OfferTile({required this.offer, this.store});
 
   final Offer offer;
+
+  /// Naechstgelegene Filiale des zugehoerigen Prospekts, falls bekannt.
+  final Store? store;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final price = offer.price;
     final validity = _validityText(offer.validFrom, offer.validUntil);
+    final storeLabel = store == null ? '' : _storeShort(store!);
     final subtitle = [
-      if (offer.retailerName != null) offer.retailerName!,
-      if (validity.isNotEmpty) validity,
-    ].join(' · ');
+      [
+        if (offer.retailerName != null) offer.retailerName!,
+        if (validity.isNotEmpty) validity,
+      ].join(' · '),
+      if (storeLabel.isNotEmpty) storeLabel,
+    ].where((line) => line.isNotEmpty).join('\n');
 
     return ListTile(
+      isThreeLine: storeLabel.isNotEmpty,
       leading: _Thumb(uri: offer.image.smallest, icon: Icons.local_offer_outlined),
       title: Text(offer.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: subtitle.isEmpty ? null : Text(subtitle),
@@ -304,6 +341,12 @@ class _BrochureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final validity = _validityText(brochure.validFrom, brochure.validUntil);
+    final store = brochure.closestStore;
+    final storeLabel = store == null ? '' : _storeShort(store);
+    final infoLine = [
+      if (validity.isNotEmpty) validity,
+      if (storeLabel.isNotEmpty) storeLabel,
+    ].join(' · ');
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -338,9 +381,11 @@ class _BrochureCard extends StatelessWidget {
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  if (validity.isNotEmpty)
+                  if (infoLine.isNotEmpty)
                     Text(
-                      validity,
+                      infoLine,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall

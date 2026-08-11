@@ -306,23 +306,98 @@ class _BrochureGrid extends ConsumerWidget {
             message: 'In deiner Nähe wurden gerade keine Prospekte gefunden.',
           );
         }
+
+        // Nach Haendler gruppieren: ALDI Sued bei ALDI Sued, Lidl bei Lidl.
+        // Innerhalb der Gruppe laufende Prospekte zuerst, dann kommende.
+        final now = DateTime.now();
+        final groups = <String, List<Brochure>>{};
+        for (final brochure in result.data) {
+          groups.putIfAbsent(brochure.retailerId, () => []).add(brochure);
+        }
+        // Unbekannte Haendler-IDs sind Slugs wie "netto-city": als Rueckfall
+        // huebsch machen statt den Prospekttitel als Haendlernamen zu zeigen.
+        String prettify(String slug) => slug
+            .split('-')
+            .map((part) =>
+                part.isEmpty ? part : part[0].toUpperCase() + part.substring(1))
+            .join(' ');
+        String nameFor(String retailerId, List<Brochure> brochures) =>
+            RetailerRegistry.displayName(retailerId, prettify(retailerId));
+        final orderedIds = groups.keys.toList()
+          ..sort((a, b) => nameFor(a, groups[a]!)
+              .toLowerCase()
+              .compareTo(nameFor(b, groups[b]!).toLowerCase()));
+        for (final brochures in groups.values) {
+          brochures.sort((a, b) {
+            final aActive = a.isActiveAt(now) ? 0 : 1;
+            final bActive = b.isActiveAt(now) ? 0 : 1;
+            if (aActive != bActive) return aActive - bActive;
+            final aFrom = a.validFrom ?? now;
+            final bFrom = b.validFrom ?? now;
+            return aFrom.compareTo(bFrom);
+          });
+        }
+
         final width = MediaQuery.sizeOf(context).width;
         final columns = (width / 180).floor().clamp(2, 6);
+        final scheme = Theme.of(context).colorScheme;
+
         return Column(
           children: [
             _PartialWarning(result: result),
             Expanded(
-              child: GridView.builder(
+              child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.62,
-                ),
-                itemCount: result.data.length,
-                itemBuilder: (context, index) =>
-                    _BrochureCard(brochure: result.data[index]),
+                children: [
+                  for (final retailerId in orderedIds) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 12, 0, 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.storefront_outlined,
+                              size: 18, color: scheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            nameFor(retailerId, groups[retailerId]!),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: scheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${groups[retailerId]!.length}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.62,
+                      ),
+                      itemCount: groups[retailerId]!.length,
+                      itemBuilder: (context, index) {
+                        final brochure = groups[retailerId]![index];
+                        return _BrochureCard(
+                          brochure: brochure,
+                          isCurrent: brochure.isActiveAt(now),
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -333,9 +408,13 @@ class _BrochureGrid extends ConsumerWidget {
 }
 
 class _BrochureCard extends StatelessWidget {
-  const _BrochureCard({required this.brochure});
+  const _BrochureCard({required this.brochure, this.isCurrent = false});
 
   final Brochure brochure;
+
+  /// True, wenn der Prospekt gerade laeuft: farbiger Rahmen plus
+  /// "Aktuell"-Marke, damit er zwischen kommenden Varianten hervorsticht.
+  final bool isCurrent;
 
   @override
   Widget build(BuildContext context) {
@@ -350,6 +429,12 @@ class _BrochureCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      shape: isCurrent
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: scheme.primary, width: 2),
+            )
+          : null,
       child: InkWell(
         onTap: () => context.go(
           Uri(
@@ -361,10 +446,40 @@ class _BrochureCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: _Thumb(
-                uri: brochure.cover.normal ?? brochure.cover.best,
-                icon: Icons.menu_book_outlined,
-                fit: BoxFit.cover,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _Thumb(
+                    uri: brochure.cover.normal ?? brochure.cover.best,
+                    icon: Icons.menu_book_outlined,
+                    fit: BoxFit.cover,
+                  ),
+                  if (isCurrent)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          'Aktuell',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: scheme.onPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             Padding(

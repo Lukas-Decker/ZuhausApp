@@ -55,6 +55,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+. "$PSScriptRoot\_konsole_utf8.ps1"
+
 $root = Split-Path -Parent $PSScriptRoot
 $distDir = Join-Path $root 'dist'
 $bucket = 'releases'
@@ -243,14 +245,14 @@ if (Test-Path $zipPath) {
   Write-Host "Kein Windows-Paket in dist/ - Windows bekommt kein Update angeboten." -ForegroundColor Yellow
 }
 if ($uploads.Count -eq 0) {
-  throw "Nichts zu veroeffentlichen. Erst bauen: ./tool/package.ps1"
+  throw "Nichts zu veröffentlichen. Erst bauen: ./tool/package.ps1"
 }
 
 foreach ($upload in $uploads) {
   # Lieber vorher klar sagen als hinterher ein 413 vom Server.
   $mb = (Get-Item -LiteralPath $upload[0]).Length / 1MB
   if ($mb -gt 50) {
-    throw ("{0} ist {1} MB gross. Supabase Storage nimmt im Free-Plan " +
+    throw ("{0} ist {1} MB groß. Supabase Storage nimmt im Free-Plan " +
       "hoechstens 50 MB je Datei.") -f $upload[1], [math]::Round($mb, 1)
   }
   Send-StorageObject -Path $upload[0] -Name $upload[1] -ContentType $upload[2] `
@@ -267,7 +269,7 @@ Send-StorageObject -Path $manifestPath -Name 'manifest.json' -ContentType 'appli
   -BaseUrl $baseUrl -Key $ServiceKey -CacheControl 'max-age=60'
 
 Write-Host ""
-Write-Host "Veroeffentlicht:" -ForegroundColor Magenta
+Write-Host "Veröffentlicht:" -ForegroundColor Magenta
 Write-Host $json
 Write-Host ""
 Write-Host "Manifest: $publicBase/manifest.json" -ForegroundColor DarkGray

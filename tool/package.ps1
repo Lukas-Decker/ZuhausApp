@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Baut die App und legt die Artefakte unter dist/ ab:
     dist/Windows-<version>.zip          (gezippter Release-Ordner)
@@ -31,7 +31,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Projekt-Root ist der Ordner ueber tool/.
+. "$PSScriptRoot\_konsole_utf8.ps1"
+
+# Projekt-Root ist der Ordner über tool/.
 $root = Split-Path -Parent $PSScriptRoot
 $distDir = Join-Path $root 'dist'
 
@@ -46,33 +48,34 @@ function Get-AppVersion {
 function Get-DefineArgs {
   $envFile = Join-Path $root 'env.json'
   if (Test-Path $envFile) {
-    Write-Host "env.json gefunden, wird in den Build uebernommen." -ForegroundColor DarkGray
+    Write-Host "env.json gefunden, wird in den Build übernommen." -ForegroundColor DarkGray
     return @("--dart-define-from-file=env.json")
   }
-  Write-Host "Keine env.json, Build laeuft im Gastmodus (ohne Supabase)." -ForegroundColor Yellow
+  Write-Host "Keine env.json, Build läuft im Gastmodus (ohne Supabase)." -ForegroundColor Yellow
   return @()
 }
 
 function Invoke-Flutter {
   param([string[]]$FlutterArgs)
   Write-Host "flutter $($FlutterArgs -join ' ')" -ForegroundColor Cyan
-  # flutter schreibt Warnungen (z.B. LNK4099 vom Firebase-SDK) auf stderr.
-  # Bei ErrorActionPreference=Stop wuerde PowerShell das faelschlich als
-  # Abbruch werten. Deshalb hier auf Continue schalten, die Ausgabe als Text
-  # durchreichen und allein am Exit-Code entscheiden.
+
+  # flutter schreibt direkt auf die Konsole, ohne Umleitung und ohne Pipeline.
+  # Das ist Absicht und loest gleich zwei alte Probleme:
+  #
+  #   * Kodierung: Ging die Ausgabe durch eine Pipeline, dekodierte PowerShell
+  #     die UTF-8-Bytes mit der Codepage der Konsole (auf deutschen Systemen
+  #     850) und schrieb sie neu kodiert wieder heraus. Aus "√ Built" wurde so
+  #     "ÔêÜ Built". Ohne Pipeline landen die Bytes unveraendert im Terminal.
+  #   * stderr: flutter meldet dort auch Harmloses (etwa Linker-Warnungen).
+  #     Mit "2>&1 |" wurde daraus je ein ErrorRecord, der bei
+  #     ErrorActionPreference=Stop als Abbruch galt und in der Ausgabe nur als
+  #     "System.Management.Automation.RemoteException" auftauchte.
+  #
+  # Ueber Erfolg oder Misserfolg entscheidet allein der Exit-Code.
   $previous = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
-    # stderr kommt in PowerShell als ErrorRecord herein. Ohne diese
-    # Umwandlung steht in der Ausgabe nur die nutzlose Zeile
-    # "System.Management.Automation.RemoteException" statt der Meldung.
-    & flutter @FlutterArgs 2>&1 | ForEach-Object {
-      if ($_ -is [System.Management.Automation.ErrorRecord]) {
-        Write-Host $_.Exception.Message
-      } else {
-        Write-Host $_
-      }
-    }
+    & flutter @FlutterArgs
   } finally {
     $ErrorActionPreference = $previous
   }

@@ -1,12 +1,14 @@
-# Laedt die Haendler-Logos (Wikipedia-Seitenbilder bzw. direkte
+﻿# Lädt die Händler-Logos (Wikipedia-Seitenbilder bzw. direkte
 # Wikimedia-Commons-Dateien) und konvertiert sie mit ffmpeg zu WebP nach
-# assets/logos/<id>.webp. Neu ausfuehren, wenn eine Kette dazukommt.
+# assets/logos/<id>.webp. Neu ausführen, wenn eine Kette dazukommt.
 #
 #   powershell -File tool/fetch_retailer_logos.ps1
 #
 # Die Logos sind Marken der jeweiligen Unternehmen und werden nur zur
-# Kennzeichnung des Haendlers in der App angezeigt.
+# Kennzeichnung des Händlers in der App angezeigt.
 $ErrorActionPreference = 'Stop'
+
+. "$PSScriptRoot\_konsole_utf8.ps1"
 
 $root = Split-Path -Parent $PSScriptRoot
 $rawDir = Join-Path $root 'build\logo_fetch'
@@ -78,7 +80,7 @@ foreach ($id in $sources.Keys) {
       $json = Get-WithRetry $uri $null
       $page = $json.query.pages.PSObject.Properties.Value |
         Where-Object { $_.thumbnail } | Select-Object -First 1
-      if (-not $page) { throw "kein Seitenbild fuer $title" }
+      if (-not $page) { throw "kein Seitenbild für $title" }
       Get-WithRetry $page.thumbnail.source $raw | Out-Null
       Write-Host "${id}: $($spec.wiki) ($($page.thumbnail.width)x$($page.thumbnail.height))"
     }

@@ -40,23 +40,36 @@ class InventoryScreen extends ConsumerWidget {
         ),
       ],
       floatingActionButton: const _InventoryAddFab(),
-      body: Column(
-        children: [
-          _SearchAndFilterBar(filter: filter, search: search),
-          Expanded(
-            child: entries.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => EmptyState(
-                icon: Icons.error_outline,
-                title: 'Fehler beim Laden',
-                message: '$error',
+      body: entries.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => EmptyState(
+          icon: Icons.error_outline,
+          title: 'Fehler beim Laden',
+          message: '$error',
+        ),
+        data: (list) {
+          // Ohne einen einzigen Vorrat gibt es nichts zu suchen und nichts zu
+          // filtern: dann faellt die Leiste weg, und der Leerzustand steht so
+          // wie in den anderen Modulen.
+          final untouched =
+              list.isEmpty && search.isEmpty && filter == InventoryFilter.all;
+          if (untouched) {
+            return _EmptyInventory(filter: filter, hasSearch: false);
+          }
+          return Column(
+            children: [
+              _SearchAndFilterBar(filter: filter, search: search),
+              Expanded(
+                child: list.isEmpty
+                    ? _EmptyInventory(
+                        filter: filter,
+                        hasSearch: search.isNotEmpty,
+                      )
+                    : _InventoryList(entries: list),
               ),
-              data: (list) => list.isEmpty
-                  ? _EmptyInventory(filter: filter, hasSearch: search.isNotEmpty)
-                  : _InventoryList(entries: list),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -368,39 +381,39 @@ class _EmptyInventory extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Widget message = hasSearch
-        ? const EmptyState(
-            icon: Icons.search_off_rounded,
-            title: 'Nichts gefunden',
-            message: 'Kein Vorrat passt zu deiner Suche.',
-          )
-        : switch (filter) {
-            InventoryFilter.low => const EmptyState(
-              icon: Icons.thumb_up_outlined,
-              title: 'Nichts wird knapp',
-              message:
-                  'Alle Vorräte mit Mindestbestand sind ausreichend gefüllt.',
-            ),
-            InventoryFilter.expiring => const EmptyState(
-              icon: Icons.event_available_rounded,
-              title: 'Nichts läuft ab',
-              message: 'In den nächsten Tagen verfällt nichts.',
-            ),
-            InventoryFilter.all => const EmptyState(
-              icon: Icons.kitchen_outlined,
-              title: 'Noch nichts erfasst',
-              message:
-                  'Scanne einen Barcode oder lege den ersten Vorrat von Hand an.',
-            ),
-          };
+    // Der Knopf gehoert nur dorthin, wo wirklich noch nichts erfasst ist:
+    // bei leerer Suche oder leerem Filter waere er irrefuehrend.
+    final ghost = hasSearch || filter != InventoryFilter.all
+        ? null
+        : _inventoryAddGhost(ref);
 
-    return Column(
-      children: [
-        Expanded(child: message),
-        _inventoryAddGhost(ref),
-        const SizedBox(height: 96),
-      ],
-    );
+    if (hasSearch) {
+      return const EmptyState(
+        icon: Icons.search_off_rounded,
+        title: 'Nichts gefunden',
+        message: 'Kein Vorrat passt zu deiner Suche.',
+      );
+    }
+
+    return switch (filter) {
+      InventoryFilter.low => const EmptyState(
+        icon: Icons.thumb_up_outlined,
+        title: 'Nichts wird knapp',
+        message: 'Alle Vorräte mit Mindestbestand sind ausreichend gefüllt.',
+      ),
+      InventoryFilter.expiring => const EmptyState(
+        icon: Icons.event_available_rounded,
+        title: 'Nichts läuft ab',
+        message: 'In den nächsten Tagen verfällt nichts.',
+      ),
+      InventoryFilter.all => EmptyState(
+        icon: Icons.kitchen_outlined,
+        title: 'Noch nichts erfasst',
+        message:
+            'Scanne einen Barcode oder lege den ersten Vorrat von Hand an.',
+        action: ghost,
+      ),
+    };
   }
 }
 

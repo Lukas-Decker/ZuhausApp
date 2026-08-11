@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/widgets/add_fab.dart';
+import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
 import '../../../core/widgets/scope_banner.dart';
@@ -34,29 +36,43 @@ class ShoppingScreen extends ConsumerWidget {
           icon: const Icon(Icons.playlist_add_rounded),
         ),
       ],
+      floatingActionButton: active == null
+          ? null
+          : AddFab(
+              onPressed: () => _addItem(context, active.id),
+              label: 'Posten hinzufügen',
+            ),
       body: active == null
           ? const Center(child: CircularProgressIndicator())
+          // Ist die Liste leer, faellt die Schnell-Eingabe weg: es gibt nichts
+          // abzuhaken, und der Leerzustand steht damit so wie in den anderen
+          // Modulen.
+          : open.isEmpty && checked.isEmpty
+          ? EmptyState(
+              icon: Icons.shopping_cart_outlined,
+              title: 'Liste ist leer',
+              message:
+                  'Trage ein, was du brauchst. Knappe Vorräte schlägt die '
+                  'App dir automatisch vor.',
+              action: AddGhostTile(
+                label: 'Posten hinzufügen',
+                onTap: () => _addItem(context, active.id),
+              ),
+            )
           : Column(
               children: [
                 _QuickAddBar(listId: active.id),
                 const _Suggestions(),
-                Expanded(
-                  child: open.isEmpty && checked.isEmpty
-                      ? const EmptyState(
-                          icon: Icons.shopping_cart_outlined,
-                          title: 'Liste ist leer',
-                          message:
-                              'Tippe oben ein, was du brauchst. Knappe Vorräte '
-                              'schlägt die App dir automatisch vor.',
-                        )
-                      : _ItemList(open: open, checked: checked),
-                ),
+                Expanded(child: _ItemList(open: open, checked: checked)),
                 if (checked.isNotEmpty)
                   _FinishBar(listId: active.id, checkedCount: checked.length),
               ],
             ),
     );
   }
+
+  Future<void> _addItem(BuildContext context, String listId) =>
+      ShoppingItemEditor.show(context, listId: listId);
 
   Future<void> _manageLists(BuildContext context, WidgetRef ref) async {
     await showModalBottomSheet<void>(

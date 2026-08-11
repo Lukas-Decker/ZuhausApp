@@ -24,51 +24,47 @@ class NotesScreen extends ConsumerWidget {
         onNote: () => _create(context, ref, checklist: false),
         onChecklist: () => _create(context, ref, checklist: true),
       ),
-      body: Column(
-        children: [
-          _SearchBar(search: search),
-          Expanded(
-            child: notes.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => EmptyState(
-                icon: Icons.error_outline,
-                title: 'Fehler',
-                message: '$error',
+      body: notes.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => EmptyState(
+          icon: Icons.error_outline,
+          title: 'Fehler',
+          message: '$error',
+        ),
+        data: (list) {
+          // Ohne eine einzige Notiz gibt es nichts zu durchsuchen: dann faellt
+          // die Suchleiste weg und der Leerzustand steht in jedem Modul an
+          // derselben Stelle.
+          if (list.isEmpty && search.isEmpty) {
+            return EmptyState(
+              icon: Icons.sticky_note_2_outlined,
+              title: 'Noch keine Notizen',
+              message: 'Erstelle eine Notiz oder eine Checkliste.',
+              action: AddGhostTile(
+                label: 'Notiz hinzufügen',
+                onTap: () => _create(context, ref, checklist: false),
               ),
-              data: (list) => list.isEmpty
-                  ? Column(
-                      children: [
-                        Expanded(child: _empty(search)),
-                        AddGhostTile(
-                          label: 'Notiz hinzufügen',
-                          onTap: () => _create(context, ref, checklist: false),
-                        ),
-                        const SizedBox(height: 96),
-                      ],
-                    )
-                  : _NotesGrid(
-                      notes: list,
-                      onAdd: () => _create(context, ref, checklist: false),
-                    ),
-            ),
-          ),
-        ],
+            );
+          }
+          return Column(
+            children: [
+              _SearchBar(search: search),
+              Expanded(
+                child: list.isEmpty
+                    ? const EmptyState(
+                        icon: Icons.search_off_rounded,
+                        title: 'Nichts gefunden',
+                        message: 'Keine Notiz passt zu deiner Suche.',
+                      )
+                    : _NotesGrid(
+                        notes: list,
+                        onAdd: () => _create(context, ref, checklist: false),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
-    );
-  }
-
-  Widget _empty(String search) {
-    if (search.isNotEmpty) {
-      return const EmptyState(
-        icon: Icons.search_off_rounded,
-        title: 'Nichts gefunden',
-        message: 'Keine Notiz passt zu deiner Suche.',
-      );
-    }
-    return const EmptyState(
-      icon: Icons.sticky_note_2_outlined,
-      title: 'Noch keine Notizen',
-      message: 'Erstelle eine Notiz oder eine Checkliste.',
     );
   }
 
@@ -99,13 +95,25 @@ class _AddMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Gleiche Form wie in den anderen Modulen: auf dem Telefon nur das Plus.
+    final compact = MediaQuery.sizeOf(context).width < 600;
+
     return MenuAnchor(
-      builder: (context, controller, _) => FloatingActionButton.extended(
-        onPressed: () =>
-            controller.isOpen ? controller.close() : controller.open(),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Neu'),
-      ),
+      builder: (context, controller, _) {
+        void toggle() =>
+            controller.isOpen ? controller.close() : controller.open();
+        return compact
+            ? FloatingActionButton(
+                onPressed: toggle,
+                tooltip: 'Notiz hinzufügen',
+                child: const Icon(Icons.add_rounded),
+              )
+            : FloatingActionButton.extended(
+                onPressed: toggle,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Neu'),
+              );
+      },
       menuChildren: [
         MenuItemButton(
           leadingIcon: const Icon(Icons.notes_rounded),

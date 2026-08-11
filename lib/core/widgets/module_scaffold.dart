@@ -29,26 +29,35 @@ class ModuleScaffold extends StatelessWidget {
     // Platz fuer Inhalt bleibt; auf breiten Fenstern die Standardhoehe.
     final isCompact = MediaQuery.sizeOf(context).width < 700;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        toolbarHeight: isCompact ? 44 : null,
-        titleTextStyle: isCompact
-            ? Theme.of(context).appBarTheme.titleTextStyle?.copyWith(fontSize: 18)
-            : null,
-        actions: [
-          ...actions,
-          if (isCompact)
-            IconButton(
-              tooltip: 'Einstellungen',
-              onPressed: () => context.push(settingsPath),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-        ],
-        bottom: bottom,
+    // Die Navigationsleiste der App deckt die Systemleiste unten bereits ab.
+    // Ohne dieses removeBottom rechnet dieses Scaffold sie ein zweites Mal an
+    // und der schwebende Knopf haengt zu weit ueber der Leiste.
+    return MediaQuery.removePadding(
+      context: context,
+      removeBottom: true,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          toolbarHeight: isCompact ? 44 : null,
+          titleTextStyle: isCompact
+              ? Theme.of(
+                  context,
+                ).appBarTheme.titleTextStyle?.copyWith(fontSize: 18)
+              : null,
+          actions: [
+            ...actions,
+            if (isCompact)
+              IconButton(
+                tooltip: 'Einstellungen',
+                onPressed: () => context.push(settingsPath),
+                icon: const Icon(Icons.settings_outlined),
+              ),
+          ],
+          bottom: bottom,
+        ),
+        body: body,
+        floatingActionButton: floatingActionButton,
       ),
-      body: body,
-      floatingActionButton: floatingActionButton,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/widgets/add_fab.dart';
 import '../../../core/widgets/add_ghost_tile.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/module_scaffold.dart';
@@ -23,10 +24,9 @@ class PetsScreen extends ConsumerWidget {
 
     return ModuleScaffold(
       title: 'Tiere',
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AddFab(
         onPressed: () => PetEditor.show(context),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Tier'),
+        label: 'Tier hinzufügen',
       ),
       body: pets.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -36,23 +36,16 @@ class PetsScreen extends ConsumerWidget {
           message: '$error',
         ),
         data: (list) => list.isEmpty
-            ? Column(
-                children: [
-                  const Expanded(
-                    child: EmptyState(
-                      icon: Icons.pets_outlined,
-                      title: 'Noch keine Tiere',
-                      message:
-                          'Lege ein Tier an, um Fütterung, Arznei und Gewicht '
-                          'zu verfolgen.',
-                    ),
-                  ),
-                  AddGhostTile(
-                    label: 'Tier hinzufügen',
-                    onTap: () => PetEditor.show(context),
-                  ),
-                  const SizedBox(height: 96),
-                ],
+            ? EmptyState(
+                icon: Icons.pets_outlined,
+                title: 'Noch keine Tiere',
+                message:
+                    'Lege ein Tier an, um Fütterung, Arznei und Gewicht '
+                    'zu verfolgen.',
+                action: AddGhostTile(
+                  label: 'Tier hinzufügen',
+                  onTap: () => PetEditor.show(context),
+                ),
               )
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),

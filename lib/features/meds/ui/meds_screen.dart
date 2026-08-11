@@ -470,22 +470,14 @@ class _PlansTab extends ConsumerWidget {
       error: (error, _) =>
           EmptyState(icon: Icons.error_outline, title: 'Fehler', message: '$error'),
       data: (list) => list.isEmpty
-          ? Column(
-              children: [
-                const Expanded(
-                  child: EmptyState(
-                    icon: Icons.medication_outlined,
-                    title: 'Noch keine Pläne',
-                    message:
-                        'Lege dein erstes Medikament mit Einnahmezeiten an.',
-                  ),
-                ),
-                AddGhostTile(
-                  label: 'Medikament hinzufügen',
-                  onTap: () => MedicationPlanEditor.show(context),
-                ),
-                const SizedBox(height: 96),
-              ],
+          ? EmptyState(
+              icon: Icons.medication_outlined,
+              title: 'Noch keine Pläne',
+              message: 'Lege dein erstes Medikament mit Einnahmezeiten an.',
+              action: AddGhostTile(
+                label: 'Medikament hinzufügen',
+                onTap: () => MedicationPlanEditor.show(context),
+              ),
             )
           : ListView.separated(
               padding: const EdgeInsets.only(bottom: 96),

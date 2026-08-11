@@ -69,6 +69,14 @@ abstract final class AppConfig {
   /// True, sobald ein Update-Kanal erreichbar konfiguriert ist.
   static bool get hasUpdateChannel => updateManifestUrl.startsWith('http');
 
+  /// `x-apikey` fuer die Filial-API der Schwarz-Gruppe (`live.api.schwarz`).
+  ///
+  /// Optional: wird nur fuer die Ortsaufloesung der Lidl-Prospekte gebraucht,
+  /// Kaufland kommt ohne aus. Ohne Wert bleibt die betroffene Teilfunktion
+  /// einfach aus, der Rest der Prospekt-Quellen laeuft normal.
+  static const String schwarzStoresApiKey =
+      String.fromEnvironment('SCHWARZ_STORES_API_KEY');
+
   /// True, sobald gueltige Supabase-Zugangsdaten vorliegen.
   static bool get hasSupabase =>
       supabaseUrl.isNotEmpty &&

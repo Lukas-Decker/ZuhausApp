@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:prospect_client/prospect_client.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/providers.dart';
 
 /// Gespeicherter Standort für Prospekt-Abfragen.
@@ -114,6 +115,11 @@ final prospectClientProvider = FutureProvider<ProspectClient>((ref) async {
     cacheDirectory: '${support.path}/prospekte-cache',
     defaultLocation: location?.point,
     defaultPostalCode: location?.plz ?? '10115',
+    // Schluessel aus env.json (--dart-define-from-file); leere Werte werden
+    // ignoriert, die betroffene Quelle bleibt dann eingeschraenkt bzw. aus.
+    credentials: SourceCredentials.fromEnvironment().withValues({
+      CredentialKey.schwarzStoresApiKey: AppConfig.schwarzStoresApiKey,
+    }),
   );
   ref.onDispose(client.close);
   return client;

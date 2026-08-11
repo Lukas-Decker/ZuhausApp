@@ -221,6 +221,9 @@ class KaufdaMapper {
     if (raw.id.isEmpty || raw.title.isEmpty) return null;
     final main = raw.price?.mainPrice;
     final previous = raw.price?.secondaryPrice;
+    // Anders als der Prospekt-Endpunkt (nullbasiert) liefert die Suche die
+    // Seitennummer bereits 1-basiert - am echten Verhalten gemessen, ein +1
+    // landete eine Seite zu weit.
     final pageNumber = raw.parent?.pageNumber;
     return Offer(
       id: raw.id,
@@ -242,7 +245,7 @@ class KaufdaMapper {
         normal: _uri(raw.imageNormal),
         large: _uri(raw.imageLarge),
       ),
-      pageNumber: pageNumber == null ? null : pageNumber + 1,
+      pageNumber: pageNumber == null || pageNumber < 1 ? null : pageNumber,
       categories: [
         for (final ref in raw.categoryPaths.isEmpty
             ? const <kd.CategoryRef>[]

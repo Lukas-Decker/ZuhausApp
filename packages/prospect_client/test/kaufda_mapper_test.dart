@@ -82,6 +82,7 @@ void main() {
     expect(searchOffer.price!.previous, isNull);
     expect(searchOffer.retailerName, 'Lidl');
     expect(searchOffer.brochureRef, 'kaufda:b-1');
-    expect(searchOffer.pageNumber, 3);
+    // Die Suche zaehlt Seiten schon ab 1, hier darf kein +1 passieren.
+    expect(searchOffer.pageNumber, 2);
   });
 }

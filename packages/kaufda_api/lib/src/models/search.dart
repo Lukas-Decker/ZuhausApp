@@ -445,7 +445,8 @@ class SearchOfferParent {
   final int? legacyId;
   final String? type;
 
-  /// Nullbasierte Seitennummer.
+  /// 1-basierte Seitennummer. Anders als beim Seiten-Endpunkt, der ab 0
+  /// zaehlt - am echten Verhalten des Viewers gemessen.
   final int? pageNumber;
 
   Map<String, dynamic> toJson() => compact({

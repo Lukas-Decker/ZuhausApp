@@ -154,6 +154,20 @@ final offerSearchProvider = FutureProvider.autoDispose
       );
     });
 
+/// Haendler samt Logo, aufgeschluesselt nach kanonischer ID.
+///
+/// Fuer die Gruppenkoepfe der Prospektuebersicht: Prospekte selbst tragen
+/// kein Logo, die Haendlerliste der Quellen schon.
+final retailerIndexProvider =
+    FutureProvider.autoDispose<Map<String, Retailer>>((ref) async {
+      final client = await ref.watch(prospectClientProvider.future);
+      final location = ref.watch(prospekteLocationProvider);
+      final result = await client.repository.getRetailers(
+        near: location?.point,
+      );
+      return {for (final retailer in result.data) retailer.id: retailer};
+    });
+
 /// Aktuelle Prospekte rund um den gespeicherten Standort.
 final nearbyBrochuresProvider =
     FutureProvider.autoDispose<SourceResult<List<Brochure>>>((ref) async {

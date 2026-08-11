@@ -340,7 +340,8 @@ class _BrochureGrid extends ConsumerWidget {
 
         final width = MediaQuery.sizeOf(context).width;
         final columns = (width / 180).floor().clamp(2, 6);
-        final scheme = Theme.of(context).colorScheme;
+        final retailers =
+            ref.watch(retailerIndexProvider).value ?? const <String, Retailer>{};
 
         return Column(
           children: [
@@ -349,60 +350,100 @@ class _BrochureGrid extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  for (final retailerId in orderedIds) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 12, 0, 6),
-                      child: Row(
-                        children: [
-                          Icon(Icons.storefront_outlined,
-                              size: 18, color: scheme.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            nameFor(retailerId, groups[retailerId]!),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  color: scheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${groups[retailerId]!.length}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: scheme.onSurfaceVariant),
-                          ),
-                        ],
-                      ),
+                  for (final retailerId in orderedIds)
+                    _RetailerSection(
+                      name: nameFor(retailerId, groups[retailerId]!),
+                      logo: retailers[retailerId]?.logo.smallest,
+                      brochures: groups[retailerId]!,
+                      columns: columns,
+                      now: now,
                     ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.62,
-                      ),
-                      itemCount: groups[retailerId]!.length,
-                      itemBuilder: (context, index) {
-                        final brochure = groups[retailerId]![index];
-                        return _BrochureCard(
-                          brochure: brochure,
-                          isCurrent: brochure.isActiveAt(now),
-                        );
-                      },
-                    ),
-                  ],
                 ],
               ),
             ),
           ],
         );
       },
+    );
+  }
+}
+
+/// Eine Haendler-Gruppe: Card mit Logo und Name als Kopf, darunter die
+/// Prospekte des Haendlers.
+class _RetailerSection extends StatelessWidget {
+  const _RetailerSection({
+    required this.name,
+    required this.logo,
+    required this.brochures,
+    required this.columns,
+    required this.now,
+  });
+
+  final String name;
+  final Uri? logo;
+  final List<Brochure> brochures;
+  final int columns;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(top: 12),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                _Thumb(
+                  uri: logo,
+                  icon: Icons.storefront_outlined,
+                  size: 36,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Text(
+                  '${brochures.length}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.62,
+              ),
+              itemCount: brochures.length,
+              itemBuilder: (context, index) {
+                final brochure = brochures[index];
+                return _BrochureCard(
+                  brochure: brochure,
+                  isCurrent: brochure.isActiveAt(now),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -519,11 +560,14 @@ class _BrochureCard extends StatelessWidget {
 // --- Bausteine --------------------------------------------------------------
 
 class _Thumb extends StatelessWidget {
-  const _Thumb({required this.uri, required this.icon, this.fit});
+  const _Thumb({required this.uri, required this.icon, this.fit, this.size = 48});
 
   final Uri? uri;
   final IconData icon;
   final BoxFit? fit;
+
+  /// Kantenlaenge, wenn kein [fit] gesetzt ist (feste Kachel).
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -535,7 +579,7 @@ class _Thumb extends StatelessWidget {
     );
     if (uri == null) {
       return fit == null
-          ? SizedBox(width: 48, height: 48, child: placeholder)
+          ? SizedBox(width: size, height: size, child: placeholder)
           : placeholder;
     }
     final image = Image.network(
@@ -545,8 +589,8 @@ class _Thumb extends StatelessWidget {
     );
     return fit == null
         ? SizedBox(
-            width: 48,
-            height: 48,
+            width: size,
+            height: size,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: image,

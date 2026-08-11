@@ -2,10 +2,17 @@
 cmake_minimum_required(VERSION 3.14)
 project(multiapp LANGUAGES CXX)
 
-# Aeltere mitgelieferte CMake-Projekte (z.B. das Firebase-C++-SDK) verlangen ein
-# cmake_minimum_required < 3.5, das neuere CMake als Fehler ablehnt. Diese
-# Policy-Variable erlaubt die Konfiguration solcher Unterprojekte trotzdem.
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+# Aeltere mitgelieferte CMake-Projekte verlangen ein cmake_minimum_required,
+# das neuere CMake nicht mehr akzeptiert: das Firebase-C++-SDK fordert 3.1.
+# Diese Policy-Variable hebt den geforderten Wert an, damit solche
+# Unterprojekte sich weiterhin konfigurieren lassen.
+#
+# Der Wert ist bewusst 3.10 und nicht 3.5: CMake verwarnt jedes Projekt, das
+# weniger als 3.10 verlangt ("Compatibility with CMake < 3.10 will be removed
+# from a future version"). Mit 3.10 ist der effektive Wert hoch genug, die
+# Warnung entfaellt und der Bau bleibt auch mit kuenftigem CMake moeglich,
+# solange das SDK seine Datei nicht selbst nachzieht.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.

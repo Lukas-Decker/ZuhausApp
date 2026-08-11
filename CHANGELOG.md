@@ -8,6 +8,11 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.2 - 2026-08-11
+
+- Der Windows-Build läuft jetzt ohne Warnungen durch. Für die App ändert
+  sich nichts, das betrifft nur die Entwicklung.
+
 ## 0.25.1 - 2026-08-11
 
 - Die verwendeten Bibliotheken sind auf den aktuellen Stand gebracht,

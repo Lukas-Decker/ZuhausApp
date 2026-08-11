@@ -40,5 +40,11 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 # PDB-Dateien mit, das erzeugt sonst dutzende harmlose Linker-Warnungen.
 target_link_options(${BINARY_NAME} PRIVATE "/ignore:4099")
 
+# LNK4078 unterdruecken: die statischen Microsoft-Laufzeitbibliotheken bringen
+# mehrere .voltbl-Abschnitte mit unterschiedlichen Attributen mit. Der Linker
+# waehlt in dem Fall selbst einen aus; fuer uns ist die Meldung folgenlos, weil
+# wir keine dieser Tabellen selbst erzeugen oder auswerten.
+target_link_options(${BINARY_NAME} PRIVATE "/ignore:4078")
+
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)

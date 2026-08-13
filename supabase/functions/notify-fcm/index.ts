@@ -9,12 +9,14 @@
 //   2. Service-Account-JSON (Firebase Admin) erzeugen und als Function-Secret
 //      hinterlegen:
 //        supabase secrets set FIREBASE_SERVICE_ACCOUNT="$(cat service.json)"
-//      Optional ein gemeinsames Geheimnis fuer den Webhook:
-//        supabase secrets set FCM_WEBHOOK_SECRET=...
+//      Das gemeinsame Geheimnis fuer den Webhook ist PFLICHT (die Function
+//      laeuft ohne JWT-Pruefung, siehe unten):
+//        supabase secrets set FCM_WEBHOOK_SECRET=<langer Zufallswert>
 //   3. Deploy: supabase functions deploy notify-fcm --no-verify-jwt
 //   4. Im Dashboard unter Database -> Webhooks einen Webhook auf INSERT von
-//      public.household_events anlegen, Ziel = diese Function. Wenn gesetzt,
-//      den Header x-webhook-secret = FCM_WEBHOOK_SECRET mitgeben.
+//      public.household_events anlegen, Ziel = diese Function, und den Header
+//      x-webhook-secret = FCM_WEBHOOK_SECRET mitgeben. Ohne diesen Header
+//      antwortet die Function mit 403 und verschickt nichts.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -22,6 +24,22 @@ interface ServiceAccount {
   client_email: string;
   private_key: string;
   project_id: string;
+}
+
+/// Vergleicht zwei Geheimnisse in konstanter Zeit.
+///
+/// Ein normaler Stringvergleich bricht beim ersten falschen Zeichen ab; aus den
+/// Laufzeitunterschieden laesst sich das Geheimnis sonst zeichenweise erraten.
+function timingSafeEquals(actual: string | null, expected: string): boolean {
+  if (actual === null) return false;
+  const a = new TextEncoder().encode(actual);
+  const b = new TextEncoder().encode(expected);
+  // Ungleiche Laenge ist ohnehin falsch, wird aber trotzdem durchgerechnet.
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  }
+  return diff === 0;
 }
 
 function base64Url(input: string | Uint8Array): string {
@@ -82,9 +100,20 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
 }
 
 Deno.serve(async (req) => {
-  // Optionaler Webhook-Schutz.
+  // Webhook-Schutz. Die Function laeuft mit --no-verify-jwt, weil der
+  // Datenbank-Webhook kein Nutzer-Token mitbringt; das gemeinsame Geheimnis ist
+  // damit die EINZIGE Huerde und deshalb Pflicht. Fehlt es, wird nichts
+  // gesendet: sonst koennte jeder, der die Function-URL kennt, eine Meldung mit
+  // beliebigem Text an ein fremdes Geraet ausloesen.
   const expectedSecret = Deno.env.get("FCM_WEBHOOK_SECRET");
-  if (expectedSecret && req.headers.get("x-webhook-secret") !== expectedSecret) {
+  if (!expectedSecret) {
+    console.error(
+      "FCM_WEBHOOK_SECRET fehlt. Push ist deaktiviert, bis das Geheimnis " +
+        "gesetzt und im Webhook-Header x-webhook-secret hinterlegt ist.",
+    );
+    return new Response("not_configured", { status: 500 });
+  }
+  if (!timingSafeEquals(req.headers.get("x-webhook-secret"), expectedSecret)) {
     return new Response("forbidden", { status: 403 });
   }
 

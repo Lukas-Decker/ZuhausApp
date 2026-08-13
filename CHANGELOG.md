@@ -8,6 +8,15 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.4 - 2026-08-13
+
+- Sicherheitskorrekturen am Server. Der Abgleich prüft jetzt genauer, wem ein
+  Datensatz gehört: Einträge aus einem Haushalt, den man verlassen hat, lassen
+  sich nicht mehr verändern, und niemand kann anderen Mitgliedern Einträge in
+  ihren privaten Bereich schieben. Push-Benachrichtigungen brauchen jetzt ein
+  Geheimnis, und ein Geräte-Token lässt sich nicht mehr auf ein fremdes Konto
+  umbiegen. An der App selbst ändert sich nichts.
+
 ## 0.25.3 - 2026-08-11
 
 - Angebote lassen sich direkt auf die Einkaufsliste setzen: In der

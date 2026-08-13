@@ -12,6 +12,12 @@ env.json
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
+# Firebase-Service-Account (Admin SDK). Enthaelt einen PRIVATEN SCHLUESSEL und
+# darf niemals ins Repo. Wird nur einmal gebraucht, um das Function-Secret
+# FIREBASE_SERVICE_ACCOUNT zu setzen.
+service-account*.json
+*-firebase-adminsdk-*.json
+
 # Arbeitsverzeichnis der Supabase CLI (haelt u.a. die verlinkte Projekt-ID).
 supabase/.temp/
 

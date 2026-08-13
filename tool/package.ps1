@@ -72,11 +72,20 @@ function Invoke-Flutter {
   #     "System.Management.Automation.RemoteException" auftauchte.
   #
   # Ueber Erfolg oder Misserfolg entscheidet allein der Exit-Code.
+  #
+  # Gebaut wird immer im Projekt-Root, nicht im Verzeichnis der Konsole:
+  # "flutter build" nimmt das aktuelle Arbeitsverzeichnis als Projekt, und
+  # --dart-define-from-file=env.json wird ebenfalls relativ dazu aufgeloest.
+  # Ohne diesen Wechsel baut ein Aufruf aus einem anderen Ordner (oder nach
+  # einem Verschieben des Projekts aus einer alten Konsole heraus) am falschen
+  # Ort, waehrend dieses Skript die Artefakte unter $root sucht.
   $previous = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
+  Push-Location $root
   try {
     & flutter @FlutterArgs
   } finally {
+    Pop-Location
     $ErrorActionPreference = $previous
   }
   if ($LASTEXITCODE -ne 0) { throw "flutter build fehlgeschlagen (Exit $LASTEXITCODE)." }

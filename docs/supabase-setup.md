@@ -216,13 +216,19 @@ Gesundheitsinhalte.
 
 1. Migration einspielen: `supabase/migrations/0005_device_tokens.sql` (Tabelle
    `device_tokens` + RPCs, wie die anderen im SQL Editor ausfuehren).
-2. Das Service-Account-JSON als Function-Secret hinterlegen (Supabase CLI):
+2. Beide Function-Secrets hinterlegen (Supabase CLI):
 
    ```bash
    supabase secrets set FIREBASE_SERVICE_ACCOUNT="$(cat service-account.json)"
-   # optional, empfohlen: gemeinsames Geheimnis fuer den Webhook
    supabase secrets set FCM_WEBHOOK_SECRET=ein-langes-zufalls-geheimnis
    ```
+
+   `FCM_WEBHOOK_SECRET` ist **Pflicht** (seit v0.25.4). Die Function laeuft mit
+   `--no-verify-jwt`, weil der Datenbank-Webhook kein Nutzer-Token mitbringt;
+   das gemeinsame Geheimnis ist damit die einzige Huerde. Ohne gesetztes
+   Geheimnis antwortet die Function mit 500 und verschickt nichts. Den Wert
+   denkst du dir selbst aus (ein langer Zufallsstring), er hat mit Firebase
+   nichts zu tun. Hintergrund: `docs/sicherheitspruefung-owasp-idor.md`, F2.
 
 3. Function deployen:
 
@@ -236,7 +242,9 @@ Im Dashboard unter **Database -> Webhooks** einen Webhook anlegen:
 
 - Tabelle: `public.household_events`, Ereignis: **INSERT**.
 - Typ: **Supabase Edge Function** -> `notify-fcm`.
-- Falls gesetzt, den Header `x-webhook-secret` = `FCM_WEBHOOK_SECRET` mitgeben.
+- Unter **HTTP Headers** den Header `x-webhook-secret` mit demselben Wert wie
+  `FCM_WEBHOOK_SECRET` eintragen. Ohne diesen Header antwortet die Function mit
+  403 und es geht kein Push raus.
 
 Damit laeuft die Kette: ein Geraet legt ein Familien-Ereignis an ->
 `household_events` bekommt eine Zeile -> der Webhook ruft `notify-fcm` ->

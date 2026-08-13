@@ -8,6 +8,12 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.5 - 2026-08-13
+
+- Das Verpackungsskript baut wieder im Projektordner. Nach dem Verschieben des
+  Projekts landeten die Artefakte am alten Ort. Für die App ändert sich
+  nichts, das betrifft nur die Entwicklung.
+
 ## 0.25.4 - 2026-08-13
 
 - Sicherheitskorrekturen am Server. Der Abgleich prüft jetzt genauer, wem ein

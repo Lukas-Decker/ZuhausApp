@@ -190,6 +190,26 @@ Danach raeumt die App die lokale Datenbank auf.
 Ohne diese Funktion bleibt die App voll nutzbar; nur der Knopf "Konto und Daten
 loeschen" meldet dann einen Fehler.
 
+## 9a. Migrationen laufen ab v0.25.4 ueber die CLI
+
+Bis 0006 wurden die Migrationen von Hand im SQL Editor eingefuegt. Seit 0007
+ist das Projekt mit der Supabase CLI verlinkt und die Historie in
+`supabase_migrations.schema_migrations` gepflegt (0001 bis 0006 wurden per
+`supabase migration repair --status applied` nachgetragen).
+
+**Neue Migrationen deshalb nicht mehr ins Dashboard einfuegen**, sonst laeuft
+die Historie wieder auseinander und die naechste Migration wird doppelt
+angewendet. Stattdessen:
+
+```bash
+supabase db push --dry-run   # zeigt, was laufen wuerde
+supabase db push
+```
+
+Einmalig nach dem Klonen: `supabase login` und
+`supabase link --project-ref eiomgepnimqviodsplaq`. Ein Datenbank-Passwort
+wird dafuer nicht gebraucht, die CLI holt sich eine temporaere Login-Rolle.
+
 ## 10. Echter Push bei geschlossener App per FCM (ab v0.13, nur Android)
 
 Der Realtime-Weg (Abschnitt 8) erreicht nur laufende Apps. Fuer einen Push, der

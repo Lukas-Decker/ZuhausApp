@@ -12,6 +12,9 @@ env.json
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
+# Arbeitsverzeichnis der Supabase CLI (haelt u.a. die verlinkte Projekt-ID).
+supabase/.temp/
+
 # Miscellaneous
 *.class
 *.log

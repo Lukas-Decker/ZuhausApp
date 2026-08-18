@@ -8,6 +8,12 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.6 - 2026-08-18
+
+- Beim Veröffentlichen wird jedes hochgeladene Paket nachgeprüft und danach
+  die vorherige Version vom Server gelöscht. Spart Speicher, für die App
+  ändert sich nichts.
+
 ## 0.25.5 - 2026-08-13
 
 - Das Verpackungsskript baut wieder im Projektordner. Nach dem Verschieben des

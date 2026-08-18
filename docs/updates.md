@@ -55,7 +55,9 @@ Das Skript
 2. berechnet Größe und SHA-256 aller Pakete,
 3. lädt `Android-<version>-<abi>.apk` (drei Stück) und
    `Windows-<version>.zip` hoch,
-4. schreibt zuletzt `manifest.json`.
+4. prüft jedes hochgeladene Paket über die öffentliche URL nach,
+5. schreibt dann `manifest.json` und prüft es genauso nach,
+6. löscht zuletzt alles aus dem Bucket, was nicht zur neuen Version gehört.
 
 **Warum drei APKs:** eine APK für alle Prozessorarten ist über 80 MB, und
 Supabase Storage nimmt im Free-Plan höchstens 50 MB je Datei. `package.ps1`
@@ -77,6 +79,22 @@ wären die lokalen Daten weg. Also bei den geteilten APKs bleiben.
 Das Manifest kommt bewusst zum Schluss: so wird nie eine Version angekündigt,
 deren Datei noch fehlt.
 
+**Nachprüfen statt hoffen:** Nach dem Hochladen holt das Skript jede Datei
+über ihre öffentliche URL zurück (mit Zeitstempel in der Adresse, damit kein
+Cache dazwischenfunkt) und vergleicht Byte-Größe und SHA-256 mit dem Original
+in `dist/`. Erst wenn alle Pakete stimmen, wird `manifest.json` geschrieben,
+und auch das Manifest wird danach nachgeprüft. Weicht irgendetwas ab, bricht
+das Skript ab, und es wird nichts gelöscht.
+
+**Aufräumen:** Steht die neue Version nachweislich vollständig im Bucket,
+löscht das Skript alles Ältere. Übrig bleiben nur `manifest.json` und die
+Dateien der gerade veröffentlichten Version. Der Free-Plan hat 1 GB, und pro
+Veröffentlichung kommen rund 130 MB dazu - ohne Aufräumen ist der Platz nach
+gut einem halben Dutzend Releases weg. Wer eine Version doch behalten will,
+hängt `-KeepOld` an; dann bleibt der Bucket, wie er ist. Zurückgehen lässt
+sich immer über einen neuen Build der alten Version, die Pakete liegen ja in
+`dist/`.
+
 Nützliche Schalter:
 
 | Schalter | Wirkung |
@@ -85,6 +103,7 @@ Nützliche Schalter:
 | `-Notes "..."` | Änderungstext-Override; ohne Angabe zählt `dist/notes-<version>.txt`, sonst der Versionsabschnitt aus `CHANGELOG.md` |
 | `-MinVersion 0.20.0` | Pflicht-Update für alles darunter; ohne Angabe bleibt der bisherige Wert |
 | `-ServiceKey ...` | Schlüssel direkt statt aus `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_KEY` |
+| `-KeepOld` | nicht aufräumen: die Dateien älterer Versionen bleiben im Bucket |
 
 Die Version kommt immer aus `pubspec.yaml`. Vor dem Veröffentlichen also
 `version:` in `pubspec.yaml` **und** `appVersion` in `lib/core/app_info.dart`
@@ -134,9 +153,9 @@ hochzählen sowie den passenden Abschnitt in `CHANGELOG.md` schreiben.
 - Ein einzelner Android-Block mit `url` (also ohne ABI-Ebene) wird weiterhin
   verstanden, falls du doch mal eine universelle APK ausliefern willst.
 
-Alte Versionen bleiben im Bucket liegen (praktisch, um notfalls
-zurückzugehen). Pro Veröffentlichung kommen rund 100 MB dazu, der Free-Plan
-hat 1 GB: ab und zu die ältesten Dateien im Dashboard unter Storage löschen.
+Im Bucket liegt immer nur die neueste Version: `publish_update.ps1` räumt nach
+der Nachprüfung auf (siehe oben). Von Hand im Dashboard löschen muss man also
+nichts mehr.
 
 ## 4. Was der Nutzer sieht
 
@@ -169,6 +188,10 @@ stehen vollständig im Manifest.
 - **"Noch keine Version veröffentlicht"** – `manifest.json` fehlt im Bucket.
 - **Prüfsummenfehler** – Datei wurde nach dem Hochladen ersetzt, ohne das
   Manifest neu zu schreiben. Einfach `publish_update.ps1` erneut laufen lassen.
+- **"liegt unvollstaendig im Bucket" / "stimmt nicht mit dem Original
+  ueberein"** – der Upload ist unterwegs abgerissen. Das Skript hat nichts
+  gelöscht und die alte Version steht noch; einfach erneut laufen lassen, die
+  Dateien werden überschrieben.
 - **Windows-Update passiert nicht** – das Update-Skript protokolliert nach
   `%TEMP%\...\updates\update.log`. Läuft die App aus einem geschützten Ordner
   (z. B. `C:\Program Files`), fehlen die Schreibrechte; dann öffnet das Skript

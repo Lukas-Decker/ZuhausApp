@@ -16,6 +16,12 @@
   Die App fragt manifest.json ab, vergleicht mit ihrer eigenen Version und
   bietet das Update an. Die Version kommt aus pubspec.yaml.
 
+  Nach dem Hochladen holt das Skript jede Datei ueber die oeffentliche URL
+  zurueck und vergleicht Groesse und SHA-256 mit dem Original. Erst wenn das
+  fuer alle Pakete und das Manifest stimmt, wird alles Aeltere aus dem Bucket
+  geloescht - der Speicher im Free-Plan ist knapp. -KeepOld laesst die alten
+  Dateien liegen.
+
   Zum Hochladen wird ein geheimer Schluessel gebraucht, der die
   Zugriffsregeln umgeht. Im Dashboard unter Settings -> API Keys:
 
@@ -39,6 +45,9 @@
 .PARAMETER Build
   Vorher tool/package.ps1 laufen lassen.
 
+.PARAMETER KeepOld
+  Nicht aufraeumen: die Dateien aelterer Versionen bleiben im Bucket.
+
 .EXAMPLE
   $env:SUPABASE_SECRET_KEY = 'sb_secret_...'
   ./tool/publish_update.ps1 -Notes "Live-Updates eingebaut"
@@ -50,7 +59,8 @@ param(
   [string]$MinVersion = '',
   [string]$ServiceKey = '',
   [string]$SupabaseUrl = '',
-  [switch]$Build
+  [switch]$Build,
+  [switch]$KeepOld
 )
 
 $ErrorActionPreference = 'Stop'
@@ -131,6 +141,120 @@ function Get-PublishedManifest {
     return Invoke-RestMethod -Uri "$PublicBase/manifest.json?t=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" -UseBasicParsing
   } catch {
     return $null
+  }
+}
+
+function Test-UploadedObject {
+  <#
+    Holt die Datei ueber die oeffentliche URL zurueck und stellt sie gegen das
+    Original: erst die Byte-Groesse, dann SHA-256. Der Zeitstempel in der URL
+    umgeht den Cache, damit wirklich das geprueft wird, was im Bucket liegt.
+    Stimmt etwas nicht, fliegt eine Ausnahme - der Aufrufer bricht dann ab,
+    bevor irgendetwas geloescht wird.
+  #>
+  param(
+    [string]$Path,
+    [string]$Name,
+    [string]$PublicBase
+  )
+  $local = Get-Item -LiteralPath $Path
+  $expectedHash = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+  $tempFile = Join-Path ([System.IO.Path]::GetTempPath()) `
+    ("zuhaus-verify-{0}.tmp" -f [guid]::NewGuid().ToString('n'))
+  $url = "$PublicBase/$Name" + "?t=$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+  $sizeMb = [math]::Round($local.Length / 1MB, 1)
+  Write-Host "Pruefe: $Name ($sizeMb MB)" -ForegroundColor Cyan
+  $vorherigerFortschritt = $ProgressPreference
+  $ProgressPreference = 'SilentlyContinue'
+  try {
+    try {
+      Invoke-WebRequest -Uri $url -OutFile $tempFile -UseBasicParsing
+    } catch {
+      $detail = $_.Exception.Message
+      if ($_.ErrorDetails) { $detail = $_.ErrorDetails.Message }
+      throw "$Name laesst sich nicht wieder herunterladen: $detail"
+    }
+    $remote = Get-Item -LiteralPath $tempFile
+    if ($remote.Length -ne $local.Length) {
+      throw ("{0} liegt unvollstaendig im Bucket: {1} statt {2} Bytes." -f `
+          $Name, $remote.Length, $local.Length)
+    }
+    $remoteHash = (Get-FileHash -LiteralPath $tempFile -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($remoteHash -ne $expectedHash) {
+      throw ("{0} stimmt nicht mit dem Original ueberein: SHA-256 {1} statt {2}." -f `
+          $Name, $remoteHash, $expectedHash)
+    }
+  } finally {
+    $ProgressPreference = $vorherigerFortschritt
+    if (Test-Path -LiteralPath $tempFile) {
+      Remove-Item -LiteralPath $tempFile -Force
+    }
+  }
+}
+
+function Get-StorageObjectNames {
+  <#
+    Listet den Bucket seitenweise auf. Ordner-Eintraege (ohne id) und
+    Platzhalter mit fuehrendem Punkt bleiben aussen vor.
+  #>
+  param([string]$BaseUrl, [string]$Key)
+  $headers = @{ 'apikey' = $Key; Authorization = "Bearer $Key" }
+  $seitengroesse = 100
+  $offset = 0
+  $namen = @()
+  while ($true) {
+    $body = @{
+      prefix = ''
+      limit  = $seitengroesse
+      offset = $offset
+      sortBy = @{ column = 'name'; order = 'asc' }
+    } | ConvertTo-Json
+    try {
+      $antwort = Invoke-RestMethod -Uri "$BaseUrl/storage/v1/object/list/$bucket" -Method Post `
+        -Headers $headers -ContentType 'application/json' -Body $body -UseBasicParsing
+    } catch {
+      $detail = $_.Exception.Message
+      if ($_.ErrorDetails) { $detail = $_.ErrorDetails.Message }
+      throw "Bucket-Inhalt laesst sich nicht lesen: $detail"
+    }
+    # PowerShell 7 reicht die JSON-Liste als ein einziges Element durch,
+    # @() macht daraus kein flaches Array. += packt sie sauber aus, und in
+    # Windows PowerShell 5.1 (dort kommt sie schon flach) stimmt es auch.
+    $seite = @()
+    if ($null -ne $antwort) { $seite += $antwort }
+    if ($seite.Count -eq 0) { break }
+    foreach ($eintrag in $seite) {
+      if (-not $eintrag.id) { continue }
+      if ($eintrag.name.StartsWith('.')) { continue }
+      $namen += $eintrag.name
+    }
+    if ($seite.Count -lt $seitengroesse) { break }
+    $offset += $seitengroesse
+  }
+  return $namen
+}
+
+function Remove-StorageObjects {
+  <#
+    Loescht die genannten Objekte, in Haeppchen von 50. Das JSON wird von Hand
+    gebaut: ConvertTo-Json macht aus einem einelementigen Array eine
+    Zeichenkette, und die nimmt Supabase nicht an.
+  #>
+  param([string[]]$Names, [string]$BaseUrl, [string]$Key)
+  $headers = @{ 'apikey' = $Key; Authorization = "Bearer $Key" }
+  for ($i = 0; $i -lt $Names.Count; $i += 50) {
+    $ende = [math]::Min($i + 49, $Names.Count - 1)
+    $teil = @($Names[$i..$ende])
+    $eintraege = ($teil | ForEach-Object { ConvertTo-Json -InputObject $_ }) -join ','
+    $body = "{""prefixes"":[$eintraege]}"
+    try {
+      Invoke-RestMethod -Uri "$BaseUrl/storage/v1/object/$bucket" -Method Delete `
+        -Headers $headers -ContentType 'application/json' -Body $body -UseBasicParsing | Out-Null
+    } catch {
+      $detail = $_.Exception.Message
+      if ($_.ErrorDetails) { $detail = $_.ErrorDetails.Message }
+      throw "Aufraeumen fehlgeschlagen: $detail"
+    }
   }
 }
 
@@ -259,6 +383,14 @@ foreach ($upload in $uploads) {
     -BaseUrl $baseUrl -Key $ServiceKey
 }
 
+# Erst nachweisen, dann ankuendigen: jedes Paket kommt ueber die oeffentliche
+# URL zurueck und muss in Groesse und SHA-256 dem Original entsprechen.
+Write-Host ""
+Write-Host "Prüfe die hochgeladenen Pakete..." -ForegroundColor Magenta
+foreach ($upload in $uploads) {
+  Test-UploadedObject -Path $upload[0] -Name $upload[1] -PublicBase $publicBase
+}
+
 # Manifest zuletzt, damit nie eine Version angekuendigt wird, deren Datei noch
 # fehlt. UTF-8 ohne BOM, sonst stolpert der JSON-Leser ueber die Umlaute.
 $manifestPath = Join-Path $distDir 'manifest.json'
@@ -267,6 +399,37 @@ $json = $manifest | ConvertTo-Json -Depth 5
 
 Send-StorageObject -Path $manifestPath -Name 'manifest.json' -ContentType 'application/json' `
   -BaseUrl $baseUrl -Key $ServiceKey -CacheControl 'max-age=60'
+
+Test-UploadedObject -Path $manifestPath -Name 'manifest.json' -PublicBase $publicBase
+
+# Aufraeumen. Jetzt liegt nachweislich alles vollstaendig oben, also fliegt
+# raus, was nicht zur neuen Version gehoert: der Speicher im Free-Plan ist
+# knapp, und alte Pakete braucht niemand mehr - die App laedt immer die
+# Version aus dem Manifest.
+if ($KeepOld) {
+  Write-Host ""
+  Write-Host "-KeepOld gesetzt: ältere Dateien bleiben im Bucket liegen." -ForegroundColor Yellow
+} else {
+  $behalten = @('manifest.json')
+  foreach ($upload in $uploads) { $behalten += $upload[1] }
+  $veraltet = @(Get-StorageObjectNames -BaseUrl $baseUrl -Key $ServiceKey |
+      Where-Object { $behalten -notcontains $_ })
+  Write-Host ""
+  if ($veraltet.Count -eq 0) {
+    Write-Host "Nichts aufzuräumen, im Bucket liegt nur $version." -ForegroundColor DarkGray
+  } else {
+    Write-Host "Lösche $($veraltet.Count) Datei(en) älterer Versionen:" -ForegroundColor Magenta
+    foreach ($name in $veraltet) { Write-Host "  - $name" }
+    Remove-StorageObjects -Names $veraltet -BaseUrl $baseUrl -Key $ServiceKey
+    $rest = @(Get-StorageObjectNames -BaseUrl $baseUrl -Key $ServiceKey |
+        Where-Object { $behalten -notcontains $_ })
+    if ($rest.Count -gt 0) {
+      Write-Warning "Diese Dateien liegen weiterhin im Bucket: $($rest -join ', ')"
+    } else {
+      Write-Host "Bucket aufgeräumt." -ForegroundColor Green
+    }
+  }
+}
 
 Write-Host ""
 Write-Host "Veröffentlicht:" -ForegroundColor Magenta

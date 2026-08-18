@@ -13,6 +13,9 @@ Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 - Beim Veröffentlichen wird jedes hochgeladene Paket nachgeprüft und danach
   die vorherige Version vom Server gelöscht. Spart Speicher, für die App
   ändert sich nichts.
+- Die Update-Auskunft auf dem Server wird ohne Formatierung abgelegt und ist
+  damit rund ein Sechstel kleiner. Die App lädt bei jeder Prüfung etwas
+  weniger.
 
 ## 0.25.5 - 2026-08-13
 

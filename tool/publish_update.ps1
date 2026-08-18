@@ -393,8 +393,11 @@ foreach ($upload in $uploads) {
 
 # Manifest zuletzt, damit nie eine Version angekuendigt wird, deren Datei noch
 # fehlt. UTF-8 ohne BOM, sonst stolpert der JSON-Leser ueber die Umlaute.
+# Minifiert: die App holt das Manifest alle sechs Stunden, Einrueckung bringt
+# ihr nichts. Auf der Konsole steht weiter die lesbare Fassung.
 $manifestPath = Join-Path $distDir 'manifest.json'
-$json = $manifest | ConvertTo-Json -Depth 5
+$json = $manifest | ConvertTo-Json -Depth 5 -Compress
+$jsonLesbar = $manifest | ConvertTo-Json -Depth 5
 [System.IO.File]::WriteAllText($manifestPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 Send-StorageObject -Path $manifestPath -Name 'manifest.json' -ContentType 'application/json' `
@@ -433,6 +436,6 @@ if ($KeepOld) {
 
 Write-Host ""
 Write-Host "Veröffentlicht:" -ForegroundColor Magenta
-Write-Host $json
+Write-Host $jsonLesbar
 Write-Host ""
 Write-Host "Manifest: $publicBase/manifest.json" -ForegroundColor DarkGray

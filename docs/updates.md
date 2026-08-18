@@ -111,7 +111,9 @@ hochzählen sowie den passenden Abschnitt in `CHANGELOG.md` schreiben.
 
 ## 3. Aufbau des Manifests
 
-`manifest.json` im Bucket:
+`manifest.json` liegt minifiert im Bucket (eine Zeile, keine Einrückung, rund
+ein Sechstel kleiner); die App holt es bei jeder Prüfung. Zum Lesen hier die
+formatierte Fassung:
 
 ```json
 {

@@ -152,6 +152,13 @@ class NotificationService {
   }
 
   void _onResponse(NotificationResponse response) {
+    // Wegwischen meldet das Plugin ebenfalls als Antwort (ohne actionId).
+    // Das ist keine Nutzeraktion auf den Inhalt, also nicht weiterreichen,
+    // sonst landet z.B. eine Medikamenten-Erinnerung als "Genommen".
+    if (response.notificationResponseType ==
+        NotificationResponseType.notificationDismissed) {
+      return;
+    }
     _actions.add(
       NotificationAction(
         actionId: response.actionId,
@@ -167,7 +174,10 @@ class NotificationService {
     try {
       final details = await _plugin.getNotificationAppLaunchDetails();
       final response = details?.notificationResponse;
-      if (details?.didNotificationLaunchApp == true && response != null) {
+      if (details?.didNotificationLaunchApp == true &&
+          response != null &&
+          response.notificationResponseType !=
+              NotificationResponseType.notificationDismissed) {
         return NotificationAction(
           actionId: response.actionId,
           payload: response.payload,

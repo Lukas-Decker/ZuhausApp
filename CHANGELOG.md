@@ -8,6 +8,12 @@ zeigt ihn im Update-Hinweis der App an. Format je Version:
 
 Einträge sind aus Nutzersicht geschrieben: was ist neu, was wurde behoben.
 
+## 0.25.7 - 2026-08-23
+
+- Wird eine Medikamenten-Erinnerung nur weggewischt, zählt das nicht mehr als
+  "Genommen". Nur der Knopf in der Meldung bzw. der Wecker-Bildschirm bucht
+  die Einnahme.
+
 ## 0.25.6 - 2026-08-18
 
 - Beim Veröffentlichen wird jedes hochgeladene Paket nachgeprüft und danach

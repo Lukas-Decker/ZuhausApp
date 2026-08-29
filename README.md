@@ -129,3 +129,9 @@ Der erste Befehl zeichnet die PNGs, der zweite verteilt sie auf Android
 | 0.11 | Biometrisches App-Schloss (Windows Hello, Fingerabdruck/Gesicht) |
 | 0.12 | Datenschutzpaket (Export, Kontolöschung, Consent, Audit-Log) |
 | 0.13 | FCM-Push (weckt geschlossene App) |
+
+## Lizenz
+
+Der Code in diesem Repository steht unter der MIT-Lizenz, siehe [LICENSE](LICENSE).
+Produktdaten beim Barcode-Scan stammen von [Open Food Facts](https://openfoodfacts.org)
+(Open Database License).
